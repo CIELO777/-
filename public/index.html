@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1,user-scalable=0"
+    />
+    <title>乐语</title>
+    <script src="//res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+    <script src="https://open.work.weixin.qq.com/wwopen/js/jwxwork-1.0.0.js"></script>
+    <script type="text/javascript">
+      (function(n, e) {
+        var t = n.documentElement,
+          i = "orientationchange" in window ? "orientationchange" : "resize",
+          d = function() {
+            var n = t.clientWidth;
+            n && (t.style.fontSize = n / 7.5 + "px");
+          };
+        n.addEventListener &&
+          (e.addEventListener(i, d, !1),
+          n.addEventListener("DOMContentLoaded", d, !1));
+      })(document, window);
+    </script>
+    <script>
+      
+    </script>
+    <style>
+      html,
+      body {
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>
+      <strong
+        >We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work
+        properly without JavaScript enabled. Please enable it to
+        continue.</strong
+      >
+    </noscript>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  </body>
+  <!-- <script>
+    window.onscroll = function() {
+      //为了保证兼容性，这里取两个值，哪个有值取哪一个
+      //scrollTop就是触发滚轮事件时滚轮的高度
+      var scrollTop =
+        document.documentElement.scrollTop || document.body.scrollTop;
+      console.log("滚动距离" + scrollTop);
+    };
+  </script> -->
+</html>
