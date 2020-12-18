@@ -142,7 +142,7 @@ export default {
 
 <style lang="less" scoped>
 .rader {
-  margin-top: 0.8rem;
+  padding-top: 0.8rem;
   .product {
     padding: 10px 15px;
     box-sizing: border-box;

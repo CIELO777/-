@@ -21,6 +21,10 @@ export default function setTitle(data) {
 		store.commit('saveTitle', { title: '客户管理', leftShow: false, tabarShow: true });
 	} else if (data.includes('SheetImg')) {
 		store.commit('saveTitle', { title: '添加图文', leftShow: true, tabarShow: false });
+	}else if (data.includes('Addcustomer')) {
+		store.commit('saveTitle', { title: '添加图文', leftShow: true, tabarShow: false });
+	}else if (data.includes('detailFilter')) {
+		store.commit('saveTitle', { title: '添加图文', leftShow: true, tabarShow: false });
 	}
 	
 }

@@ -128,7 +128,7 @@ export default {
 
 <style lang="less" scoped>
 .operat {
-  margin-top: 0.8rem;
+  padding-top: 0.8rem;
   .qs-title {
     background-color: #f0f0f5;
     padding: 10px;

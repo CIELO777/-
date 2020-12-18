@@ -122,7 +122,7 @@ export default {
     width: 100%;
     left: 0;
     height: 0.8rem;
-    top: 78px;
+    top: 33PX;
     border-bottom: 8px solid #f1f1f1;
     border-top: 8px solid #f1f1f1;
     padding-left: 0.3rem;
@@ -133,6 +133,7 @@ export default {
   .agendaCont {
     background-color: #fff;
     // padding: 8px 15px;
+    height:calc(~"100% - 1.9rem")
     .schedule-main {
       height: 1.2rem;
       background-color: #fff;
@@ -161,7 +162,7 @@ export default {
     }
   }
   .agendaCont:nth-child(2) {
-    margin-top: 1.9rem;
+    padding-top: 1.9rem;
   }
   .qs-green {
     color: #3d8329;

@@ -1,8 +1,8 @@
 <template>
   <div class="agentD">
-    <div class="backGo" @click="backgo">
+    <!-- <div class="backGo" @click="backgo">
       <van-icon name="arrow-left" size="17px" color="#fff" />
-    </div>
+    </div> -->
     <div class="agenTitle">日程内容</div>
     <van-field v-model="message" rows="3" autosize label="留言" type="textarea" placeholder="请输入留言" />
     <div class="agenTitle">提醒时间</div>

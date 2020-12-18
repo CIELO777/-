@@ -13,7 +13,7 @@
     <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.phone" closeable position="bottom" :style="{ height: '20%' }">
       <p class="pop-tit">手机</p>
       <van-field label="" type="tel" v-model="formData.phone" placeholder="请输入手机号" />
-      <van-button color="#60C6C6" round size="mini"  type="primary"  @click="FormSave(formData.phone,'phone','phone')" class="btnTb">保存</van-button>
+      <van-button color="#60C6C6" round size="mini" type="primary" @click="FormSave(formData.phone,'phone','phone')" class="btnTb">保存</van-button>
     </van-popup>
 
     <van-cell is-link @click="showPopup('validity',crmInfo.status)" title="有效性" :value="
@@ -37,12 +37,14 @@
     <van-cell is-link @click="showPopup('sex')" title="性别" :value="crmInfo.gender==2 ?'未知':crmInfo.gender==1? '男':'女'"></van-cell>
     <van-action-sheet :actions="actionsSex" v-model="popShow.sex" @select="onSelectSex" />
 
-    <van-cell is-link @click="showPopup('comp',crmInfo.company)" title="公司信息" :value="crmInfo.company||''"></van-cell>
-    <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.comp" closeable position="bottom" :style="{ height: '18.6%' }">
-      <p class="pop-tit">公司信息</p>
-      <van-field label="" v-model="formData.comp" placeholder="请输入公司信息" />
-      <van-button color="#60C6C6" round size="mini" class="btnTb" type="primary" block @click="FormSave(formData.comp,'company','comp')">保存</van-button>
-    </van-popup>
+    <van-cell is-link @click="showPopup('comp',crmInfo.company)" title="公司信息" :value="crmInfo.company"></van-cell>
+    <!-- <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.comp" closeable position="bottom" :style="{ height: '100%' }"> -->
+    <compInfo route="LinkDetailed" :companys.sync="company" ref="compInfo" :totalPageCounts="totalPageCount" :compshow.sync="compListShow" :user="users" :list="compLists">
+    </compInfo>
+    <!-- <p class="pop-tit">公司信息</p> -->
+    <!-- <van-field label="" v-model="formData.comp" placeholder="请输入公司信息" /> -->
+    <!-- <van-button color="#60C6C6" round size="mini" class="btnTb" type="primary" block @click="FormSave(formData.comp,'company','comp')">保存</van-button> -->
+    <!-- </van-popup> -->
 
     <van-cell is-link @click="showPopup('job')" title="公司职务" :value="cooList[crmInfo.companyOcc ==-1?7:crmInfo.companyOcc]"></van-cell>
     <van-action-sheet :actions="actionsCoo" v-model="popShow.job" @select="onSelectJob" />
@@ -51,7 +53,7 @@
     <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.note" closeable position="bottom" :style="{ height: '40%' }">
       <p class="pop-tit">备注</p>
       <van-field label="" v-model="formData.note" type="textarea" rows="4" placeholder="请输入备注" />
-      <van-button color="#60C6C6"  round size="mini" type="primary"  @click="FormSave(formData.note,'remark','note')" class="btnTb">保存</van-button>
+      <van-button color="#60C6C6" round size="mini" type="primary" @click="FormSave(formData.note,'remark','note')" class="btnTb">保存</van-button>
     </van-popup>
 
     <van-cell is-link @click="showPopup('birther')" title="出生日期" :value="crmInfo.birthday||''"></van-cell>
@@ -63,21 +65,21 @@
     <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.weChat" closeable position="bottom" :style="{ height: '20%' }">
       <p class="pop-tit">微信</p>
       <van-field label="" v-model="formData.weChat" placeholder="请输入微信号" />
-      <van-button color="#60C6C6" size="mini" round  type="primary" block @click="FormSave(formData.weChat,'wx','weChat')" class="btnTb">保存</van-button>
+      <van-button color="#60C6C6" size="mini" round type="primary" block @click="FormSave(formData.weChat,'wx','weChat')" class="btnTb">保存</van-button>
     </van-popup>
 
     <van-cell is-link @click="showPopup('qq',crmInfo.qq)" title="QQ" :value="crmInfo.qq||''"></van-cell>
     <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.qq" closeable position="bottom" :style="{ height: '20%' }">
       <p class="pop-tit">QQ</p>
       <van-field label="" v-model="formData.qq" placeholder="请输入QQ号" />
-      <van-button color="#60C6C6" size="mini" round type="primary"  @click="FormSave(formData.qq,'qq','qq')" class="btnTb">保存</van-button>
+      <van-button color="#60C6C6" size="mini" round type="primary" @click="FormSave(formData.qq,'qq','qq')" class="btnTb">保存</van-button>
     </van-popup>
 
     <van-cell is-link @click="showPopup('emall',crmInfo.email)" title="邮箱" :value="crmInfo.email||''"></van-cell>
     <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.emall" closeable position="bottom" :style="{ height: '20%' }">
       <p class="pop-tit">邮箱</p>
       <van-field label="" v-model="formData.emall" placeholder="请输入邮箱号" />
-      <van-button color="#60C6C6" round size="mini" type="primary"  @click="FormSave(formData.emall,'email','emall')" class="btnTb">保存</van-button>
+      <van-button color="#60C6C6" round size="mini" type="primary" @click="FormSave(formData.emall,'email','emall')" class="btnTb">保存</van-button>
     </van-popup>
 
     <van-cell title="创建时间" :value="crmInfo.createTime||''"></van-cell>
@@ -99,6 +101,7 @@
 </template>
 
 <script>
+
 import {
   generateTimeout,
   generateNonce,
@@ -111,7 +114,7 @@ import {
 let timeout = generateTimeout();
 let nonce = generateNonce();
 import local from '../uilts/localStorage';
-
+import compInfo from './detailFilter/CompInfo';
 export default {
   name: "forms",
   props: ["crmInfo"],
@@ -236,23 +239,25 @@ export default {
           companyOcc: 6,
         },
       ],
-      action: ''
+      action: '',
+      company: "",
+      totalPageCount: "",
+      compListShow: false,
+      users: {},
+      compLists: [],
     };
   },
   methods: {
     showPopup(e, d) { //  回显表单数据
-      // console.log(e, d);
+      if (e == 'comp') { this.compListShow = true; }
       this.popShow[e] = true;  // 打开弹框
       this.formData[e] = d;  // 回显数据
     },
     FormSave(data, type, ourType) {  // 保存表单数据
-      // console.log(data, type, ourType);
       let that = this;
       let crm = {};
       crm.id = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
       crm.itrId = this.$U || local.U();
-      console.log(crm.itrId);
-      console.log(local.U());
       crm.compId = this.$C || local.C();
       crm.phone = JSON.parse(sessionStorage.getItem('_crm_info'))?.phone;
       let signature = generateSignature3(crm.id, crm.itrId, crm.compId, timeout, nonce);
@@ -265,9 +270,26 @@ export default {
       if (crm.companyOcc == 7) {
         crm.companyOcc = -1;
       }
+      console.log(data, type);
+      console.log(type == 'nickname' && data === '');
+      if (type == 'nickname' && data === '' || data === null) {
+        this.$toast({
+          message: '姓名不能为空',
+          position: 'bottom',
+        });
+        return
+      } else if (type == 'phone' && data === '' || data === null) {
+        this.$toast({
+          message: '手机不能为空',
+          position: 'bottom',
+        });
+        return
+      }
       switch (type) {
         case 'nickname':
           crm[type] = data;
+          // 手动更新列表数据，防止返回刷新，scrolltop 丢失；
+          this.$store.commit("ManualUpdate", { target: 'nickName', data })
           break;
         case 'phone':
           crm[type] = data;
@@ -285,7 +307,8 @@ export default {
           crm[type] = data;
           break;
         case 'company':
-          crm[type] = data;
+          crm.company = data;
+          this.$store.commit("ManualUpdate", { target: 'company', data })
           break;
       };
       this.$get("/api/request/itr/comp/customer/save", {
@@ -341,7 +364,6 @@ export default {
         params: crm,
       })
         .then(function (res) {
-          console.log(res);
           if (res.error === 'success') {
             that.popShow[ourName] = false; // 关闭弹框
             that.$emit('getCrm'); // 更新数据
@@ -386,25 +408,60 @@ export default {
           console.log(error);
         });
     },
+    compList(cur) {// 来源方式下拉框接口请求
+      let that = this;
+      let timeout = generateTimeout();
+      let nonce = generateNonce();
+      let compID = JSON.parse(sessionStorage.getItem("userinfo"))?.bind_comp_id;
+      let signature = generateSignature3(compID, timeout, nonce);
+      let data = {
+        current: cur || 1,
+        size: 20,
+        compId: compID,
+        timeout: timeout,
+        nonce: nonce,
+        signature: signature,
+      };
+      this.$get("/api/request/itr/comp/customer/company/result", {
+        params: data,
+      })
+        .then((res) => {
+          if (!res.error && res.data.length > 0) {
+            let data = res.data.map(item => {
+              var reg = /^(\d{3})\d{4}(\d{4})$/;
+              return {
+                ...item,
+                encrypt: item.ownerId.replace(reg, "$1****$2")
+              }
+            });
+            this.compLists = cur ? this.compLists.concat(data) : data;
+            this.totalPageCount = res.totalPageCount;
+            this.users = res.user;
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
   },
   mounted() {
     this.getCid();
     // this.action = ;
-
   },
   created() {
-    this.action = sessionStorage.getItem('active')
-
+    this.action = sessionStorage.getItem('active');
+    this.compList();
   },
   updated() {
     this.crmInfos = this.crmInfo;
-  }
+  },
+  components: { compInfo }
 };
 </script>
 
 <style lang="less" scoped>
 .deaContant {
-  margin-top: 0.86rem;
+  margin-top: 44px;
   .btnTb {
     position: absolute;
     right: 10px;

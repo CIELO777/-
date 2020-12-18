@@ -70,6 +70,20 @@ const routes = [
     name: 'OrderList',
     component: () => import(/* webpackChunkName: "about" */ '../components/orderList.vue')
   },
+  {
+    path: '/detailFilter',
+    name: 'detailFilter',
+    component: () => import(/* webpackChunkName: "about" */ '../components/Detailfilter.vue')
+  },
+  {
+    path: '/addcustomer',
+    name: 'Addcustomer',
+    component: () => import(/* webpackChunkName: "about" */ '../components/detailFilter/Addcustomer.vue')
+  }, {
+    path: '/compInfo',
+    name: 'compInfo',
+    component: () => import(/* webpackChunkName: "about" */ '../components/detailFilter/CompInfo.vue')
+  },
 ]
 
 const router = new VueRouter({

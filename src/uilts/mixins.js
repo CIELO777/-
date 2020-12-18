@@ -12,10 +12,9 @@ export const ScorllMixin = {
 			var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 			var windowHeight = document.documentElement.clientHeight || document.body.clientHeight;
 			var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-			// console.log(scrollTop, windowHeight, scrollHeight);
 			if (scrollTop + windowHeight >= scrollHeight && scrollTop > 20) {
-				this.$store.commit("SoundCurNum", "follow")
 				console.log('到底了');
+				this.$store.commit("SoundCurNum", "follow")
 			}
 		}
 		this.current = 1;
@@ -29,6 +28,7 @@ export const ScorllMixin = {
 		this.$store.commit("ClearCurNum", "home");
 		this.$store.commit("ClearCurNum", "common");
 		this.$store.commit("ClearCurNum", "highseas");
+		this.$store.commit("ClearCurNum", "filter");
 
 	},
 

@@ -79,7 +79,6 @@ export default {
   methods: {
     orderItemClick() {  // 跳转到订单表单页面
     let userInfo = JSON.parse(sessionStorage.getItem('_crm_info')); // 默认给显示选中的姓名手机； 
-    console.log(userInfo); 
       this.$router.push({
         name: 'OrderDetail',
         params: {
@@ -161,7 +160,7 @@ export default {
     width: 100%;
     left: 0;
     height: 0.8rem;
-    top: 78px;
+    top: 33PX;
     border-bottom: 8px solid #f1f1f1;
     border-top: 8px solid #f1f1f1;
     padding-left: 0.3rem;
@@ -223,7 +222,7 @@ export default {
     }
   }
   .orderCont:nth-child(2) {
-    margin-top: 1.9rem;
+    padding-top: 1.9rem;
   }
     .van-empty {
       background: #f1f1f1;

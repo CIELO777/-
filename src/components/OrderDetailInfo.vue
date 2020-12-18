@@ -243,7 +243,6 @@ export default {
   created() {
     let id = this.$route.params.id;
     let that = this;
-    console.log(id);
     let signature = generateSignature(id, timeout, nonce);
     this.$get('/api/remote/mall/order/detail', {
       params: {

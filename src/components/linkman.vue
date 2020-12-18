@@ -4,19 +4,21 @@
     <div class="nav">
       <template v-for="(item ,i) in list">
         <div :key="i" class="nav-item">
-          <div class="nav-L" @click="handItemClick(item)">
+          <div class="nav-L" @click="handItemClick(item,i)">
             <div class="nav-fir">
-              <div class="nickN">{{item.nickname}} {{item.id}}</div>
+              <div class="nickN">{{item.nickname}}</div>
+              <!--  {{item.id}} -->
               <template v-if="label">
                 <div class="nav-comp ml" v-if="item.ownerType ==0">（总公司公海）</div>
                 <div class="nav-comp ml" v-else-if="item.ownerType ==1">（分公司公海）</div>
                 <div class="nav-comp ml" v-else-if="item.ownerType ==2">（所属部门公海）</div>
                 <div class="nav-comp ml" v-else>（个人公海）</div>
               </template>
-              <div v-else class="nav-comp ml">（{{userMaps[item.ownerId].nickname}}）</div>
+              <div v-else class="nav-comp ml">{{userMaps[item.ownerId] ? '（ '+userMaps[item.ownerId].nickname +'）':""}}</div>
             </div>
+
+            <p class="nav-comp"> {{item.company === undefined ||item.company === null || item.company === ""?  "未填写公司名称" :item.company}}</p>
             <p class="nav-comp">{{item.lastContactRecord}}</p>
-            <p></p>
           </div>
           <div class="nav-R" :key="i">
             <a :href="'tel:'+item.phone">
@@ -26,9 +28,9 @@
           <template>
             <!-- 如果有userID字段 就展示对话，如果没有就选人 -->
             <div class="firm" @click="openChat(item.wxCrmId)" v-if="item.wxCrmId">
-              <img src="../assets/img/企业微信.png" alt="">
+              <img class="firmImg" src="../assets/img/企业微信.png" alt="">
             </div>
-            <div class="firm" @click="linkmanClick(item.id,item.phone)" v-else>
+            <div class="firm" @click="linkmanClick(item.id,item.phone,i)" v-else>
               <img src="../assets/img/企业微信1.png" alt="">
             </div>
           </template>
@@ -47,9 +49,6 @@ export default {
     return {
       searchData: '',
       route: '',
-      scrollTop: "",
-      windowHeight: "",
-      scrollHeight: "",
       userIds: [],
       chatuserID: "",
     }
@@ -57,26 +56,13 @@ export default {
   methods: {
     searchChange() {
     },
-    handItemClick(data) {
+    handItemClick(data, index) {
       sessionStorage.setItem('tabNum', 0);
       sessionStorage.setItem('_crm_info', JSON.stringify(data))
-      this.$router.push('/linkDetailed');
+      sessionStorage.setItem('ManualIdx', index) // 记录点击的数据索引，为了列表更新数据用
+      this.$router.push({ name: 'LinkDetailed' });
     },
-    handleScroll() {
-      this.scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-      this.windowHeight = document.documentElement.clientHeight || document.body.clientHeight;
-      this.scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-    },
-    // getWXConfig() {
-    //   initWxConfig().then((res) => {
-    //     return wxAgentConfig()
-    //   }).then((res) => {
-    //     alert(JSON.stringify(res))
-    //   });
-    // },
-    linkmanClick(id, phone) {  // 点击拉去联系人
-      // this.$emit('userIdSave', '21321', id, phone)  // 一参是WXid  二参是 当前id ，手机号，
-
+    linkmanClick(id, phone, idx) {  // 点击拉去联系人
       wx.invoke('selectExternalContact', {
         "filterType": 0, //0表示展示全部外部联系人列表，1表示仅展示未曾选择过的外部联系人。默认值为0；除了0与1，其他值非法。在企业微信2.4.22及以后版本支持该参数
       }, (res) => {
@@ -110,13 +96,15 @@ export default {
           }
         }
       });
+    },
+    initScroll() { // 选择会触发滚动条位置，所以每次请求结束清除滚动位置；
+      this.$nextTick(() => {
+        document.documentElement.scrollTop = 0;
+      })
     }
-
   },
   created() {
     this.route = this.$route.name;
-    window.addEventListener('scroll', this.handleScroll) // 监听滚动事件，然后用handleScroll这个方法进行相应的处理
-
   },
   computed: {
     getIndex() {
@@ -126,16 +114,23 @@ export default {
         return this.$store.state.current.common
       } else if (this.route == 'Home') {
         return this.$store.state.current.home
+      } else if (this.route == 'detailFilter') {
+        return this.$store.state.current.filter;
       }
-    }
+    },
+
+
   },
   watch: {
     getIndex(val) {
       this.current = val;
       if (this.totals < this.current) return;
-      this.$toast.loading('加载中...');
       if (this.current !== 1) this.$emit('chengParentCur', this.current);
     },
+  },
+  mounted() {
+    // console.log('zhxingl1');
+    // window.document.documentElement.scrollTop = sessionStorage.getItem('histroyScrollTop') || 0;
   }
 }
 
@@ -145,7 +140,7 @@ export default {
 @FColor: #aaaaaa;
 .content {
   font-size: 14px;
-  height: calc(~"100vh - 50px");
+  height: calc(~"100vh - 90px");
   background: @bgColor;
   .van-search {
     position: fixed;
@@ -157,7 +152,9 @@ export default {
 .nav {
   margin: 0 auto;
   box-sizing: border-box;
-  margin-bottom: 50px;
+  padding-bottom: 50px;
+  background: #f1f1f1;
+  padding-top: 48px;
   .nav-item {
     width: 100%;
     display: flex;
@@ -169,7 +166,7 @@ export default {
     align-items: center;
     box-sizing: border-box;
     .nav-fir {
-      margin-bottom: 12px;
+      // margin-bottom: .1rem;
       display: flex;
       .nickN {
         color: #3b3b3b;
@@ -186,6 +183,10 @@ export default {
     .nav-L {
       flex: 7;
       overflow: hidden;
+      height: 80%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
     .nav-R {
       display: flex;
@@ -206,6 +207,7 @@ export default {
       flex: 1;
       flex-shrink: 0;
       margin-left: 0.1rem;
+
       img {
         width: 100%;
         height: 100%;
@@ -223,5 +225,6 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 80%;
+  // margin-bottom: .1rem;
 }
 </style>

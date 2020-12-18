@@ -17,14 +17,23 @@ export default new Vuex.Store({
       home: 1,
       common: 1,
       highseas: 1,
+      filter: 1
     },
     cacheState: '',
+    SearchValue: "",  // taber搜索
+    SearchMode: '',  //
+    SearchReset: '',
+    ManualData: {
+      nickName: "",
+      company: "",
+      sheet:"",
+    }
 
   },
   mutations: {
     saveTitle(state, pathName) {
       state.title = pathName.title;
-      window.document.title =  pathName.title;
+      window.document.title = pathName.title;
       state.leftShow = pathName.leftShow;
       state.tabarShow = pathName.tabarShow;
     },
@@ -46,6 +55,8 @@ export default new Vuex.Store({
         state.current.common = ++state.current.common;
       } else if (tabIndex == 8) {  // 公海
         state.current.highseas = ++state.current.highseas;
+      } else if (tabIndex == 9) {// 详细过滤
+        state.current.filter = ++state.current.filter;
       }
     },
     ClearCurNum(state, pathName) {
@@ -54,6 +65,21 @@ export default new Vuex.Store({
     cache(state, pathName) {
       state.cacheState = pathName;
     },
+    Searchfuzzy(state, pathName) {
+      state.SearchValue = pathName;
+      // state.SearchMode = ''; // 此方法监听搜索框内容，然后返回，
+    },
+    SearchfuzzyReset(state, pathName) {
+      // state.SearchValue = '';
+      state.SearchMode = pathName;// 点击搜索取消按钮触发，目的是恢复默认列表
+    },
+    destroyedSearch(state, pathName) { // 页面销毁应该让搜索重置，
+      state.SearchReset = pathName;
+    },
+    ManualUpdate(state, pathName) {// 手动更新列表名字，公司信息，跟进记录，目的为表单返回不刷新页面
+      state.ManualData[pathName.target] = pathName.data;
+      console.log(state.ManualData);
+    }
   },
   actions: {
   },

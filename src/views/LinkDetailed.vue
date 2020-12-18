@@ -1,8 +1,8 @@
 <template>
   <div class="detail">
-    <div class="backGo" @click="backgo">
+    <!-- <div class="backGo" @click="backgo">
       <van-icon name="arrow-left" size="17px" color="#fff" />
-    </div>
+    </div> -->
     <van-tabs v-model="active" color="#51BBBA" @change="tabsChange" class="tabs" offset-top="46" sticky>
       <van-tab v-for="(item,index) in navigationList" :title="item.name" :key="index">
         <div v-show="active == 0">
@@ -61,13 +61,6 @@ export default {
     [ImagePreview.Component.name]: ImagePreview.Component,
   },
   created() {
-    // ImagePreview({
-    //   images: [
-    //     'https://img.yzcdn.cn/vant/apple-1.jpg',
-    //     'https://img.yzcdn.cn/vant/apple-2.jpg',
-    //   ],
-    //   startPosition: 1,
-    // });
     let tabnum = sessionStorage.getItem('tabNum');
     if (tabnum == 1) {
       this.active = 1;
@@ -143,12 +136,14 @@ export default {
     height: calc(~"100vh - 90px");
   }
 
-  /deep/ .van-tabs__wrap {  // 兼容vant tabar 修改部分样式
+  /deep/ .van-tabs__wrap {
+    // 兼容vant tabar 修改部分样式
     position: fixed;
-    top: 45px;
+    top: 0;
     left: 0px;
     width: 100%;
     height: 44px;
+    margin-bottom: 3px;
     /deep/ .van-tabs__nav--line {
       padding-bottom: 14px;
     }

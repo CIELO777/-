@@ -1,7 +1,7 @@
 <template>
   <div class="choose" @scroll="scrollEvent">
-    <div class="backGo" @click="backgo">
-      <van-icon name="arrow-left" size="17px" color="#fff" />
+    <div class='text-ali'>
+      <van-icon name="arrow-left" @click="goBack" /><span>已选择详情页</span>
     </div>
     <van-button class="addbtn" size="mini" @click="addList" color="#5c5c5c">添加</van-button>
     <van-popup v-model="addListshow" position="bottom" closeable :style="{ height: '100%' }" @close="closePop">
@@ -190,6 +190,9 @@ export default {
         sessionStorage.removeItem('shelvesData')
         this.selectList = [];  // 不请求清空全部
       }
+    },
+    goBack(){
+      this.$router.go(-1)
     }
   },
   created() {
@@ -208,6 +211,7 @@ export default {
   background: #f1f1f1;
   height: calc(~"100% - 46px");
   overflow-y: scroll;
+  padding-top: 46px;
   .backGo {
     width: 1rem;
     height: 45px;
@@ -325,6 +329,28 @@ export default {
     height: calc(~"100% - 46px");
     overflow-y: scroll;
     margin-top: 46px;
+  }
+  .text-ali {
+    position: fixed;
+    top: -1px;
+    left: 0px;
+    text-align: center;
+    width: 100%;
+    font-size: 16px;
+    height: 46px;
+    line-height: 52px;
+    background: #5c5c5c;
+    color: #fff;
+    i {
+      float: left;
+      line-height: 48px;
+      padding-left: 5px;
+    }
+    // display: flex;
+    // justify-content: space-between;
+    // align-items: center;
+    // padding: 10px;
+    // box-sizing: border-box;
   }
 }
 </style>

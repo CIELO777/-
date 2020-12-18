@@ -1,8 +1,8 @@
 <template>
   <div class="orderDetail">
-    <div class="backGo" @click="backgo">
+    <!-- <div class="backGo" @click="backgo">
       <van-icon name="arrow-left" size="17px" color="#fff" />
-    </div>
+    </div> -->
     <div class="dTitle">客户信息</div>
     <van-cell-group>
       <van-field type="number" label="订单金额" placeholder="必填项" v-model="money" />
@@ -42,7 +42,7 @@
     <van-field type="tel" label="客户手机 " placeholder="必填项" v-model="receiptMobile" />
     <van-cell is-link title="订单所属" to="OrderList" :value="OrderquantityName" />
     <van-action-sheet />
-    <van-button type="primary" size="large" style="margin-top:50px;background:#51BBBA" @click="OrderSave">保存</van-button>
+    <van-button type="primary" size="large" @click="OrderSave">保存</van-button>
   </div>
 </template>
 
@@ -117,7 +117,6 @@ export default {
       param.append("products ", JSON.stringify(product));
       this.$post1('/api/request/mall/order/create', param)
         .then(function (res) {
-          console.log(res);
           if (res.error == 'success') {
             that.$toast({
               message: '新增成功',
@@ -129,8 +128,6 @@ export default {
               that.$router.push("/linkDetailed")
               sessionStorage.setItem('tabNum', 2)
             }, 800)
-
-
           }
         })
         .catch(function (error) {
@@ -151,12 +148,10 @@ export default {
     },
     addImg(e) {
       let file = e.target.files[0];
-      console.log(file);
       if (file == undefined) {
         return false;
       }
       var fileSize = file.size; //获得文件大小；
-      console.log(file);
       var filePath = file.type.split("/")[1];
       // var fileType = filePath[filePath.length - 1]; //获得文件结尾的类型如 zip rar 这种写法确保是最后的
       if (!(filePath == "png" || filePath == "jpg" || filePath == "jpeg" || filePath == "gif")) {
@@ -169,7 +164,6 @@ export default {
       this.uploadImg(file, sessionStorage.getItem('userinfo')?.id);
     },
     uploadImg(file, compId) {
-      console.log(file);
       var that = this;
       var formData = new FormData();
       formData.append('id', "13394171296");
@@ -183,7 +177,6 @@ export default {
             return;
           }
           that.imageList.push(url);
-          console.log(that.imageList);
         } else {
           that.$toast.fail('上传失败请稍后再试!');
         }
@@ -193,7 +186,7 @@ export default {
     }
   },
   created() {
-    console.log("created,orderDetil");
+    console.log('2');
     if (this.$route.params.add) {  // 如果是新增的话，那么就清空表单
       this.receiptName = this.$route.params.name;
       this.receiptMobile = this.$route.params.phone;
@@ -212,11 +205,9 @@ export default {
         shuliang: 1
       }
     })
-    console.log(this.productList);
 
   },
   activated() {
-    console.log('activated');
     if (sessionStorage.getItem('orderSelectInfo')) {
       this.OrderquantityName = JSON.parse(sessionStorage.getItem('orderSelectInfo')).name;
       this.OrderquantityId = JSON.parse(sessionStorage.getItem('orderSelectInfo')).id;
@@ -235,7 +226,11 @@ export default {
     };
   },
   beforeRouteEnter(to, from, next) {
-    console.log(to);
+    //  因为顶部tabbar 被移除，获取不到点击事件，所以通过路由控制数组是否存在
+    if (to.name == 'OrderDetail' && from.name == 'LinkDetailed') {
+      sessionStorage.removeItem("shelvesIds")
+      sessionStorage.removeItem("shelvesData")
+    }
     // 注意，在路由进入之前，组件实例还未渲染，所以无法获取this实例，只能通过vm来访问组件实例
     next()
   },
@@ -335,6 +330,12 @@ export default {
       left: 0;
       top: 0;
     }
+  }
+  button {
+    background: #51bbba;
+    display: block;
+    margin: 50px auto 0;
+    width: 94%;
   }
 }
 </style>

@@ -87,10 +87,10 @@ import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
 import { ImagePreview } from 'vant';
 import sha1 from '../uilts/sha1';
 import Utils from '../uilts/utils';
-console.log(wx, 'followWX')
 export default {
   name: 'FollowPage',
   mixins: [ScorllMixin],
+  inject: ["reload"],
   data() {
     return {
       follList: [],
@@ -158,7 +158,6 @@ export default {
                 url: str
               };
             })
-            console.log(data);
             that.follList = that.current == 1 ? data : that.follList.concat(data);
             that.followUserMap = { ...that.followUserMap, ...res.itrUser };
             that.total = res.totalPageCount;
@@ -214,7 +213,6 @@ export default {
       )
         .then(function (res) {
           if (res.error === 'success') {
-            console.log(res);
           }
         })
         .catch(function (error) {
@@ -222,7 +220,6 @@ export default {
         });
     },
     ImgClick(src) { // 点击图片进入预览模式
-      console.log(src);
       ImagePreview([src]);
     },
     async getAgentConfig() {  // 拉取
@@ -237,7 +234,6 @@ export default {
       await this.$post1('/wx-crm-server/wx/js_api_ticket/auth',
         param
       ).then((res) => {
-        console.log(res, 'getAgentConfig');
         let str1 = 'jsapi_ticket=' + res.jsapi_ticket + '&noncestr=' + nonce + '&timestamp=' + timeout / 1000 + '&url=' + url
         this.jsapi2 = res.jsapi_ticket  // 这个值是拉取的值agentConfig 值
         this.timestamp2 = timeout / 1000;
@@ -261,7 +257,6 @@ export default {
         param
       )
         .then(res => {
-          console.log(res, 'getWxJsJdk');
           this.appId = res.appId;
           this.noncestr = nonce;
           this.timestamp = timeout / 1000;
@@ -279,7 +274,6 @@ export default {
             jsApiList: ['agentConfig', 'selectExternalContact'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
           });
           wx.ready(function () {
-            console.log(that.appid2, 'appid2', that.timestamp2, that.noncestr2, that.signature2);
             wx.agentConfig({
               corpid: that.appid2, // 必填，企业微信的corpid，必须与当前登录的企业一致
               agentid: res.agentId, // 必填，企业微信的应用id （e.g. 1000247）
@@ -288,7 +282,6 @@ export default {
               signature: that.signature2,// 必填，签名，见附录-JS-SDK使用权限签名算法
               jsApiList: ['selectExternalContact'], //必填
               success: function (res) {
-                console.log(res, 'successgetWxJsJdk');
                 // 回调
                 // alert('成功')
               },
@@ -309,7 +302,6 @@ export default {
         })
     },
     openChat() {
-      console.log('cHAT',this.wxCrmId);
       wx.openEnterpriseChat({ // 调用对话
         // 注意：userIds和externalUserIds至少选填一个。内部群最多2000人；外部群最多500人；如果有微信联系人，最多40人
         userIds: '',    //参与会话的企业成员列表，格式为userid1;userid2;...，用分号隔开。
@@ -329,6 +321,9 @@ export default {
     },
     linkmanClick() {  // 点击拉去联系人
       console.log('linkmanClick');
+      this.saveWxCrm(21313);
+
+      return;
       wx.invoke('selectExternalContact', {
         "filterType": 0, //0表示展示全部外部联系人列表，1表示仅展示未曾选择过的外部联系人。默认值为0；除了0与1，其他值非法。在企业微信2.4.22及以后版本支持该参数
       }, (res) => {
@@ -340,13 +335,13 @@ export default {
           return;
         } else {   // 如果单选了，保存当前userid
           // this.wxCrmId = res.userIds[0];
-          console.log(res.userIds[0], 'res.userIds[0]');
           this.saveWxCrm(res.userIds[0]);
+
         }
         if (res.err_msg == "selectExternalContact:ok") {
         } else {
           //错误处理
-          console.log('拉区联系人错了');
+          console.log('拉取联系人错了');
         }
       });
     },
@@ -371,6 +366,16 @@ export default {
               message: '关联外部联系人成功',
               position: 'bottom',
             });
+            this.$nextTick(() => {
+              this.current = 1;
+              this.getAgendaList();
+              window.document.documentElement.scrollTop = 0;
+              let json = JSON.parse(sessionStorage.getItem('_crm_info')); // 更新dom 本地wxid
+              json.wxCrmId = wxid;
+              sessionStorage.setItem('_crm_info', JSON.stringify(json));
+              this.wxCrmId = JSON.parse(sessionStorage.getItem('_crm_info'))?.wxCrmId;
+
+            })
             // await this.getAgendaList();
             // setTimeout(() => {
             //   this.reload();
@@ -408,7 +413,6 @@ export default {
     this.getAgendaList();
     this.phone = JSON.parse(sessionStorage.getItem('_crm_info'))?.phone;
     this.wxCrmId = JSON.parse(sessionStorage.getItem('_crm_info'))?.wxCrmId;
-    console.log(this.wxCrmId, 'wxcrmid');
     this.id = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
     await this.getAgentConfig()  // 同步执行 否则会报错
     await this.getWxJsJdk();
@@ -445,7 +449,7 @@ export default {
     width: 100%;
     left: 0;
     height: 0.8rem;
-    top: 78px;
+    top: 33px;
     border-bottom: 8px solid #f1f1f1;
     border-top: 8px solid #f1f1f1;
     div {
@@ -458,7 +462,7 @@ export default {
     }
   }
   .follCont:nth-child(2) {
-    margin-top: 1.9rem;
+    padding-top: 1.9rem;
   }
   .follCont {
     background-color: #fff;

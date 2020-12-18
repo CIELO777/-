@@ -77,7 +77,6 @@ export default {
               that.$toast.fail('未查询到相关客户信息');
             } else {
               let datasss = res.data;
-              console.log(datasss);
               that.data = that.current == 1 ? res.data : that.data.concat(res.data);
               that.user = res.user;
               that.show = true;
