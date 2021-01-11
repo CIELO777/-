@@ -1,14 +1,10 @@
 <template>
   <div class="choose" @scroll="scrollEvent">
-    <div class="backGo" @click="backgo">
-      <van-icon name="arrow-left" size="17px" color="#fff" />
-    </div>
-    <van-button class="addbtn" size="mini" @click="addList" color="#5c5c5c">添加</van-button>
-    <van-popup v-model="addListshow" position="bottom" closeable :style="{ height: '100%' }" @close="closePop">
-      <div class='text-ali'>请选择详情页</div>
+    <van-popup v-model="addListshow" position="bottom"  :style="{ height: '100%' }" >
+      <!-- <div class='text-ali'>请选择详情页</div> -->
       <div id="abc" @scroll="scrollEventselect">
-        <div v-for="(item,index) in list" :key="index" class="chooseView">
-          <van-checkbox v-model="item.check" class="check" @change="checkChange(item,index)"></van-checkbox>
+        <div v-for="(item,index) in list" :key="index" @click="checkChange(item,index)" class="chooseView">
+          <van-checkbox v-model="item.check" class="check" ></van-checkbox>
           <div class="img-text">
             <img :src="item.thumb" alt="">
             <div>
@@ -16,6 +12,10 @@
               <p>{{item.description}}</p>
             </div>
           </div>
+        </div>
+        <div class="btn">
+          <van-button @click="closePop">返回</van-button>
+          <van-button type="primary" @click="closePop">添加</van-button>
         </div>
       </div>
     </van-popup>
@@ -38,6 +38,11 @@
         <p>还没有选择详情页</p>
       </div>
     </div>
+    <div class="btn">
+      <van-button @click="goBack">确认</van-button>
+      <van-button type="primary" @click="addList">添加</van-button>
+    </div>
+
   </div>
 </template>
 
@@ -68,7 +73,6 @@ export default {
       let idss
       if (ids) {
         console.log(ids);
-        console.log();
         idss = JSON.parse(ids).join(',')
       }
       this.$get('/api/request/mall/product/ids/result', {
@@ -110,7 +114,7 @@ export default {
         });
     },
     checkChange(i, d) {
-      this.list[d].check = i.check;  // 更改当前数据选中状态
+      this.list[d].check = !i.check;  // 更改当前数据选中状态
     },
     addList() { // 添加商品列表
       this.addListshow = true;
@@ -143,6 +147,7 @@ export default {
           this.getChooseList(0);
         }
       }
+      this.addListshow = false;
     },
     backgo() { // 点击上面的返回上一层按钮清空数据
       this.$router.go(-1);
@@ -166,7 +171,7 @@ export default {
       var scrollTop = read.scrollTop;
       var windowHeight = read.clientHeight;
       var scrollHeight = read.scrollHeight;
-      if (scrollTop + windowHeight >= scrollHeight && scrollTop > 20) {
+      if (scrollTop + windowHeight == scrollHeight && scrollTop > 20) {
         console.log('到底了');
         this.current = ++this.current;
         console.log(this.total, this.current);
@@ -190,10 +195,12 @@ export default {
         sessionStorage.removeItem('shelvesData')
         this.selectList = [];  // 不请求清空全部
       }
+    },
+    goBack() {
+      this.$router.go(-1)
     }
   },
   created() {
-    console.log('dsa');
     let shelevs = sessionStorage.getItem('shelvesIds');
     if (shelevs && JSON.parse(shelevs).length !== 0) { // 如果本地商品id为空，那么不让他进行请求
       this.getChooseList(0)
@@ -309,6 +316,11 @@ export default {
       }
     }
   }
+
+  #abc {
+    height: calc(~"100% - 46px");
+    overflow-y: scroll;
+  }
   .text-ali {
     position: fixed;
     top: -1px;
@@ -320,11 +332,30 @@ export default {
     line-height: 52px;
     background: #5c5c5c;
     color: #fff;
+    i {
+      float: left;
+      line-height: 48px;
+      padding-left: 5px;
+    }
+    // display: flex;
+    // justify-content: space-between;
+    // align-items: center;
+    // padding: 10px;
+    // box-sizing: border-box;
   }
-  #abc {
-    height: calc(~"100% - 46px");
-    overflow-y: scroll;
-    margin-top: 46px;
+  .btn {
+    display: block;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    background: rgb(81, 187, 186);
+    height: 44px;
+    border: none;
+    color: #fff;
+    button {
+      width: 50%;
+    }
   }
 }
 </style>

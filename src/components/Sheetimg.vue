@@ -1,8 +1,8 @@
 <template>
   <div class="sheetimg">
-    <div class="backGo" @click="backgo">
+    <!-- <div class="backGo" @click="backgo">
       <van-icon name="arrow-left" size="17px" color="#fff" />
-    </div>
+    </div> -->
     <van-field v-model="message" rows="4" autosize type="textarea" placeholder="请输入文字" />
     <div class="waupolad">
       <template v-for="(item,index) in imageList">
@@ -72,6 +72,7 @@ export default {
               message: '新增成功',
               position: 'bottom',
             });
+            that.$store.commit("ManualUpdate", { target: 'sheet', data: data.title })
             setTimeout(() => {
               that.$router.push({
                 name: 'LinkDetailed',
@@ -197,6 +198,15 @@ export default {
       display: inherit;
       padding-left: 16px;
     }
+  }
+  button {
+    margin-top: 10px;
+    display: block;
+    margin: 10px auto 0;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
   }
 }
 </style>

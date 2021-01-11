@@ -12,7 +12,7 @@
       <div class="FollIcon">
         <!-- 如果有userID字段 就展示对话，如果没有就选人 -->
         <a :href="'tel:'+ phone" @click="telClick">
-          <van-icon name="phone-o" size="28" style="margin-right:15px;" />
+          <van-icon name="phone-o" size="23" style="margin-right:15px;" />
         </a>
         <div class="firm" v-if="wxCrmId" @click="openChat()">
           <img src="../assets/img/企业微信.png" alt="">
@@ -53,10 +53,14 @@
         </div>
         <div class="content">
           <div class="text">
-            <span>{{item.title==null?'':item.title}} <a v-if="item.url != false" :href="item.url" style="color:blue">查看链接</a></span>
+            <!-- 如果type === 4 证明是对话，对话展示content内容，其他展示title -->
+            <template>
+              <span v-if="item.type == 4" style="white-space: pre;">{{item.content}}</span>
+              <span v-else>{{item.title==null?'':item.title}} <a v-if="item.url != false" @click="JumpOrder(item.url)" style="color:blue">查看链接</a></span>
+            </template>
             <div v-if="item.type == 0 && item.content.length > 0" class="img-list">
               <template v-for="(itr,i) in item.content">
-                <img :key="i" :src="itr + '?x-oss-process=image/resize,m_fill,h_200,w_200'" @click="ImgClick(itr + '?x-oss-process=image/resize,m_fill,h_200,w_200')" />
+                <img :key="i" :src="itr" @click="ImgClick(itr)" />
               </template>
             </div>
             <!-- <div v-if="item.type == 1">
@@ -66,14 +70,24 @@
             </div> -->
           </div>
           <div class="info">
-            <span>{{item.detTime}}</span>
-            <span class="user" v-if="followUserMap[item.itrId]">{{followUserMap[item.itrId].nickname || ""}}</span>
+            <span style="font-size:12px;">{{item.detTime}}</span>
+            <span v-show="limits" class="user" @click="dele(item.id,item.pid)">删除</span>
+            <!--   -->
+            <span @click="chat(followUserMap[item.itrId],item.pid)" class="user" v-if="followUserMap[item.itrId]">{{followUserMap[item.itrId].nickname || ""}}</span>
           </div>
         </div>
       </div>
       <van-empty v-show="empty" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
 
     </div>
+    <!-- 对话框 -->
+    <van-popup :safe-area-inset-bottom="true" v-model="chatPop" position="bottom" :style="{ height: '250px' }">
+      <p class="pop-tit">向 " {{chatName}} " 发送消息</p>
+      <van-field v-model="chatmessage" rows="5" autosize type="textarea" maxlength="500" show-word-limit />
+      <!-- <van-field label="" v-model="formData.nickname" placeholder="请输入姓名" /> -->
+      <van-button class="chabtn" size="mini" round color="#60C6C6" type="primary" @click="chatFs()">发送</van-button>
+    </van-popup>
+
   </div>
 </template>
 
@@ -87,10 +101,12 @@ import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
 import { ImagePreview } from 'vant';
 import sha1 from '../uilts/sha1';
 import Utils from '../uilts/utils';
-console.log(wx, 'followWX')
+import communication from "../uilts/communication";
+
 export default {
   name: 'FollowPage',
   mixins: [ScorllMixin],
+  inject: ["reload"],
   data() {
     return {
       follList: [],
@@ -113,6 +129,12 @@ export default {
       noncestr: "",
       timestamp: "",
       chatuserID: "",
+      limits: "",
+      chatPop: false,
+      chatName: "",
+      chatmessage: "",
+      pid: "",
+      nickname: "",
     }
 
   },
@@ -139,11 +161,11 @@ export default {
           if (!res.error) {
             let str = '';
             let data = res.data.map(item => {
-              let time = item.createTime.split(" ")[0];
-              let timeArr = time.split("-");
+              let time = item.createTime.split(" ");
+              let timeArr = time[0].split("-");
               item.month = timeArr[1];
               item.day = timeArr[2];
-              item.detTime = item.createTime.split(" ")[1].substring(0, 5);
+              item.detTime = that.fordate(timeArr, time[1]);
               if (item.type == 0) {
                 item.content = JSON.parse(item.content)
               }
@@ -158,7 +180,6 @@ export default {
                 url: str
               };
             })
-            console.log(data);
             that.follList = that.current == 1 ? data : that.follList.concat(data);
             that.followUserMap = { ...that.followUserMap, ...res.itrUser };
             that.total = res.totalPageCount;
@@ -172,6 +193,14 @@ export default {
 
         });
     },
+    fordate(timeArr, time1) { // 时间处理
+      timeArr.splice(0, 1)
+      timeArr.splice(1, 0, '月')
+      timeArr.splice(3, 0, '日')
+      let date = timeArr.join('');
+      let time2 = time1.match(/(\d{2})\:(\d{2})/)
+      return date + time2[0];
+    },
     addFollPop() { //点击添加跟进记录
       this.Actionshow = true;
     },
@@ -182,19 +211,6 @@ export default {
       this.Actionshow = false;
       this.audioPop = true;
       wx.startRecord();
-    },
-    onScroll() {
-      // 可滚动容器的高度
-      let innerHeight = document.querySelector('.follCont').offsetHeight;
-      // 屏幕尺寸高度
-      let outerHeight = document.documentElement.clientHeight
-      // 可滚动容器超出当前窗口显示范围的高度
-      let scrollTop = document.documentElement.scrollTop
-      // scrollTop在页面为滚动时为0，开始滚动后，慢慢增加，滚动到页面底部时，出现innerHeight <= (outerHeight + scrollTop)的情况，严格来讲，是接近底部。
-      if (outerHeight + scrollTop >= innerHeight) {
-        // 加载更多操作
-        console.log('触底了');
-      }
     },
     telClick() {  // 点击拨打电话
       let crmInfo = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
@@ -211,18 +227,40 @@ export default {
       param.append("type", 2);
       param.append("compId", this.$C || local.C());
       this.$post1('/api/request/itr/comp/customer/record/save', param
-      )
-        .then(function (res) {
-          if (res.error === 'success') {
-            console.log(res);
-          }
-        })
+      ).then((res) => {
+        if (res.error === 'success') {
+          this.getAgendaList()
+        }
+      })
         .catch(function (error) {
           console.log(error);
         });
     },
+    HometelClicks(id) {  // 点击拨打电话
+      let crmInfo = id;
+      let signature = generateSignature3(0, this.$C || local.C(), this.$U || local.U(), crmInfo, timeout, nonce);
+      let param = new URLSearchParams();
+      param.append("timeout", timeout);
+      param.append("nonce", nonce);
+      param.append("signature", signature);
+      param.append("id", 0);
+      param.append("title", "拨打了电话");
+      param.append("content", "");
+      param.append("itrId", this.$U || local.U());
+      param.append("pid", crmInfo);
+      param.append("type", 2);
+      param.append("compId", this.$C || local.C());
+      this.$post1('/api/request/itr/comp/customer/record/save', param
+      ).then((res) => {
+        if (res.error === 'success') {
+          this.getAgendaList()
+        }
+      })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },// 首页触发跟进记录
     ImgClick(src) { // 点击图片进入预览模式
-      console.log(src);
       ImagePreview([src]);
     },
     async getAgentConfig() {  // 拉取
@@ -237,7 +275,6 @@ export default {
       await this.$post1('/wx-crm-server/wx/js_api_ticket/auth',
         param
       ).then((res) => {
-        console.log(res, 'getAgentConfig');
         let str1 = 'jsapi_ticket=' + res.jsapi_ticket + '&noncestr=' + nonce + '&timestamp=' + timeout / 1000 + '&url=' + url
         this.jsapi2 = res.jsapi_ticket  // 这个值是拉取的值agentConfig 值
         this.timestamp2 = timeout / 1000;
@@ -261,7 +298,6 @@ export default {
         param
       )
         .then(res => {
-          console.log(res, 'getWxJsJdk');
           this.appId = res.appId;
           this.noncestr = nonce;
           this.timestamp = timeout / 1000;
@@ -279,7 +315,6 @@ export default {
             jsApiList: ['agentConfig', 'selectExternalContact'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
           });
           wx.ready(function () {
-            console.log(that.appid2, 'appid2', that.timestamp2, that.noncestr2, that.signature2);
             wx.agentConfig({
               corpid: that.appid2, // 必填，企业微信的corpid，必须与当前登录的企业一致
               agentid: res.agentId, // 必填，企业微信的应用id （e.g. 1000247）
@@ -288,12 +323,10 @@ export default {
               signature: that.signature2,// 必填，签名，见附录-JS-SDK使用权限签名算法
               jsApiList: ['selectExternalContact'], //必填
               success: function (res) {
-                console.log(res, 'successgetWxJsJdk');
                 // 回调
                 // alert('成功')
               },
               fail: function (res) {
-                console.log(error, 'erroragentConfig');
                 if (res.errMsg.indexOf('function not exist') > -1) {
                 }
               }
@@ -309,7 +342,6 @@ export default {
         })
     },
     openChat() {
-      console.log('cHAT',this.wxCrmId);
       wx.openEnterpriseChat({ // 调用对话
         // 注意：userIds和externalUserIds至少选填一个。内部群最多2000人；外部群最多500人；如果有微信联系人，最多40人
         userIds: '',    //参与会话的企业成员列表，格式为userid1;userid2;...，用分号隔开。
@@ -328,7 +360,8 @@ export default {
       });
     },
     linkmanClick() {  // 点击拉去联系人
-      console.log('linkmanClick');
+      // this.saveWxCrm(1312);
+      // return;
       wx.invoke('selectExternalContact', {
         "filterType": 0, //0表示展示全部外部联系人列表，1表示仅展示未曾选择过的外部联系人。默认值为0；除了0与1，其他值非法。在企业微信2.4.22及以后版本支持该参数
       }, (res) => {
@@ -340,13 +373,13 @@ export default {
           return;
         } else {   // 如果单选了，保存当前userid
           // this.wxCrmId = res.userIds[0];
-          console.log(res.userIds[0], 'res.userIds[0]');
           this.saveWxCrm(res.userIds[0]);
+          communication.$emit('update', 'msg'); //触发home 页面方法，目的是为了更新列表数据
         }
         if (res.err_msg == "selectExternalContact:ok") {
         } else {
           //错误处理
-          console.log('拉区联系人错了');
+          console.log('拉取联系人错了');
         }
       });
     },
@@ -357,7 +390,7 @@ export default {
       crm.itrId = this.$U || local.U();
       crm.compId = this.$C || local.C();
       crm.wxCrmId = wxid;
-      crm.phone = this.phone;
+      // crm.phone = this.phone;
       let signature = generateSignature3(crm.id, crm.itrId, crm.compId, timeout, nonce);
       crm.timeout = timeout;
       crm.nonce = nonce;
@@ -371,10 +404,16 @@ export default {
               message: '关联外部联系人成功',
               position: 'bottom',
             });
-            // await this.getAgendaList();
-            // setTimeout(() => {
-            //   this.reload();
-            // }, 1000)
+            this.$nextTick(() => {
+              this.current = 1;
+              this.getAgendaList();
+              window.document.documentElement.scrollTop = 0;
+              let json = JSON.parse(sessionStorage.getItem('_crm_info')); // 更新dom 本地wxid
+              json.wxCrmId = wxid;
+              sessionStorage.setItem('_crm_info', JSON.stringify(json));
+              this.wxCrmId = JSON.parse(sessionStorage.getItem('_crm_info'))?.wxCrmId;
+              communication.$emit('update', { index: Number(sessionStorage.getItem('ManualIdx')), wxId: this.wxCrmId, route: sessionStorage.getItem('active') }); //触发home 页面更新列表数据
+            })
           } else {
             this.$toast({
               message: res.errMsg,
@@ -386,11 +425,143 @@ export default {
           console.log(error);
         });
     },
+    Unbindupdate() {
+      let json = JSON.parse(sessionStorage.getItem('_crm_info')); // 更新dom 本地wxid
+      json.wxCrmId = '';
+      sessionStorage.setItem('_crm_info', JSON.stringify(json));
+      this.wxCrmId = '';
+    },// 更新解绑后的数据
+    getpermission() { // 获取是不是管理员
+      let param = new URLSearchParams();
+      let signature = generateSignature3(this.$U || local.U(), nonce, timeout);
+      param.append("userId", this.$U || local.U());
+      param.append("nonce", nonce);
+      param.append("timeout", timeout);
+      param.append("signature", signature);
+      this.$post1('/api/request/itr/comp/permission/current', param)
+        .then((res) => {
+          if (!res.error) {
+            this.limits = res.company.role == 1 ? true : false;
+          } else {
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    dele(id, pid) { // 删除跟进记录
+      this.$dialog.confirm({
+        title: '温馨提示',
+        message: '您确定要删除这条记录吗？',
+      })
+        .then(() => {
+          this.deleOk(id, pid)
+        })
+        .catch(() => {
+
+        });
+    },
+    deleOk(id, pid) { // 删除跟进记录调用接口
+      // let param = new URLSearchParams();
+      let timeout = generateTimeout();
+      let nonce = generateNonce();
+      let signature = generateSignature3(id, pid, nonce, timeout);
+      let data = {
+        id,
+        pid,
+        nonce,
+        timeout,
+        signature,
+      };
+      this.$get("/api/request/itr/comp/customer/record/delete", {
+        params: data,
+      })
+        .then((res) => {
+          setTimeout(() => {
+            this.getAgendaList()
+          }, 200)
+        })
+        .catch(function (error) {
+
+        });
+    },
+    chat(data, pid) {
+      let currentId = JSON.parse(sessionStorage.getItem('userinfo'))?.id;
+      this.chatName = data.nickname;
+      if (currentId === data.id) {
+        this.$toast.fail('不能和自己对话')
+      } else {
+        this.chatPop = true;
+        this.chatmessage = '';
+        this.pid = pid;
+        this.nickname = data.nickname
+      }
+    },
+    chatFs() {  // 发送消息
+      let param = new URLSearchParams();
+      let crmInfo = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
+      let nickname = JSON.parse(sessionStorage.getItem('userinfo'))?.nickname;
+      let signature = generateSignature3(0, this.$C || local.C(), this.$U || local.U(), crmInfo, timeout, nonce);
+      param.append("title", '23213');
+      let content = nickname + '--->' + this.nickname + ':\n' + this.chatmessage;
+      // return;
+      param.append("type", 4);
+      param.append("content", content);
+      param.append("id", 0);
+      param.append("compId", this.$C || local.C());
+      param.append("itrId", this.$U || local.U());
+      param.append("pid", crmInfo);
+      param.append("nonce", nonce);
+      param.append("notifyMode", 1);
+      param.append("signature", signature);
+      param.append("timeout", timeout);
+      this.$post1('/api/request/itr/comp/customer/record/save', param)
+        .then((res) => {
+          if (res.error == 'success') {
+            this.$toast({
+              message: '新增成功',
+              position: 'bottom',
+            })
+            this.chatPop = false;
+            setTimeout(() => {
+              this.getAgendaList()
+            }, 200)
+
+          } else {
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    JumpOrder(url) { // 跳转至订单详情页面
+      let result;
+      if (url.indexOf('order') !== -1) {
+        result = url.match(/id=(\S*)/)[1];
+        this.$router.push({
+          path: "/orderdetailinfo/" + result,
+          // name: 'mallList',
+          query: {
+            id: result
+          }
+        })
+      } else if (url.indexOf('form') !== -1) {
+        this.$toast.fail('表单导入暂不支持查看详情')
+      }
+    }
   },
   computed: {
     getIndex() {
-      return this.$store.state.current.follow
+      return this.$store.state.current.follow;
     }
+  },
+  mounted() {
+    communication.$on('updateUnbind', () => {
+      this.Unbindupdate();
+    })
+    communication.$on('callTel', (id) => {  // 首页电话按钮触发跟进记录
+      this.HometelClicks(id)
+    })
   },
   watch: {
     getIndex(val) {
@@ -398,22 +569,25 @@ export default {
       if (this.total < this.current) return;
       this.$toast.loading('加载中...');
       this.getAgendaList();
-
     },
   },
   components: {
     [ImagePreview.Component.name]: ImagePreview.Component,  // 挂载图片预览组件
   },
   async created() {
+    console.log('created')
+    await this.getpermission();
     this.getAgendaList();
     this.phone = JSON.parse(sessionStorage.getItem('_crm_info'))?.phone;
     this.wxCrmId = JSON.parse(sessionStorage.getItem('_crm_info'))?.wxCrmId;
-    console.log(this.wxCrmId, 'wxcrmid');
     this.id = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
     await this.getAgentConfig()  // 同步执行 否则会报错
     await this.getWxJsJdk();
   },
-
+  activated() {
+    console.log('activated')
+    document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.follow; // 设置每个页面的scrollTop
+  },
 }
 </script>
 <style lang="less" scoped>
@@ -445,7 +619,7 @@ export default {
     width: 100%;
     left: 0;
     height: 0.8rem;
-    top: 78px;
+    top: 33px;
     border-bottom: 8px solid #f1f1f1;
     border-top: 8px solid #f1f1f1;
     div {
@@ -458,16 +632,19 @@ export default {
     }
   }
   .follCont:nth-child(2) {
-    margin-top: 1.9rem;
+    padding-top: 1.8rem;
   }
   .follCont {
     background-color: #fff;
+    .follMain:first-child {
+      padding-top: 35px;
+    }
     .follMain {
       display: flex;
       padding: 10px 15px;
 
       .time {
-        width: 1.6rem;
+        width: 1.4rem;
         flex-shrink: 0;
         span:first-child {
           font-size: 22px;
@@ -481,7 +658,7 @@ export default {
       }
       .content {
         flex: 3;
-        margin-left: 0.2rem;
+        // margin-left: 0.2rem;
         .text {
           background: #f1f1f1;
           padding: 10px 5px;
@@ -490,6 +667,7 @@ export default {
             line-height: 25px;
             word-break: break-all;
             padding-left: 8px;
+            padding: 5px 2px;
           }
           .img-list {
             display: flex;
@@ -505,7 +683,7 @@ export default {
           }
         }
         .info {
-          padding: 8px 10px;
+          padding: 8px 0px;
           color: #aaa;
           font-size: 13px;
 
@@ -528,8 +706,8 @@ export default {
     flex: 1;
     flex-shrink: 0;
     img {
-      width: 100%;
-      height: 100%;
+      width: 80%;
+      height: 80%;
     }
   }
   .FollIcon {
@@ -549,6 +727,16 @@ export default {
     span {
       text-align: center;
     }
+  }
+  /deep/ .van-field__word-limit {
+    text-align: left;
+  }
+  .pop-tit {
+    padding: 10px 8px;
+  }
+  .chabtn {
+    margin: 10px;
+    float: right;
   }
 }
 </style>

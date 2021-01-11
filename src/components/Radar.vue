@@ -59,11 +59,12 @@ export default {
       start: "【",
       end: "】",
       recordList: [],
-      empty:false,
+      empty: false,
     }
   },
   methods: {
     getDescription(title, pageType) {
+      //console.log(this.pageTypeMap, pageType); pageType 索引为key=10 ，pageTypeMap并没有key10的 
       return this.pageTypeMap[pageType] + this.start + title + this.end;
     },
     getRadar() { // 获取雷达列表
@@ -102,6 +103,11 @@ export default {
                   from.status = 1;
                 }
                 from.description = that.optMap[from.status] + that.getDescription(item.description, from.pageType);
+                // console.log(that.optMap[from.status]);
+                // console.log('fdescription:' + from.description);
+                // console.log('id' + item.description);
+                // console.log(from.pageType);
+                // console.log(that.getDescription(item.description, from.pageType));
                 allArr.push(from);
               }
             })
@@ -142,7 +148,7 @@ export default {
 
 <style lang="less" scoped>
 .rader {
-  margin-top: 0.8rem;
+  padding-top: 0.8rem;
   .product {
     padding: 10px 15px;
     box-sizing: border-box;

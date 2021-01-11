@@ -1,5 +1,9 @@
 <template>
   <div class="orderList" @scroll="scrollEvent">
+    <div class="search">
+      <van-search plain class="a" v-model="SearchValue" placeholder="请输入搜索关键词" @input="searchChange" />
+      <span class="geu" type="primary" plain size="mini" @click="goback">关闭</span>
+    </div>
     <div v-for="(item,index) in orderList " :key="index" class="orderViews" @click="orderSelect(item.nickname,item.userId)">
       <img :src="item.portrait" alt="">
       <div class="orderText">
@@ -26,7 +30,8 @@ export default {
     return {
       orderList: [],
       current: 1,
-      total: 0
+      total: 0,
+      SearchValue: "",
     }
   },
   created() {
@@ -34,12 +39,11 @@ export default {
   },
   methods: {
     orderSelect(name, id) {
-      console.log(name, id);
       let data = {
         name,
         id,
       }
-      sessionStorage.setItem('orderSelectInfo',JSON.stringify(data));
+      sessionStorage.setItem('orderSelectInfo', JSON.stringify(data));
       this.$router.push('/OrderDetail')
       // this.$router.push({
       //   name: 'OrderDetail',
@@ -55,18 +59,20 @@ export default {
       var windowHeight = read.clientHeight;
       var scrollHeight = read.scrollHeight;
       if (scrollTop + windowHeight == scrollHeight) {
-        console.log('============到底了13123========');
         this.current = ++this.current;
-        console.log(this.total, this.current);
         if (this.total < this.current) return;
         this.$toast.loading('加载中...');
-        this.getList();
+        if (this.SearchValue !== '') {  // 如果搜索框上有文字那么就触发搜锁
+          this.searchChange(this.SearchValue, this.current)
+        } else {
+          this.getList();
+
+        }
       }
     },
     getList() {
       let that = this;
       let staff_id = JSON.parse(sessionStorage.getItem('userinfo'))?.bind_staff_id;
-      console.log(staff_id);
       let signature = generateSignature3(this.$C || local.C(), staff_id, timeout, nonce);
       this.$get('/api/request/itr/comp/staff/result', {
         params: {
@@ -98,7 +104,59 @@ export default {
           console.log(error);
         });
     },
-
+    searchChange(value, cur) {
+      let read = document.querySelector('.orderList')
+      read.scrollTop = 0;
+      let that = this;
+      this.orderList = [];
+      let staff_id = JSON.parse(sessionStorage.getItem('userinfo'))?.bind_staff_id;
+      let signature = generateSignature3(this.$C || local.C(), staff_id, timeout, nonce);
+      this.$get('/api/request/itr/comp/staff/result', {
+        params: {
+          compId: this.$C || local.C(),
+          current: cur || 1,
+          nonce,
+          queryStatus: 1,
+          signature,
+          size: 20,
+          timeout,
+          userId: staff_id,
+          fuzzy: value
+        },
+      })
+        .then(function (res) {
+          if (!res.error) {
+            if (res.data.length > 0) {
+              let datas = res.data.map(item => {
+                var reg = /^(\d{3})\d{4}(\d{4})$/;
+                item.userId1 = item.userId.replace(reg, "$1****$2");
+                return item;
+              });
+              that.orderList = that.current == 1 ? datas : that.orderList.concat(datas);
+              that.total = res.totalPageCount;
+              that.$toast.clear();
+            } else {
+              that.orderList = [];
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    goback() { // 返回上一层
+      this.$router.replace('/OrderDetail');
+    }
+  },
+  watch: {
+    SearchValue(val) {
+      let read = document.querySelector('.orderList')
+      read.scrollTop = 0;
+      this.current = 1;
+      if (val === '') {
+        this.getList();
+      }
+    }
   },
   destroyed() {
     this.current = 1;
@@ -109,7 +167,8 @@ export default {
 <style lang="less" scoped>
 .orderList {
   font-size: 0.26rem;
-  height: calc(~"100% - 46px");
+  background: #fff;
+  height: 100%;
   overflow-y: scroll;
   .orderViews {
     padding: 0 0.2rem;
@@ -136,6 +195,26 @@ export default {
         margin-right: 0.16rem;
         color: #9c9c9c;
       }
+    }
+  }
+  div:nth-of-type(2) {
+    padding-top: 54px;
+  }
+  .search {
+    position: FIXED;
+    left: 0;
+    background-color: #fff;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    top: 0;
+    width: 100%;
+    .a {
+      flex: 7;
+    }
+    .geu {
+      display: inline-block;
+      margin-right: 10px;
     }
   }
 }

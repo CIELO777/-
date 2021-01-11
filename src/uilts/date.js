@@ -1,4 +1,4 @@
-// 1.日期格式转为日期标准字符串：2015-03-19
+// 1.时间戳转为日期标准字符串：2015-03-19
 var formatDate = function (date) {
 	var y = date.getFullYear();
 	var m = date.getMonth() + 1;
@@ -22,9 +22,114 @@ var formatDateTime = function (date) {
 	second = second < 10 ? ('0' + second) : second;
 	return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
 };
+var yesterday = function getDay(num, str) { // 获取昨日日期：2015-03-19
+	var today = new Date();
+	var nowTime = today.getTime();
+	var ms = 24 * 3600 * 1000 * num;
+	today.setTime(parseInt(nowTime + ms));
+	var oYear = today.getFullYear();
+	var oMoth = (today.getMonth() + 1).toString();
+	if (oMoth.length <= 1) oMoth = '0' + oMoth;
+	var oDay = today.getDate().toString();
+	if (oDay.length <= 1) oDay = '0' + oDay;
+	return oYear + str + oMoth + str + oDay;
+}
+var lastSevent = function lastSevent(num) {
+	var date1 = new Date();
+	//今天时间
+	var time1 = date1.getFullYear() + "-" + (date1.getMonth() + 1) + "-" + date1.getDate()
+	var date2 = new Date(date1);
+	date2.setDate(date1.getDate() + num);
+	//num是正数表示之后的时间，num负数表示之前的时间，0表示今天
+	var time2 = date2.getFullYear() + "-" + (date2.getMonth() + 1) + "-" + date2.getDate();
+	return time2;
+}
 
+let getM = function getM() { // 上个月第一天、上个月最后一天、当月第一天、当天
+	const date = new Date()
+	const m = date.getMonth() + 1
+	const y = date.getFullYear()
+	const d = date.getDate()
+	const lastM = m > 1 ? m - 1 : 12
+	const yOfLastM = lastM === 12 ? y - 1 : y
+	const lastDayOfLastM = new Date(yOfLastM, lastM, 0).getDate()
+	const addZero = n => n < 10 ? "0" + n : n
+	return [
+		`${yOfLastM}-${addZero(lastM)}-01`,
+		`${yOfLastM}-${addZero(lastM)}-${addZero(lastDayOfLastM)}`,
+		`${y}-${addZero(m)}-01`,
+		`${y}-${addZero(m)}-${addZero(d)}`
+	]
+}
+let month = function month() {
+	var now = new Date(); //当前日期
+	var nowMonth = now.getMonth(); //当前月
+	var nowYear = now.getFullYear(); //当前年
+	//本月的开始时间
+	var monthStartDate = new Date(nowYear, nowMonth, 1);
+	//本月的结束时间
+	var monthEndDate = new Date(nowYear, nowMonth + 1, 0);
+	var timeStar = Date.parse(monthStartDate) / 1000;//s
+	var timeend = Date.parse(monthEndDate) / 1000;//s
+	return {
+		timeStar: formatTime(timeStar, 'Y/M/D'),
+		timeend: formatTime(timeend, 'Y/M/D')
+	}
+}
+function formatTime(number, format) { // 时间戳转日期格式
+	var formateArr = ['Y', 'M', 'D', 'h', 'm', 's'];
+	var returnArr = [];
+	var date = new Date(number * 1000);
+	returnArr.push(date.getFullYear());
+	returnArr.push(formatNumbers(date.getMonth() + 1));
+	returnArr.push(formatNumbers(date.getDate()));
+	returnArr.push(formatNumbers(date.getHours()));
+	returnArr.push(formatNumbers(date.getMinutes()));
+	returnArr.push(formatNumbers(date.getSeconds()));
+	for (var i in returnArr) {
+		format = format.replace(formateArr[i], returnArr[i]);
+	}
+	return format;
+}
 
+//数据转化  
+function formatNumbers(n) {
+	n = n.toString()
+	return n[1] ? n : '0' + n
+}
+
+let getCurrentDate = function getCurrentDate(format) {
+	var now = new Date();
+	var year = now.getFullYear(); //得到年份
+	var month = now.getMonth(); //得到月份
+	var date = now.getDate(); //得到日期
+	var day = now.getDay(); //得到周几
+	var hour = now.getHours(); //得到小时
+	var minu = now.getMinutes(); //得到分钟
+	var sec = now.getSeconds(); //得到秒
+	month = month + 1;
+	if (month < 10) month = "0" + month;
+	if (date < 10) date = "0" + date;
+	if (hour < 10) hour = "0" + hour;
+	if (minu < 10) minu = "0" + minu;
+	if (sec < 10) sec = "0" + sec;
+	var time = "";
+	//精确到天
+	if (format == 1) {
+		time = year + "-" + month + "-" + date;
+	}
+	//精确到分
+	else if (format == 2) {
+		time =year.toString() + month.toString() + date.toString() + hour.toString() + minu.toString() + sec		
+	}
+	return time;
+}
 export {
 	formatDate,
-	formatDateTime
+	formatDateTime,
+	yesterday,
+	lastSevent,
+	month,
+	getM,
+	getCurrentDate
 }

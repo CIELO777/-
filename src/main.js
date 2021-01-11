@@ -22,16 +22,21 @@ Vue.prototype.$U = local.U();  // Userid
 Vue.prototype.$C = local.C();  // Compid
 Vue.config.productionTip = false;
 router.beforeEach((to, from, next) => {
+  // console.log(to);
   let toP = to.name;
-  if (toP === 'OrderDetail' || toP === 'ChooseCommodity' || toP === 'OrderList') {
-    store.commit('cache', 'OrderDetail') // 如果这三个页面，那么就缓存订单页面
-  } else if (toP === 'Home' || toP === 'Common' || toP === 'HighSeas') {
-    store.commit('cache', 'ji1')
-  } else {
-    store.commit('cache', toP)
+  let fromP = from.name;
+
+  sessionStorage.setItem('route', toP)
+  setTitle(toP || to.fullPath);// 设置表头
+  if (toP == 'Home') {
+    sessionStorage.setItem('TabIndex', 6);
+  } else if (toP == 'Common') {
+    sessionStorage.setItem('TabIndex', 7);
+  } else if (toP == 'HighSeas') {
+    sessionStorage.setItem('TabIndex', 8);
+  } else if (toP == 'detailFilter') {
+    sessionStorage.setItem('TabIndex', 9);
   }
-  // console.log(toP);
-  setTitle(toP || to.fullPath)
   // 路由中是否包含即将要进入的路由，如果不包含直接跳转到首页
   let include = router.options.routes.find(item => item.name == toP);
   if (include) {

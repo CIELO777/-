@@ -1,28 +1,24 @@
 <template>
   <div id="app">
-    <!-- <div class="navTit"> </div> -->
-    <van-nav-bar :title="$store.state.title" class="nav-bar" @click-left="onClickLeft" @click-right.stop="onClickRight" fixed placeholder v-if="topBar">
-      <template #left v-if="$store.state.leftShow">
-        <van-icon name="arrow-left" size="18" />
-      </template>
-      <template #right>
-        <van-icon name="weapp-nav" size="18" color="#fff" />
-      </template>
-    </van-nav-bar>
     <!-- 下拉菜单 -->
     <div class="test_triangle_border" v-show="MenuPop" ref="treeWrap">
       <div class="popup">
         <ul>
-          <li @click="unbind">解绑</li>
+          <li @click="unbind">确定解绑？</li>
         </ul>
       </div>
     </div>
     <!-- 下拉弹框 -->
-    <van-popup closeable v-model="show" position="bottom" :style="{ height: '30%' }" class="popUnbind">
+    <van-popup closeable v-model="show" position="bottom" :style="{ height: '300px' }" class="popUnbind">
       <div class="unbindnav">
-        <p class="title">解绑</p>
-        <p>您是否要解绑乐语id: <span style="color:red">{{userinfo}}</span></p>
-        <van-field v-model="unvalue" placeholder="请输入unbind以确认解绑该账号" />
+        <div class="hint">
+          <van-icon name="warning" size="25px" />
+          <p class="qy-hint" style="padding-left:0">
+            解绑
+          </p>
+        </div>
+        <p>您是否要解绑乐语id <span style="color:red">{{userinfo}}</span></p>
+        <input type="text" v-model="unvalue" placeholder="请输入unbind以确认解绑该账号（不区分大小写）">
       </div>
       <van-button type="danger" size="large" class="unbindbtn" @click="unbindSave">解绑</van-button>
     </van-popup>
@@ -33,20 +29,22 @@
   </div>
 </template>
 <script>
-import Taber from './components/Tabbar'
+import Taber from './components/Tabbar';
 import { generateTimeout, generateNonce, generateSignature3, generateSignature4 } from './uilts/tools';
 let timeout = generateTimeout();
 let nonce = generateNonce();
 import Utils from './uilts/utils';
 export default {
   components: {
-    Taber
+    Taber,
   },
   provide() {    //父组件中通过provide来提供变量，在子组件中通过inject来注入变量。                                             
     return {
-      reload: this.reload
+      reload: this.reload,
+      unbind: this.unbind,
     }
   },
+
   data() {
     return {
       tabbarShow: true,
@@ -67,12 +65,15 @@ export default {
       this.MenuPop = true;
     },
     unbind() { // 解绑菜单按钮
+      this.userinfo = JSON.parse(sessionStorage.getItem('userinfo'))?.id; // 回显userID
       this.show = true;
     },
     unbindSave() { // 确认解绑
+      console.log('执行了')
       let that = this;
-      if (this.unvalue === 'unbind') {
+      if (this.unvalue.toLowerCase() === 'unbind') {
         let openId = sessionStorage.getItem("openId");
+        console.log(JSON.parse(sessionStorage.getItem('userinfo')), 'userINFO')
         let userinfo = JSON.parse(sessionStorage.getItem('userinfo'))?.id
         let signature = generateSignature4(openId, userinfo, nonce, timeout)
         let param = new URLSearchParams();
@@ -81,8 +82,10 @@ export default {
         param.append("nonce", nonce);
         param.append("timeout", timeout);
         param.append("signature", signature);
+        console.log(param, 'param')
         this.$post1('/wx-crm-server/wx/un/bind/itr', param)
           .then(function (res) {
+            console.log(res)
             if (res.code === 200) {
               that.$toast.success('该账号解绑成功');
               that.show = false; // 解绑成功关闭弹框
@@ -100,12 +103,13 @@ export default {
         this.$toast.fail('请在输入框输入unbind确认解绑')
       }
     },
+    unbindsss() {
+      this.unbind()
+    },
     reload() {
       this.isRouterAlive = false;            //先关闭，
       this.$nextTick(function () {
-        this.isRouterAlive = true;
-        console.log('2')
-        //再打开
+        this.isRouterAlive = true;//再打开
       })
     }
   },
@@ -115,13 +119,6 @@ export default {
       return this.$store.state.cacheState;
     }
   },
-  // watch: {
-  //   cacheState(val) {
-  //     console.log(val);
-  //     this.cacheStates = val;
-
-  //   }
-  // },
   mounted() {
     document.addEventListener('mouseup', (e) => {
       let tree = this.$refs.treeWrap
@@ -132,11 +129,6 @@ export default {
       }
     })
   },
-  created() {
-    this.userinfo = JSON.parse(sessionStorage.getItem('userinfo'))?.id;
-  },
-
-
 }
 </script>
 <style lang="less">
@@ -168,8 +160,8 @@ body {
     }
   }
   .van-nav-bar__left i {
-    color:#fff;
-  } 
+    color: #fff;
+  }
 }
 .sha {
   width: 100vw;
@@ -241,17 +233,40 @@ body {
   font-size: 0.34rem;
   p:nth-child(2) {
     margin-top: 0.3rem;
+    padding-left: 12px;
   }
-  .title {
-    font-size: 20px;
+  .hint {
+    display: flex;
+  }
+  .hint i {
+    margin-top: 14px;
+  }
+  .qy-hint {
+    font-size: 0.4rem;
+    margin: 8px 8px;
     font-weight: 900;
+    margin-top: 8px;
+    color: #000;
+  }
+  input {
+    border: 1px solid #eee;
+    margin-left: 12px;
+    width: 90%;
+    margin-top: 0.3rem;
+    font-size: 0.28rem;
+    padding: 5px 0;
   }
 }
 .popUnbind {
+  overflow-y: scroll;
   .unbindbtn {
-    position: absolute;
-    bottom: 0;
+    position: fixed;
+    bottom: 0px;
     left: 0;
+    height: 0.8rem;
   }
+}
+.van-empty {
+  background: #f1f1f1;
 }
 </style>

@@ -12,15 +12,17 @@
         </van-button>
       </div>
     </van-form>
-    <van-popup v-model="show" position="bottom" closeable :style="{ height: '100%' }" @close="closePop">
-      <div class='text-ali'>查重结果</div>
+    <van-popup v-model="show" position="bottom" :style="{ height: '100%' }">
+      <!-- <div class='text-ali'>查重结果@close="closePop"</div> -->
       <div @scroll="scrollEvent" id="abc">
         <div class="checkView" v-for="(item,index) in data" :key="index">
           <p><span class="title">{{item.nickname}}</span><span>（{{user[item.ownerId].nickname}}）</span></p>
           <p>{{item.company === null ? "未填写公司名称" : item.company}}</p>
         </div>
       </div>
-
+      <button @click="closePop" class="backBtn">
+        返回上一层
+      </button>
     </van-popup>
   </div>
 </template>
@@ -77,7 +79,6 @@ export default {
               that.$toast.fail('未查询到相关客户信息');
             } else {
               let datasss = res.data;
-              console.log(datasss);
               that.data = that.current == 1 ? res.data : that.data.concat(res.data);
               that.user = res.user;
               that.show = true;
@@ -92,6 +93,7 @@ export default {
     },
     closePop() {
       this.current = 1;
+      this.show =false;
     },
     scrollEvent() {
       let read = document.querySelector('#abc')
@@ -164,8 +166,19 @@ export default {
     height: 100%;
     overflow-y: scroll;
     div:first-child {
-      margin-top: 46px;
+      // margin-top: 46px;
     }
+  }
+  .backBtn {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 44px;
+    font-size: 16px;
+    background:rgb(81, 187, 186) ;
+    color:#fff;
+    border:none;
   }
 }
 </style>

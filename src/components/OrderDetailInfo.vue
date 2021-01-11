@@ -6,7 +6,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>客户姓名 : </span>
+        <span>客户姓名：</span>
       </div>
       <div>
         <span> {{orderInfo.receiptName}}</span>
@@ -14,7 +14,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>客户手机 : </span>
+        <span>客户手机：</span>
       </div>
       <div>
         <span class="qs-blue"> {{orderInfo.receiptMobile}}</span>
@@ -22,7 +22,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>客户地址 : </span>
+        <span>客户地址：</span>
       </div>
       <div>
         <span> {{orderInfo.receiptProvince==0?'':orderInfo.receiptProvince}}{{orderInfo.receiptCity==0?'':orderInfo.receiptCity}}{{orderInfo.receiptArea==0?'':orderInfo.receiptArea}}{{orderInfo.receiptAddress==0?'':orderInfo.receiptAddress}}</span>
@@ -47,7 +47,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>订单ID : </span>
+        <span>订单ID：</span>
       </div>
       <div>
         <span> {{orderInfo.id}}</span>
@@ -55,7 +55,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>创建时间 : </span>
+        <span>创建时间：</span>
       </div>
       <div>
         <span> {{orderInfo.createTime}}</span>
@@ -63,7 +63,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>买家留言 : </span>
+        <span>买家留言：</span>
       </div>
       <div>
         <span> {{orderInfo.loginRemark||'无'}}</span>
@@ -71,7 +71,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>商品摘要 : </span>
+        <span>商品摘要：</span>
       </div>
       <div>
         <span> {{orderInfo.title}}</span>
@@ -79,7 +79,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>订单金额 : </span>
+        <span>订单金额：</span>
       </div>
       <div>
         <span> {{orderInfo.total}}元</span>
@@ -87,7 +87,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>实际支付 : </span>
+        <span>实际支付：</span>
       </div>
       <div>
         <span> {{orderInfo.actualTotal}} 元 <span class="qs-blue">{{orderInfo.paymentStatus==1?'已支付':orderInfo.paymentStatus==2?'部分支付':'未支付'}}</span></span>
@@ -95,7 +95,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>余额抵扣 : </span>
+        <span>余额抵扣：</span>
       </div>
       <div>
         <span> {{orderInfo.balancePay}}元</span>
@@ -103,7 +103,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>会员卡支付 : </span>
+        <span>会员卡支付：</span>
       </div>
       <div>
         <span> {{orderInfo.cardPay}}</span>
@@ -111,7 +111,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>积分兑换 : </span>
+        <span>积分兑换：</span>
       </div>
       <div>
         <span class="qs-blue"> {{orderInfo.integralPay}}积分</span>
@@ -119,7 +119,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>收款方 : </span>
+        <span>收款方：</span>
       </div>
       <div>
         <span> {{orderInfo.collectCompType==0?'企业自收':'平台代收'}}</span>
@@ -127,7 +127,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>支付方式 : </span>
+        <span>支付方式：</span>
       </div>
       <div>
         <span> {{orderInfo.paymentTypeName}}</span>
@@ -136,7 +136,7 @@
 
     <div class="cell">
       <div>
-        <span>支付模式 : </span>
+        <span>支付模式：</span>
       </div>
       <div>
         <span> {{orderInfo.paymentMode==0?'自动':'手动'}}</span>
@@ -145,7 +145,7 @@
 
     <div class="cell">
       <div>
-        <span>开票状态 : </span>
+        <span>开票状态：</span>
       </div>
       <div>
         <span> {{orderInfo.billStatus==0?'未开票':'已开票'}}</span>
@@ -153,7 +153,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>运费 : </span>
+        <span>运费：</span>
       </div>
       <div>
         <span> {{orderInfo.freight||0}}元</span>
@@ -161,7 +161,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>发票抬头 : </span>
+        <span>发票抬头：</span>
       </div>
       <div>
         <span> {{orderInfo.invoiceTitle||'无'}}</span>
@@ -169,7 +169,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>发货 : </span>
+        <span>发货：</span>
       </div>
       <div>
         <span> {{orderInfo.supplyStatus==0?'未发货':'已发货'}}</span>
@@ -177,7 +177,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>来源类型 : </span>
+        <span>来源类型：</span>
       </div>
       <div>
         <span> {{orderInfo.pageType==0?'微网页':orderInfo.pageType==1?'手机站群':'APP'}}</span>
@@ -185,7 +185,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>页面来源 : </span>
+        <span>页面来源：</span>
       </div>
       <div>
         <span> {{orderInfo.source||''}}</span>
@@ -196,7 +196,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>销售提成 : </span>
+        <span>销售提成：</span>
       </div>
       <div>
         <span> {{orderInfo.cmsPromoteAmount||0}}元</span>
@@ -204,7 +204,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>提成状态 : </span>
+        <span>提成状态：</span>
       </div>
       <div>
         <span class="qs-blue"> {{orderInfo.commissionStatus==0?'无提成':orderInfo.commissionStatus==1?'提成有效':'提成无效'}}</span>
@@ -212,7 +212,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>销售昵称 : </span>
+        <span>销售昵称：</span>
       </div>
       <div>
         <span> {{orderInfo.promoteName||''}}</span>
@@ -220,7 +220,7 @@
     </div>
     <div class="cell">
       <div>
-        <span>手机号码 : </span>
+        <span>手机号码：</span>
       </div>
       <div>
         <span> {{orderInfo.promote === 'undefined' ? "" : orderInfo.promote}}</span>
@@ -243,7 +243,6 @@ export default {
   created() {
     let id = this.$route.params.id;
     let that = this;
-    console.log(id);
     let signature = generateSignature(id, timeout, nonce);
     this.$get('/api/remote/mall/order/detail', {
       params: {
@@ -288,6 +287,10 @@ export default {
   }
   .cell div:first-child {
     margin-right: 0.4rem;
+    flex-shrink: 0;
+  }
+  .cell div:last-child span {
+    word-break: break-all;
   }
   .product-cell {
     padding: 10px;

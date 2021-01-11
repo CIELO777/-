@@ -1,9 +1,29 @@
 <template>
-  <van-tabbar v-model="active" @change="tabbarChange">
-    <van-tabbar-item icon="home-o" name="Home">联系人</van-tabbar-item>
-    <van-tabbar-item icon="search" name="Common">常用</van-tabbar-item>
-    <van-tabbar-item icon="friends-o" name="HighSeas">公海</van-tabbar-item>
-    <van-tabbar-item icon="setting-o" name="Checking">查重</van-tabbar-item>
+  <van-tabbar v-model="active" @change="tabbarChange" class="overallBar">
+    <van-tabbar-item name="Home">
+      <template #icon="props">
+        <img :src="props.active ? Home.active : Home.inactive" class="barImg" />
+        <span :style="{color:props.active ? 'red' : '#000'}" class="barText">联系人</span>
+      </template>
+    </van-tabbar-item>
+    <van-tabbar-item name="Common">
+      <template #icon="props">
+        <img :src="props.active ? Common.active : Common.inactive" class="barImg" />
+        <span :style="{color:props.active ? 'red' : '#000'}" class="barText">常用</span>
+      </template>
+    </van-tabbar-item>
+    <van-tabbar-item name="HighSeas">
+      <template #icon="props">
+        <img :src="props.active ? HighSeas.active : HighSeas.inactive" class="barImg" />
+        <span :style="{color:props.active ? 'red' : '#000'}" class="barText">公海</span>
+      </template>
+    </van-tabbar-item>
+    <van-tabbar-item name="Checking">
+      <template #icon="props">
+        <img :src="props.active ? Checking.active : Checking.inactive" class="barImg" />
+        <span :style="{color:props.active ? 'red' : '#000'}" class="barText">查重</span>
+      </template>
+    </van-tabbar-item>
   </van-tabbar>
 </template>
 
@@ -11,7 +31,23 @@
 export default {
   data() {
     return {
-      active: ''
+      active: '',
+      Home: {
+        active: require('../assets/img/contact_new_select@2x.png'),
+        inactive: require('../assets/img/contact_new_unselect@2x.png'),
+      },
+      Common: {
+        active: require('../assets/img/contact_top_select@2x.png'),
+        inactive: require('../assets/img/contact_top_unselect@2x.png'),
+      },
+      HighSeas: {
+        active: require('../assets/img/contact_opensea_select@2x.png'),
+        inactive: require('../assets/img/contact_opensea_unselect@2x.png'),
+      },
+      Checking: {
+        active: require('../assets/img/contact_check_select23@2x.png'),
+        inactive: require('../assets/img/contact_check_unselect23@2x.png'),
+      },
     }
   },
   methods: {
@@ -33,3 +69,16 @@ export default {
   }
 }
 </script>
+<style lang="less" scoped>
+.overallBar {
+  .barImg {
+    margin: 0 auto;
+  }
+  .barText {
+    font-size: 12px;
+  }
+  /deep/ .van-tabbar-item__icon {
+    margin-bottom: 0px;
+  }
+}
+</style>

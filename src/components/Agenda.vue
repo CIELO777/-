@@ -7,8 +7,8 @@
       <span>添加日程</span>
     </div>
     <div class="agendaCont">
-      <div class="schedule-main" v-for="(item,index) in scheduleList" :key="index" @click="AgendaDetail(item)">
-        <h1>{{item.title}}</h1>
+      <div class="scheduleMain" v-for="(item,index) in scheduleList" :key="index" @click="AgendaDetail(item)">
+        <h1 style="">{{item.title}}</h1>
         <div class="smMain">
           <span class="qs-gray">{{item.time}}</span>
           <span :class="[item.status==0?'qs-org':'qs-green']" class="remind">{{item.status==0?'未提醒':'已提醒'}}</span>
@@ -122,7 +122,7 @@ export default {
     width: 100%;
     left: 0;
     height: 0.8rem;
-    top: 78px;
+    top: 33px;
     border-bottom: 8px solid #f1f1f1;
     border-top: 8px solid #f1f1f1;
     padding-left: 0.3rem;
@@ -133,48 +133,46 @@ export default {
   .agendaCont {
     background-color: #fff;
     // padding: 8px 15px;
-    .schedule-main {
-      height: 1.2rem;
-      background-color: #fff;
-      border-bottom: 1px solid #f1f1f1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 3px 10px;
-      h1 {
-        font-size: 0.3rem;
-        font-weight: 500;
-        margin-bottom: 0.2rem;
-        margin-top: 0.1rem;
-        overflow: hidden;
-      }
-      .smMain {
-        display: flex;
-        justify-content: space-between;
-      }
-      // .remind {
-      //   position: absolute;
-      //   bottom: 5px;
-      //   right: 10px;
-      //   font-size: 28rpx;
-      // }
+    height: calc(~"100% - 1.9rem");
+  }
+  .scheduleMain {
+    height: 1.2rem;
+    background-color: #fff;
+    border-bottom: 1px solid #f1f1f1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3px 10px;
+    h1 {
+      font-size: 0.3rem;
+      font-weight: 500;
+      margin-bottom: 0.2rem;
+      margin-top: 0.1rem;
+      overflow: hidden;
     }
+    .smMain {
+      display: flex;
+      justify-content: space-between;
+    }
+    // .remind {
+    //   position: absolute;
+    //   bottom: 5px;
+    //   right: 10px;
+    //   font-size: 28rpx;
+    // }
   }
   .agendaCont:nth-child(2) {
-    margin-top: 1.9rem;
+    padding-top: 1.9rem;
   }
-  .qs-green {
-    color: #3d8329;
-  }
-  .qs-gray {
-    color: #9c9c9c;
-    font-size: 15px;
-  }
-  .qs-org {
-    color: #ff8000;
-  }
-  .van-empty {
-    background: #f1f1f1;
-  }
+  // .qs-green {
+  //   color: #3d8329;
+  // }
+  // .qs-gray {
+  //   color: #9c9c9c;
+  //   font-size: 15px;
+  // }
+  // .qs-org {
+  //   color: #ff8000;
+  // }
 }
 </style>

@@ -12,11 +12,15 @@ export const ScorllMixin = {
 			var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 			var windowHeight = document.documentElement.clientHeight || document.body.clientHeight;
 			var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-			// console.log(scrollTop, windowHeight, scrollHeight);
-			if (scrollTop + windowHeight >= scrollHeight && scrollTop > 20) {
-				this.$store.commit("SoundCurNum", "follow")
+			this.$store.commit("ScrollSave", scrollTop);
+			let nav = document.querySelector('.nav');
+			// setTimeout(() => {
+			if (scrollTop + windowHeight == scrollHeight && scrollTop > 20) {
 				console.log('到底了');
+				this.$store.commit("SoundCurNum", "follow");
+				// 记录scrollTop的位置，防止页面都scrolltop耦合
 			}
+
 		}
 		this.current = 1;
 	},
@@ -26,9 +30,10 @@ export const ScorllMixin = {
 		this.$store.commit("ClearCurNum", "schedule");
 		this.$store.commit("ClearCurNum", "radar");
 		this.$store.commit("ClearCurNum", "operating");
-		this.$store.commit("ClearCurNum", "home");
-		this.$store.commit("ClearCurNum", "common");
-		this.$store.commit("ClearCurNum", "highseas");
+		// this.$store.commit("ClearCurNum", "home"); // 一级菜单不进行清除，因为从表单返回时候缓存了，所以不清空页数
+		// this.$store.commit("ClearCurNum", "common"); // 一级菜单不进行清除，因为从表单返回时候缓存了，所以不清空页数
+		// this.$store.commit("ClearCurNum", "highseas");
+		this.$store.commit("ClearCurNum", "filter");
 
 	},
 

@@ -8,7 +8,7 @@ export default function setTitle(data) {
 	} else if (data.includes('OrderDetail')) {
 		store.commit('saveTitle', { title: '新增订单', leftShow: true });
 	} else if (data.includes('ChooseCommodity')) {
-		store.commit('saveTitle', { title: '已选择详情页', leftShow: true });
+		store.commit('saveTitle', { title: '未选择详情页', leftShow: true });
 	} else if (data.includes('OrderList')) {
 		store.commit('saveTitle', { title: '选择所属者', leftShow: true });
 	} else if (data.includes('Agendadetail')) {
@@ -21,6 +21,12 @@ export default function setTitle(data) {
 		store.commit('saveTitle', { title: '客户管理', leftShow: false, tabarShow: true });
 	} else if (data.includes('SheetImg')) {
 		store.commit('saveTitle', { title: '添加图文', leftShow: true, tabarShow: false });
+	}else if (data.includes('Addcustomer')) {
+		store.commit('saveTitle', { title: '添加联系人', leftShow: true, tabarShow: false });
+	}else if (data.includes('detailFilter')) {
+		store.commit('saveTitle', { title: '筛选客户', leftShow: true, tabarShow: false });
+	}else if (data.includes('Addcustomer')) {
+		store.commit('saveTitle', { title: '公司信息', leftShow: true, tabarShow: false });
 	}
 	
 }

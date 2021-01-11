@@ -11,37 +11,37 @@
         <div class="main-order">
           <div>
             <div class="line1">
-              <span>客户信息 : </span>
+              <span>客户信息：</span>
               <span class='bold'>{{item.receiptName}}</span>
             </div>
             <div class="line1">
-              <span>推广昵称 : </span>
+              <span>推广昵称：</span>
               <span class="qs-gray">{{item.promoteName}}</span>
             </div>
             <div class="line1">
-              <span>订单金额 : </span>
+              <span>订单金额：</span>
               <span class="qs-red bold ">{{item.total}} 元</span>
             </div>
             <div class="line1">
-              <span>支付状态 : </span>
+              <span>支付状态：</span>
               <span :class="item.paymentStatus==0?'qs-blue':'qs-green' .bold">{{item.paymentStatus==0?'未支付':'已支付'}}</span>
             </div>
           </div>
           <div>
             <div class="line1">
-              <span>提成状态 : </span>
+              <span>提成状态：</span>
               <span :class="item.commissionStatus==0?'qs-red':item.commissionStatus==1?'qs-green':'qs-red'">{{item.commissionStatus==0?'未确认':item.commissionStatus==1?'提成有效':'提成无效'}}</span>
             </div>
             <div class="line1">
-              <span class="qs-gray">推广人员 : </span>
+              <span class="qs-gray">推广人员：</span>
               <span class="qs-gray">{{item.promote === 'undefined' ? "":item.promote }}</span>
             </div>
             <div class="line1">
-              <span class="qs-gray ">支付方式 : </span>
+              <span class="qs-gray ">支付方式：</span>
               <span class="qs-gray ">{{item.paymentTypeName}}</span>
             </div>
             <div class="line1">
-              <span>发货状态 : </span>
+              <span>发货状态：</span>
               <span :class="item.supplyStatus==0?'qs-blue':'qs-green'">{{item.supplyStatus==0?'未发货':'已发货'}}</span>
             </div>
           </div>
@@ -50,7 +50,7 @@
           </div>
         </div>
         <div class="order-date">
-          <span class="qs-gray line1 pl">{{item.createTime}}</span>
+          <span class="qs-gray line1 pl"><span style="color:#2C3E50">下单时间：</span>{{item.createTime}}</span>
         </div>
       </div>
       <van-empty v-show="empty" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
@@ -78,15 +78,14 @@ export default {
   },
   methods: {
     orderItemClick() {  // 跳转到订单表单页面
-    let userInfo = JSON.parse(sessionStorage.getItem('_crm_info')); // 默认给显示选中的姓名手机； 
-    console.log(userInfo); 
+      let userInfo = JSON.parse(sessionStorage.getItem('_crm_info')); // 默认给显示选中的姓名手机； 
       this.$router.push({
         name: 'OrderDetail',
         params: {
           add: true,
-          name:userInfo.nickname,
-          phone:userInfo.phone,
-          
+          name: userInfo.nickname,
+          phone: userInfo.phone,
+
         }
       })
     },
@@ -123,9 +122,10 @@ export default {
         path: `/orderdetailinfo/${id}`,
       })
     },
-    
+
   },
   created() {
+    console.log('created')
     this.getOrderList();
     this.current = 1;
   },
@@ -141,7 +141,11 @@ export default {
       this.$toast.loading('加载中...');
       this.getOrderList();
     },
-  }
+  },
+  activated() {
+    console.log('activated')
+    document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.order; // 设置每个页面的scrollTop
+  },
 }
 </script>
 
@@ -161,7 +165,7 @@ export default {
     width: 100%;
     left: 0;
     height: 0.8rem;
-    top: 78px;
+    top: 33px;
     border-bottom: 8px solid #f1f1f1;
     border-top: 8px solid #f1f1f1;
     padding-left: 0.3rem;
@@ -223,10 +227,10 @@ export default {
     }
   }
   .orderCont:nth-child(2) {
-    margin-top: 1.9rem;
+    padding-top: 1.9rem;
   }
-    .van-empty {
-      background: #f1f1f1;
-    }
+  .van-empty {
+    background: #f1f1f1;
+  }
 }
 </style>
