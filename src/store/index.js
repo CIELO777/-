@@ -39,6 +39,7 @@ export default new Vuex.Store({
       nickName: "",
       company: "",
       sheet: "",
+      gender:"",
     }
 
   },
@@ -115,6 +116,7 @@ export default new Vuex.Store({
       state.SearchReset = pathName;
     },
     ManualUpdate(state, pathName) {// 手动更新列表名字，公司信息，跟进记录，目的为表单返回不刷新页面
+      console.log(pathName);
       state.ManualData[pathName.target] = pathName.data;
       console.log(state.ManualData);
     }

@@ -197,6 +197,7 @@ export default {
       this.tit = tit; // 改变组件的 标题
       this.compListShow = true; // 打开组件
       this.compList();
+      this.$refs.compInfo.emptyCur()
       this.$nextTick(() => {  // 滚动条重置
         document.querySelector('#abc').scrollTop = 0; // 重置滚动条
       })
@@ -210,9 +211,9 @@ export default {
       setTimeout(() => { // 初始化自定义的时间
         this.$refs.dataInt.reast()
       }, 100)
-
     },
     updatings(data) {  // 子组件更新日期，返回数组，【2015-09-15，2016-10-16】
+      console.log(data)
       if (this.module.module1Type == 'date') {
         data[1] == 7 ? this.module.date = "全部" : this.module.date = data[0].join().replace(',', '至')
       } else if (this.module.module1Type == 'nolately') {
@@ -259,7 +260,6 @@ export default {
             }
           ],
         };
-
       } else if (data == 2) { //客户状态
         this.data = {
           types: 1,
@@ -461,7 +461,6 @@ export default {
         .then((res) => {
           if (!res.error) {
             this.totalPageCount = res.totalPageCount;
-            this.compLists = res.data;
             this.compLists = cur ? this.compLists.concat(res.data) : res.data;
             // console.log(res);
           }
@@ -863,6 +862,7 @@ export default {
       this.diyColumn[this.index].value = this.diy.price;
     },
     onSelect(value) { // select选择确认
+      console.log(value)
       this.diyColumn[this.index].value = value.value;
       this.diy.showaction = false;
     }

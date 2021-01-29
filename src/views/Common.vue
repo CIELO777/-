@@ -1,8 +1,11 @@
 <template>
   <div class="about">
     <navBar @ClearList="ClearLists" @Typefilter="Typefilters(arguments)" ref="navBar" :SearchtotalPageCounts="SearchtotalPageCount" @unbinds="unbindsss" :modes.sync="mode"></navBar>
+    <!-- <van-pull-refresh class="pull" :success-text="successtext" style="min-height: 100vh;" head-height="40" v-model="isLoading" @refresh="onRefresh"> -->
     <linkman ref="mychild" @userIDLength="userIDLengths" @userIdSave="userIdSaves(arguments)" v-if="data.length>0" :list="data" :totals="total" :users="user" :userMaps="userMap" @chengParentCur="chengParentCurs"></linkman>
     <van-empty v-show="empty" class="van-empty" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
+    <!-- </van-pull-refresh> -->
+
   </div>
 </template>
 <script>
@@ -16,10 +19,12 @@ import local from '../uilts/localStorage';
 import Utils from '../uilts/utils';
 import navBar from '../components/NavBar';
 import communication from "../uilts/communication";
+import { pullMixin } from '@/uilts/pull'
 
 export default {
   name: 'Common',
   inject: ['reload', 'unbind'],
+  mixins: [pullMixin],
   data() {
     return {
       data: [],
@@ -71,12 +76,17 @@ export default {
             // console.log(that.data);
             that.$refs?.mychild?.$toast.clear();
             if (that.data.length == 0) that.empty = true; //如果数据大于0，就显示空信息
+            that.successtext = '刷新成功';
             that.$toast.clear(); //清除弹框
           } else if (res.error) {
-            this.$toast.fail('乐语营销架构过期')
+            that.successtext = '刷新失败';
+            that.$toast.fail('乐语营销架构过期')
           }
+          that.isLoading = false;  // 如果是刷新的情况那么就 关闭刷新状态
         })
         .catch(function (error) {
+          that.isLoading = false;  // 如果是刷新的情况那么就 关闭刷新状态
+          that.successtext = '刷新失败';
           console.log(error);
           that.$toast.fail('请求失败，请稍后再试');
         });
@@ -130,8 +140,8 @@ export default {
             jsApiList: ['agentConfig', 'selectExternalContact', 'openEnterpriseChat'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
           });
           wx.ready(function () {
-            // that.getAgentConfigApi()
-            // alert(that.appid2, that.timestamp2, that.noncestr2, that.signature2)
+            wx.hideAllNonBaseMenuItem();
+
             wx.agentConfig({
               corpid: that.appid2, // 必填，企业微信的corpid，必须与当前登录的企业一致
               agentid: res.agentId, // 必填，企业微信的应用id （e.g. 1000247）
@@ -358,11 +368,12 @@ export default {
     document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.common;
     // 如果ManualData：true 证明姓名，电话，跟进记录修改过，这样的话就重新赋值把。
     let index = sessionStorage.getItem('ManualIdx');
-    let { nickName, company, sheet } = this.$store.state.ManualData;
+    let { nickName, company, sheet, gender } = this.$store.state.ManualData;
     try {  // 不为空的情况下回显手动更改数据
       if (nickName !== '') { this.data[index].nickname = nickName; }
       if (company !== '') { this.data[index].company = company; }
       if (sheet !== '') { this.data[index].lastContactRecord = sheet; }
+      if (gender !== '') { this.data[index].gender = gender; }
     } catch (err) {
       console.log(err);
     }
@@ -417,5 +428,8 @@ export default {
 <style>
 .van-empty {
   padding-top: 3rem;
+}
+.pull /deep/ .van-pull-refresh__head {
+  top: 45px;
 }
 </style>

@@ -1,12 +1,16 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
+    name: 'Navigation',
+    component: () => import(/* webpackChunkName: "about" */ '../views/navigation.vue'),
+  },
+  {
+    path: '/home',
     name: 'Home',
     component: () => import(/* webpackChunkName: "about" */ '../views/Home.vue'),
   },
@@ -79,16 +83,37 @@ const routes = [
     path: '/addcustomer',
     name: 'Addcustomer',
     component: () => import(/* webpackChunkName: "about" */ '../components/detailFilter/Addcustomer.vue')
-  }, {
+  },
+  {
     path: '/compInfo',
     name: 'compInfo',
     component: () => import(/* webpackChunkName: "about" */ '../components/detailFilter/CompInfo.vue')
+  },
+  {
+    path: '/card',
+    name: 'Card',
+    component: () => import(/* webpackChunkName: "about" */ '../views/Card.vue')
+  },
+  {
+    path: '/colorPage',
+    name: 'ColorPage',
+    component: () => import(/* webpackChunkName: "about" */ '../views/ColorPage.vue')
+  },
+  {
+    path: '/video',
+    name: 'Video',
+    component: () => import(/* webpackChunkName: "about" */ '../views/Video.vue')
+  },
+  {
+    path: '/iframe',
+    name: 'Iframe',
+    component: () => import(/* webpackChunkName: "about" */ '../components/colorPage/Iframe.vue')
   },
 ]
 
 const router = new VueRouter({
   mode: 'history',
-  base: '/wx-crm/',
+  base: '/wx-crmTest/',
   routes
 })
 

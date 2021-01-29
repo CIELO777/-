@@ -12,6 +12,7 @@
     <!-- <template v-for="(item, index) in formDiy">
       <van-cell :key="index" :placeholder="item.placeholder" is-link @click="showPopup(item.name, crmInfo[item.name],item.type)" :title="item.label" :value="crmInfo[item.name] == undefined ? '' : crmInfo[item.name]"></van-cell>
     </template> -->
+
     <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.nickname" closeable position="bottom" :style="{ height: '180px' }">
       <p class="pop-tit">姓名</p>
       <van-field label="" v-model="formData.nickname" placeholder="请输入姓名" />
@@ -261,10 +262,11 @@ export default {
       return this.formDiy.find(item => name === item.name)
     },
     showPopup(e, d) {
-      // console.log(e, d);
+      console.log(e, d);
       //  如果包含字段进行数据合并，垃圾。自定义数据不再一个接口里，在这做处理，目的获取当前自定义表单的一些详细信息（type，lable）
       if (e.includes("column")) {
         let item = this.findSelect(e);
+        console.log(item, this.formDiy)
         if (item.type == 'text' || item.type == 'textarea') {
           this.diy.show = true;
         } else {
@@ -285,6 +287,7 @@ export default {
         if (
           e == "contactNumber" ||
           e == "lastContactRecord" ||
+
           e == "lastContactTime"
         ) {
           this.followUp();
@@ -297,7 +300,7 @@ export default {
           this.share.ids = this.crmInfo.share1.map(item => {
             return item.userId
           }).join(',')
-          // console.log(this.share.ids)
+          console.log(this.share.ids)
           this.$refs.shareUser.clickshare(this.share.ids) // 触发子元素方法目的请求已经共享的数据
         };
         this.popShow[e] = true; // 打开弹框
@@ -309,7 +312,7 @@ export default {
       }
     },
     onSelect(e) {
-      // console.log(e);
+      console.log(e);
       this.FormSave(e.value, this.diy.headline, 'showaction')
     },
     FormSave(data, type, ourType) {
@@ -350,6 +353,7 @@ export default {
         });
         return;
       }
+      console.log(data, type, ourType)
       switch (type) {
         case "nickname":
           crm[type] = data;
@@ -391,7 +395,7 @@ export default {
             } else {
               that.diy[ourType] = false
             }
-            that.$emit("getCrm");
+            that.$emit("getCrm");  // 更新列表信息
           }
         })
         .catch(function (error) {
@@ -417,6 +421,7 @@ export default {
       this.saveSelect("birthday", formatDate(value), "birthday");
     },
     saveSelect(key, data, ourName) {
+      console.log(key, data, ourName)
       // 下拉表单提交
       let that = this;
       let crm = {};
@@ -434,7 +439,13 @@ export default {
       crm.timeout = timeout;
       crm.nonce = nonce;
       crm.signature = signature;
+      // 手动更新列表数据，防止返回刷新，scrolltop 丢失；
+      console.log(key, data, ourName)
+
       crm[key] = data;
+      if (key == 'gender') {
+        that.$store.commit("ManualUpdate", { target: "gender", data }); // 更新列表数据
+      }
       if (crm.sourceType) {
         crm.customSourceType = crm.sourceType || "";
       }

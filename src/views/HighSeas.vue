@@ -1,9 +1,12 @@
 <template>
   <div class="about">
     <navBar @unbinds="unbindsss" @ClearList="ClearLists" @Typefilter="Typefilters(arguments)" ref="navBar" :SearchtotalPageCounts="SearchtotalPageCount" :modes.sync="mode"></navBar>
+    <!-- <van-pull-refresh class="pull"  :success-text="successtext"  v-model="isLoading" @refresh="onRefresh"> -->
     <linkman ref="mychild" @userIDLength="userIDLengths" @userIdSave="userIdSaves(arguments)" @chengParentCur="chengParentCurs" :totals="total" label="Seas" v-if="data.length>0" :list="data" :users="user" :userMaps="userMap">
     </linkman>
     <van-empty v-show="empty" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
+    <!-- </van-pull-refresh> -->
+
   </div>
 </template>
 <script>
@@ -18,10 +21,12 @@ import local from '../uilts/localStorage';
 import Utils from '../uilts/utils';
 import navBar from '../components/NavBar';
 import communication from "../uilts/communication";
+import { pullMixin } from '@/uilts/pull'
 
 export default {
   name: 'HighSeas',
   inject: ['reload', 'unbind'],
+  mixins: [pullMixin],
   data() {
     return {
       data: [],
@@ -69,13 +74,18 @@ export default {
             that.userMap = Object.assign(that.userMap, res.user);
             that.user = res.user;
             that.total = res.totalPageCount;
+            that.successtext = '刷新成功';
             that.$refs?.mychild?.$toast.clear();
             that.$toast.clear(); //清除弹框
           } else if (res.error) {
-            this.$toast.fail('乐语营销架构过期')
+            that.successtext = '刷新失败';
+            that.$toast.fail('乐语营销架构过期')
           }
+          that.isLoading = false;  // 如果是刷新的情况那么就 关闭刷新状态
         })
         .catch(function (error) {
+          that.isLoading = false;  // 如果是刷新的情况那么就 关闭刷新状态
+          that.successtext = '刷新失败';
           that.$toast.fail('请求失败，请稍后再试');
 
         });
@@ -116,6 +126,8 @@ export default {
             jsApiList: ['agentConfig', 'selectExternalContact'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
           });
           wx.ready(function () {
+            wx.hideAllNonBaseMenuItem();
+
             // that.getAgentConfigApi()
             wx.agentConfig({
               corpid: that.appid2, // 必填，企业微信的corpid，必须与当前登录的企业一致
@@ -322,19 +334,21 @@ export default {
     await this.getAgentConfig();
     await this.getWxJsJdk();
   },
-  activated() {
+  async activated() {
     document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.common;
-
     // 如果ManualData：true 证明姓名，电话，跟进记录修改过，这样的话就重新赋值把。
     let index = sessionStorage.getItem('ManualIdx');
-    let { nickName, company, sheet } = this.$store.state.ManualData;
+    let { nickName, company, sheet, gender } = this.$store.state.ManualData;
     try {  // 不为空的情况下回显手动更改数据
       if (nickName !== '') { this.data[index].nickname = nickName; }
       if (company !== '') { this.data[index].company = company; }
       if (sheet !== '') { this.data[index].lastContactRecord = sheet; }
+      if (gender !== '') { this.data[index].gender = gender; }
     } catch (err) {
       console.log(err);
     }
+    await this.getAgentConfig(); // 同步执行 否则会报错
+    await this.getWxJsJdk();
   },
   components: {
     linkman,
@@ -345,9 +359,9 @@ export default {
       deep: true,
       handler(newValue, oldValue) {
         if (newValue) {
-          console.log(newValue,'hai')
+          console.log(newValue, 'hai')
           console.log(this.$route.name)
-          if (this.$route.name == 'HighSeas') { 
+          if (this.$route.name == 'HighSeas') {
             this.initscroll(); // 搜索之前先清空scrolltop
             this.$store.commit("ClearCurNum", "highseas");
             this.searcHome(newValue, 1);  // 去搜索
@@ -390,7 +404,10 @@ export default {
   // height: calc(~"100% - 98px");
   .van-empty {
     padding-top: 3rem;
-    
+  }
+  .pull /deep/ .van-pull-refresh__head {
+    // 改变下拉框的提醒位置
+    top: 45px;
   }
 }
 </style>

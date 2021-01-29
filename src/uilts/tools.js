@@ -28,6 +28,19 @@ let generateSignature3 = (...arg) => {
 	let result = sha1.hex_sha1(paramStr.replace(/,/g, ""));
 	return result;
 }
+
+let generateSignatureQrcode = (...arg) => {
+	let param = new Array();
+	for (let i = 0; i < arg.length; i++) {
+		param.push(arg[i]);
+	}
+	param.push("43552e86342fb354a25f84b4e182fb8c");
+	param.sort();
+	let paramStr = param.toString();
+	let result = sha1.hex_sha1(paramStr.replace(/,/g, ""));
+	return result;
+}
+
 let generateSignature4 = (...arg) => {
 	let param = new Array();
 	for (let i = 0; i < arg.length; i++) {
@@ -86,5 +99,6 @@ export {
 	generateSignature4,
 	generateSignature,
 	randomWord,
-	generateSignature8
+	generateSignature8,
+	generateSignatureQrcode
 };

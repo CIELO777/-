@@ -20,7 +20,6 @@ export const ScorllMixin = {
 				this.$store.commit("SoundCurNum", "follow");
 				// 记录scrollTop的位置，防止页面都scrolltop耦合
 			}
-
 		}
 		this.current = 1;
 	},

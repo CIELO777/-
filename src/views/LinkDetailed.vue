@@ -109,11 +109,13 @@ export default {
         },
       })
         .then((res) => {
+          console.log(res)
           if (!res.error) {
             let shareStr = '';
             res.share.forEach(item => { // 遍历循环字符串
               shareStr = shareStr + res.user[item.userId].nickname + ','
             })
+            console.log(shareStr)
             let a = {
               ...res,
               status: res.status == 1 ? '未知' : '有效',

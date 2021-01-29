@@ -11,7 +11,7 @@
       <div class="i-sticky-demo">
         <div v-for="(item,index) in dateMap" :key="index">
           <div class='date-title'>{{index}} </div>
-          <div v-for="(items,idxs) in item" :key="idxs" class="i-sticky-demo-item">{{items.date}} {{items.description}}</div>
+          <div v-for="(items,idxs) in item" :key="idxs" class="i-sticky-demo-item"><span>{{items.date}} </span><span>{{items.description}}</span></div>
         </div>
       </div>
     </div>
@@ -160,7 +160,7 @@ export default {
       background-color: #fff;
       padding: 10px;
       display: flex;
-      flex-direction: column; 
+      flex-direction: column;
       font-size: 14px;
       line-height: 0.5rem;
       color: #000;
@@ -181,7 +181,16 @@ export default {
     }
     .i-sticky-demo-item {
       font-size: 14px;
-      padding: 10px;
+      display: flex;
+      flex-wrap: nowrap;
+      margin-bottom: 5px;
+      span:first-child {
+        flex-shrink: 0;
+        margin-right: 5px;
+      }
+      span {
+        line-height: 20px;
+      }
     }
   }
 }

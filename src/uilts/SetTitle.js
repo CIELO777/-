@@ -21,12 +21,19 @@ export default function setTitle(data) {
 		store.commit('saveTitle', { title: '客户管理', leftShow: false, tabarShow: true });
 	} else if (data.includes('SheetImg')) {
 		store.commit('saveTitle', { title: '添加图文', leftShow: true, tabarShow: false });
-	}else if (data.includes('Addcustomer')) {
+	} else if (data.includes('Addcustomer')) {
 		store.commit('saveTitle', { title: '添加联系人', leftShow: true, tabarShow: false });
-	}else if (data.includes('detailFilter')) {
+	} else if (data.includes('detailFilter')) {
 		store.commit('saveTitle', { title: '筛选客户', leftShow: true, tabarShow: false });
-	}else if (data.includes('Addcustomer')) {
+	} else if (data.includes('Addcustomer')) {
 		store.commit('saveTitle', { title: '公司信息', leftShow: true, tabarShow: false });
+	} else if (data.includes('Navigation')) {
+		store.commit('saveTitle', { title: '乐语', leftShow: false, tabarShow: false });
+	}else if (data.includes('Card')) {
+		store.commit('saveTitle', { title: '企业名片', leftShow: false, tabarShow: false });
+	}else if (data.includes('Video')) {
+		store.commit('saveTitle', { title: '视频', leftShow: false, tabarShow: false });
+	}else if (data.includes('ColorPage')) {
+		store.commit('saveTitle', { title: '全部彩页', leftShow: false, tabarShow: false });
 	}
-	
 }

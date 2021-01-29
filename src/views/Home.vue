@@ -1,10 +1,11 @@
+
 <template>
   <div class="home">
     <navBar @ClearList="ClearLists" :SearchtotalPageCounts="SearchtotalPageCount" ref="navBar" :modes.sync="mode" @Typefilter="Typefilters(arguments)" @unbinds="unbindsss"></navBar>
     <img src="https://dist.jiain.net/mall/images/registerBackground.jpg" alt="" style="width: 100%;" v-show="show" />
+    <!-- <van-pull-refresh class="pull" :success-text="successtext" style="min-height: 100vh;" head-height="40" v-model="isLoading" @refresh="onRefresh"> -->
     <linkman @userIDLength="userIDLengths" @userIdSave="userIdSaves(arguments)" ref="mychild" v-if="data.length > 0" :list="data" :totals="total" :users="user" :userMaps="userMap" @chengParentCur="chengParentCurs">
     </linkman>
-    <!-- <button @click="linkmanClick">33</button> -->
     <van-empty v-show="empty" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
     <!-- 企业微信验证码 -->
     <van-popup v-model="show" :close-on-click-overlay="false" position="bottom" :style="{ height: '45%' }" overlay-class="popup">
@@ -26,6 +27,7 @@
         </template>
       </van-field>
     </van-popup>
+    <!-- </van-pull-refresh> -->
   </div>
 </template>
 <script>
@@ -46,15 +48,19 @@ import local from "../uilts/localStorage";
 import Utils from "../uilts/utils";
 import Update from "../uilts/update";
 import navBar from "../components/NavBar";
-import communication from "../uilts/communication";
+import { pullMixin } from '@/uilts/pull'
 
+import communication from "../uilts/communication";
 // import { initWxConfig, wxAgentConfig } from '../uilts/wx-js-sdk/wxConfig'
 // import wx from 'weixin-js-sdk';
 export default {
   name: "Home",
   inject: ["reload", "unbind"],
+  mixins: [pullMixin],
   data() {
     return {
+      count: 0,
+      isLoading: false,
       data: [],
       user: {},
       userMap: {},
@@ -88,12 +94,15 @@ export default {
     navBar,
   },
   methods: {
+    // onRefresh() {
+    //   this.getList(1)
+    // },
     async getList(datas, id) {
       // 下拉联系人列表
       let that = this;
+      let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
       let timeout = generateTimeout();
       let nonce = generateNonce();
-      let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
       let signature = generateSignature3(
         userinfo?.id,
         userinfo?.bind_comp_id,
@@ -101,8 +110,8 @@ export default {
         nonce
       );
       let data = {
-        userId: userinfo.id,
-        compId: userinfo.bind_comp_id,
+        userId: userinfo?.id,
+        compId: userinfo?.bind_comp_id,
         current: datas || 1,
         size: 20,
         nonce,
@@ -114,6 +123,7 @@ export default {
         params: data,
       })
         .then(function (res) {
+          console.log(res)
           if (!res.error) {
             that.data = datas == 1 ? res.data : that.data.concat(res.data);
             that.userMap = Object.assign(that.userMap, res.user);
@@ -123,13 +133,18 @@ export default {
             that.$refs?.mychild?.$toast.clear();
             if (that.data.length == 0) that.empty = true; //如果数据大于0，就显示空信息
             sessionStorage.setItem("TabIndex", 6); // 因为触底分页需要，一进项目设置为数字6
+            that.successtext = '刷新成功';
           } else if (res.error) {
+            that.successtext = '刷新失败';
             that.$toast.fail("乐语营销架构过期");
           }
           that.ClearToast();
+          that.isLoading = false;  // 如果是刷新的情况那么就 关闭刷新状态
         })
         .catch(function (error) {
           console.log(error);
+          that.isLoading = false;  // 如果是刷新的情况那么就 关闭刷新状态
+          that.successtext = '刷新失败';
           that.$toast.fail("请求失败，请稍后再试");
         });
     },
@@ -352,12 +367,7 @@ export default {
             jsApiList: ["agentConfig", "selectExternalContact", 'openEnterpriseChat'], // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
           });
           wx.ready(function () {
-            // wx.onHistoryBack(function () {
-            //   return confirm("确定要放弃当前页面的修改？");
-            // });
-            // wx.hideMenuItems({
-            //   menuList: ['menuItem:copyUrl', 'menuItem:openWithSafari'] // 要隐藏的菜单项
-            // });
+            wx.hideAllNonBaseMenuItem();
             wx.agentConfig({
               corpid: that.appid2, // 必填，企业微信的corpid，必须与当前登录的企业一致
               agentid: res.agentId, // 必填，企业微信的应用id （e.g. 1000247）
@@ -420,22 +430,6 @@ export default {
           // alert(err);
         });
     },
-    // linkmanClick() {
-    //   // 点击拉去联系人
-    //   wx.invoke(
-    //     "selectExternalContact",
-    //     {
-    //       filterType: 0, //0表示展示全部外部联系人列表，1表示仅展示未曾选择过的外部联系人。默认值为0；除了0与1，其他值非法。在企业微信2.4.22及以后版本支持该参数
-    //     },
-    //     function (res) {
-    //       if (res.err_msg == "selectExternalContact:ok") {
-    //         this.userID = res.userId; //返回当前外部联系人userId
-    //       } else {
-    //         //错误处理
-    //       }
-    //     }
-    //   );
-    // },
     userIDLengths(data) {
       // 判断联系人长度，如果长度大于1，那么就弹窗
       this.$toast({
@@ -628,11 +622,12 @@ export default {
     // this.getList(1);
     // 如果ManualData：true 证明姓名，电话，跟进记录修改过，这样的话就重新赋值把。
     let index = sessionStorage.getItem('ManualIdx');
-    let { nickName, company, sheet } = this.$store.state.ManualData;
+    let { nickName, company, sheet, gender } = this.$store.state.ManualData;
     try {  // 不为空的情况下回显手动更改数据
       if (nickName !== '') { this.data[index].nickname = nickName; }
       if (company !== '') { this.data[index].company = company; }
       if (sheet !== '') { this.data[index].lastContactRecord = sheet; }
+      if (gender !== '') { this.data[index].gender = gender; }
     } catch (err) {
       console.log(err);
     }
@@ -640,30 +635,32 @@ export default {
     await this.getWxJsJdk();
   },
   async created() {
-    let that = this;
     let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
-    this.code = this.$route.query.code;
-    if (this.code) {
-      //有code
-      if (userinfo?.bind_comp_id) {
-        // 有公司ID
-        this.totalLodding();
-        this.getList(); // 就去请求列表
-      } else {
-        //没有公司ID
-        await this.getUserinfo(); //拿code 获取用户信息
-      }
-    } else {
-      // 无code
-      if (userinfo?.bind_comp_id) {
-        // 如果有就不跳转微信页
-        this.totalLodding();
-        this.getList(); // 有公司ID 就去请求列表
-      } else {
-        // 没有code 请求code
-        this.getURl(); // 没有code 请求code
-      }
-    }
+    // if (userinfo?.bind_comp_id) {
+    this.totalLodding();
+    this.getList(); // 就去请求列表
+    // }
+    // this.code = this.$route.query.code;
+    // if (this.code) {
+    //   //有code
+    //   if (userinfo?.bind_comp_id) {
+    //     // 有公司ID
+    //     this.getList(); // 就去请求列表
+    //   } else {
+    //     //没有公司ID
+    //     await this.getUserinfo(); //拿code 获取用户信息
+    //   }
+    // } else {
+    //   // 无code
+    //   if (userinfo?.bind_comp_id) {
+    //     // 如果有就不跳转微信页
+    //     this.totalLodding();
+    //     this.getList(); // 有公司ID 就去请求列表
+    //   } else {
+    //     // 没有code 请求code
+    //     this.getURl(); // 没有code 请求code
+    //   }
+    // }
     setTimeout(async () => {
       await this.getAgentConfig(); // 同步执行 否则会报错
       await this.getWxJsJdk();
@@ -694,11 +691,6 @@ export default {
 
   },
   mounted() {
-    Utils.$on("reset", (msg) => {
-      // 解绑触发该方法，重新获取code 拉去信息
-      this.getURl(); // 没有code 请求code
-      this.getUserinfo();
-    });
     communication.$on('update', (msg) => {
       if (msg.route !== 'Home') return;
       this.ManualUpdate(msg.index, msg.wxId)
@@ -757,5 +749,9 @@ export default {
 }
 .van-empty {
   padding-top: 3rem;
+}
+.pull /deep/ .van-pull-refresh__head {
+  // 改变下拉框的提醒位置
+  top: 45px;
 }
 </style>

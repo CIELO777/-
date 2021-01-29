@@ -7,7 +7,16 @@
           <div class="nav-L" @click="handItemClick(item,i)">
             <div class="nav-fir">
               <div class="nickN">{{item.nickname}}</div>
-              <!--  {{item.id}} -->
+              <!-- 性别 -->
+              <div class="wawa" v-if="item.gender == 2">
+                <img src="../../public/img/gg/gender_unknow.png" />
+              </div>
+              <div class="wawa" v-if="item.gender == 1">
+                <img src="../../public/img/gg/gender_man.png" />
+              </div>
+              <div class="wawa" v-if="item.gender == 0">
+                <img src="../../public/img/gg/gender_woman.png" />
+              </div>
               <template v-if="label">
                 <div class="nav-comp ml" v-if="item.ownerType ==0">（总公司公海）</div>
                 <div class="nav-comp ml" v-else-if="item.ownerType ==1">（分公司公海）</div>
@@ -69,7 +78,8 @@ export default {
       console.log(id, phone, idx, 'linkmanClick')
       wx.invoke('selectExternalContact', {
         "filterType": 0, //0表示展示全部外部联系人列表，1表示仅展示未曾选择过的外部联系人。默认值为0；除了0与1，其他值非法。在企业微信2.4.22及以后版本支持该参数
-      }, (res) => {console.log(res,'selectExternalContact')
+      }, (res) => {
+        console.log(res, 'selectExternalContact')
         if (res.userIds.length > 1) {  // 如果多选了，提示他，只能选择一个外部联系人
           this.$emit('userIDLength', 2)
           return;
@@ -89,7 +99,7 @@ export default {
       });
     },
     openChat(wxCrmId) {
-      console.log(wxCrmId,'对话')
+      console.log(wxCrmId, '对话')
       wx.openEnterpriseChat({ // 调用对话
         // 注意：userIds和externalUserIds至少选填一个。内部群最多2000人；外部群最多500人；如果有微信联系人，最多40人
         userIds: '',    //参与会话的企业成员列表，格式为userid1;userid2;...，用分号隔开。
@@ -97,12 +107,12 @@ export default {
         groupName: '',  // 会话名称。单聊时该参数传入空字符串""即可。
         chatId: "", // 若要打开已有会话，需指定此参数。如果是新建会话，chatId必须为空串
         success: function (res) {
-          console.log(res,'success')
+          console.log(res, 'success')
           var chatId = res.chatId; //返回当前群聊ID，仅当使用agentConfig注入该接口权限时才返回chatId
           // 回调
         },
         fail: function (res) {
-          console.log(res,'fail')
+          console.log(res, 'fail')
           if (res.errMsg.indexOf('function not exist') > -1) {
             alert('版本过低请升级')
           }
@@ -188,6 +198,7 @@ export default {
     .nav-fir {
       // margin-bottom: .1rem;
       display: flex;
+      align-items: center;
       .nickN {
         color: #3b3b3b;
         font-size: 15px;
@@ -198,6 +209,7 @@ export default {
         flex-shrink: 0;
         word-break: break-all;
         max-width: 60%;
+        margin-right: .1rem;
       }
     }
     .nav-L {
@@ -249,7 +261,6 @@ export default {
   // }
 }
 .ml {
-  margin-left: 5px;
 }
 .nav-comp {
   color: @FColor;
@@ -259,5 +270,12 @@ export default {
   white-space: nowrap;
   width: 80%;
   // margin-bottom: .1rem;
+}
+.wawa {
+  display: inline-block;
+  img {
+    width: 0.3rem;
+    height: 0.3rem;
+  }
 }
 </style>

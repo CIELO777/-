@@ -100,21 +100,22 @@ export default {
       var scrollHeight = read.scrollHeight;
       if (scrollTop + windowHeight == scrollHeight && scrollTop > 15) {
         this.current = ++this.current;
-        console.log('到底', this.current, this.totalPageCounts);
+        // console.log('到底', this.current, this.totalPageCounts);
         if (this.totalPageCounts < this.current) return;
         this.$toast.loading('加载中...');
         if (this.SearchValue !== '') {  // 如果搜索框上有文字那么就触发搜锁
           console.log(this.current);
-          if(this.route == 'shareUser'){ // 区分是哪个页面调用的
-            this.$emit('touchSearchs',[this.SearchValue, this.current])
+          if (this.route == 'shareUser') { // 区分是哪个页面调用的
+            this.$emit('touchSearchs', [this.SearchValue, this.current])
 
-          }else {
+          } else {
             this.$parent.searchs([this.SearchValue, this.current]);
           }
         } else {
-          if(this.route == 'shareUser'){ // 区分是哪个页面调用的
-            this.$emit('changeCur',this.current)
-          }else {
+          if (this.route == 'shareUser') { // 区分是哪个页面调用的
+            this.$emit('changeCur', this.current)
+          } else {
+            console.log(this.current,'asdsasa')
             this.$parent.compList(this.current);
           }
 
@@ -136,14 +137,14 @@ export default {
       }
       this.close()
     },
-    searchChange(value, cur) {
+    searchChange(value) {
       this.current = 1;
       let abc = document.querySelector('#abc')
       abc.scrollTop = 0; // 清除滚动条位置
       if (value === '') {
-        if(this.route == 'shareUser'){ // 区分是哪个页面调用的
-          this.$emit('changeCur',1)
-        }else {
+        if (this.route == 'shareUser') { // 区分是哪个页面调用的
+          this.$emit('changeCur', 1)
+        } else {
           this.$parent.compList(1);
         }
       } else {
@@ -155,12 +156,15 @@ export default {
     },
     checkChange(item, index) { // 共享客户选择
       // console.log(item, index)
-      this.$emit('Changecheck',item,index)
+      this.$emit('Changecheck', item, index)
       // this.list[d].check = i.check;  // 更改当前数据选中状态
     },
-    shareOk(){ // 共享确认
+    shareOk() { // 共享确认
       this.$emit('shareOk')
-      
+
+    },
+    emptyCur(){
+      this.current = 1
     }
   },
   created() {

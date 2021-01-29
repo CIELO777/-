@@ -18,7 +18,7 @@
           <van-button @click="goback">返回</van-button>
           <van-button type="primary" @click="add">添加</van-button>
         </div>
-        <van-empty v-show="shareList.length == 0" description="暂无相关消息" />
+        <van-empty v-show="shareList.length == 0" description="暂无相关消息" class="empty"/>
       </div>
       <div v-if="show">
         <compInfo @initScroll="initScrolls" @shareOk="shareOks" @Changecheck="Changechecks(arguments)" @touchSearchs="touchSearch" @search="searchs(arguments)" @changeCur="changeCurs" @loading="loading" height="calc(100% - 94px)" route="shareUser" ref="compInfo" :totalPageCounts="total" :compshow.sync="show" @updatelists="clickshare(ids)" :list="shareList">
@@ -87,7 +87,7 @@ export default {
       param.append("timeout", timeout);
       param.append("nonce", nonce);
       param.append("compId", this.$C || local.C());
-      param.append("signature", signature);
+      // param.append("signature", signature);
 
       this.$post1("/api/request/itr/comp/customer/opt", param)
         .then((res) => {
@@ -217,6 +217,7 @@ export default {
       this.searchs(value)
     },
     Changechecks(value) { // 共享选择 更变数据中的check，这个就是选中的数据
+    console.log(value)
       this.shareList[value[1]].check = value[0].check;
     },
     shareOks() { // 共享确认 ,check==true过滤userid
@@ -229,6 +230,7 @@ export default {
           userId.push(item.userId);
         }
       })
+      console.log(userId.join(',') + ',' + this.ids)
       this.$emit('update:ids', userId.join(',') + ',' + this.ids)
       if (data.length == 0) {
         this.$toast({
@@ -253,7 +255,6 @@ export default {
       param.append("timeout", timeout);
       param.append("nonce", nonce);
       param.append("compId", this.$C || local.C());
-      param.append("signature", signature);
       this.shareList.length = 0;
       this.$toast.loading({
         message: '加载中...',
@@ -351,6 +352,10 @@ export default {
   .choose {
     height: calc(~"100% - 46px");
     overflow-y: scroll;
+  }
+  .empty {
+    width: 100%;
+    height: 100%;
   }
 }
 </style>

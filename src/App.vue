@@ -69,11 +69,9 @@ export default {
       this.show = true;
     },
     unbindSave() { // 确认解绑
-      console.log('执行了')
       let that = this;
       if (this.unvalue.toLowerCase() === 'unbind') {
         let openId = sessionStorage.getItem("openId");
-        console.log(JSON.parse(sessionStorage.getItem('userinfo')), 'userINFO')
         let userinfo = JSON.parse(sessionStorage.getItem('userinfo'))?.id
         let signature = generateSignature4(openId, userinfo, nonce, timeout)
         let param = new URLSearchParams();
@@ -233,7 +231,6 @@ body {
   font-size: 0.34rem;
   p:nth-child(2) {
     margin-top: 0.3rem;
-    padding-left: 12px;
   }
   .hint {
     display: flex;
@@ -250,20 +247,21 @@ body {
   }
   input {
     border: 1px solid #eee;
-    margin-left: 12px;
-    width: 90%;
+    width: 95%;
     margin-top: 0.3rem;
     font-size: 0.28rem;
     padding: 5px 0;
   }
 }
 .popUnbind {
-  overflow-y: scroll;
+  overflow-y: hidden;
   .unbindbtn {
     position: fixed;
-    bottom: 0px;
     left: 0;
-    height: 0.8rem;
+    bottom: 0;
+    height: 44px;
+    font-size: 12px;
+    width: 100%;
   }
 }
 .van-empty {

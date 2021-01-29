@@ -55,8 +55,8 @@
           <div class="text">
             <!-- 如果type === 4 证明是对话，对话展示content内容，其他展示title -->
             <template>
-              <span v-if="item.type == 4" style="white-space: pre;">{{item.content}}</span>
-              <span v-else>{{item.title==null?'':item.title}} <a v-if="item.url != false" @click="JumpOrder(item.url)" style="color:blue">查看链接</a></span>
+              <span v-if="item.type == 4" style="white-space: pre-wrap;">{{item.content}}</span>
+              <span v-else style="white-space: pre-wrap;">{{item.title==null?'':item.title}} <a v-if="item.url != false" @click="JumpOrder(item.url)" style="color:blue">查看链接</a></span>
             </template>
             <div v-if="item.type == 0 && item.content.length > 0" class="img-list">
               <template v-for="(itr,i) in item.content">
@@ -180,6 +180,8 @@ export default {
                 url: str
               };
             })
+
+
             that.follList = that.current == 1 ? data : that.follList.concat(data);
             that.followUserMap = { ...that.followUserMap, ...res.itrUser };
             that.total = res.totalPageCount;
@@ -458,7 +460,6 @@ export default {
           this.deleOk(id, pid)
         })
         .catch(() => {
-
         });
     },
     deleOk(id, pid) { // 删除跟进记录调用接口
@@ -644,7 +645,7 @@ export default {
       padding: 10px 15px;
 
       .time {
-        width: 1.4rem;
+        width: 22%;
         flex-shrink: 0;
         span:first-child {
           font-size: 22px;
@@ -657,7 +658,7 @@ export default {
         }
       }
       .content {
-        flex: 3;
+        width: 77%;
         // margin-left: 0.2rem;
         .text {
           background: #f1f1f1;
