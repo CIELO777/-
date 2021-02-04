@@ -2,17 +2,85 @@
  * @Author: YUN_KONG 
  * @Date: 2021-01-12 13:43:19 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-01-29 11:40:43
+ * @Last Modified time: 2021-02-03 17:06:41
  * 此模块用于彩页视频顶部tab
  */
 <template>
   <div class="tab">
-    <van-tabs :lazy-render="false" v-model="active" @change="tabsChange" color="#51BBBA">
-      <template v-for="(item,index) in tabArrays">
+    <van-tabs
+      :lazy-render="false"
+      v-model="active"
+      @change="tabsChange"
+      color="#51BBBA"
+    >
+      <template v-for="(item, index) in tabArrays">
         <van-tab ref="dataNum" :title="item.title" :key="index">
           <!-- <keep-alive> -->
-          <VideoPage v-bind="$attrs" v-on="$listeners" :configs="configs" :datas="datas" :states="states" :userMaps="userMaps" :ref="`videoView${index}`" :key="index" v-if="videoID == item.id && $route.name =='Video' "></VideoPage>
-          <ColorView v-bind="$attrs" v-on="$listeners" @currentChange="currentChanges" v-if="id == item.id && $route.name =='ColorPage' " :key="index" :ref="`colorView${index}`" :datas="datas" :trajectoryCounts="trajectoryCounts" :userMaps="userMaps" :configs="configs" :formCounts="formCounts" :states="states"></ColorView>
+          <VideoPage
+            v-bind="$attrs"
+            v-on="$listeners"
+            :configs="configs"
+            :datas="datas"
+            :states="states"
+            :userMaps="userMaps"
+            :ref="`videoView${index}`"
+            :key="index"
+            v-if="videoID == item.id && $route.name == 'Video'"
+          ></VideoPage>
+
+          <ColorView
+            v-bind="$attrs"
+            v-on="$listeners"
+            @currentChange="currentChanges"
+            v-if="id == item.id && $route.name == 'ColorPage'"
+            :key="index"
+            :ref="`colorView${index}`"
+            :datas="datas"
+            :trajectoryCounts="trajectoryCounts"
+            :userMaps="userMaps"
+            :configs="configs"
+            :formCounts="formCounts"
+            :states="states"
+          ></ColorView>
+
+          <AdvertorialView
+            v-bind="$attrs"
+            v-on="$listeners"
+            v-if="id == item.id && $route.name == 'Advertorial'"
+            :key="index"
+            :ref="`AdvertorialView${index}`"
+            :datas="datas"
+            :trajectoryCounts="trajectoryCounts"
+            :userMaps="userMaps"
+            :configs="configs"
+            :formCounts="formCounts"
+            :states="states"
+          ></AdvertorialView>
+
+          <documentView
+            v-bind="$attrs"
+            v-on="$listeners"
+            v-if="videoID == item.id && $route.name == 'Document'"
+            :key="index"
+            :ref="`documentView${index}`"
+            :datas="datas"
+            :userMaps="userMaps"
+            :configs="configs"
+            :states="states"
+          ></documentView>
+
+          <PosterView
+            v-bind="$attrs"
+            v-on="$listeners"
+            v-if="videoID == item.id && $route.name == 'Poster'"
+            :key="index"
+            :ref="`PosterView${index}`"
+            :datas="datas"
+            :userMaps="userMaps"
+            :configs="configs"
+            :states="states"
+          >
+          </PosterView>
           <!-- </keep-alive> -->
         </van-tab>
       </template>
@@ -23,6 +91,9 @@
 <script>
 import ColorView from '../../components/colorPage/ColorView';
 import VideoPage from '../../components/video/VideoPage';
+import AdvertorialView from '../../components/Advertorial/AdvertorialView';
+import documentView from '../../components/poster/documentView';
+import PosterView from '../../components/poster/PosterView';
 
 import {
   generateTimeout,
@@ -66,11 +137,6 @@ export default {
       this.$emit('ColorId', index) // 点击tab 获取用户点击的id，穿父组件
     },
     getList() {  // 获取当前列表
-      // this.$toast.loading({
-      //   message: '加载中...',
-      //   forbidClick: true,
-      //   loadingType: 'spinner',
-      // });
       let categroyId = sessionStorage.getItem("colorId")
       let signature = generateSignature3(
         this.$U,
@@ -121,11 +187,11 @@ export default {
 
   },
   created() {
-    // this.getList()
     console.log(this.$route.name)
+    // this.getList()
   },
   mounted() { },
-  components: { ColorView, VideoPage }
+  components: { ColorView, VideoPage, AdvertorialView, documentView, PosterView }
 };
 </script>
 

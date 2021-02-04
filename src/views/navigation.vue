@@ -1,86 +1,167 @@
 <template>
   <div class="navigation">
-    <van-pull-refresh v-model="isLoading" @refresh="onRefresh" style="min-height: 100vh;">
+    <van-pull-refresh
+      v-model="isLoading"
+      @refresh="onRefresh"
+      style="min-height: 100vh"
+    >
       <div class="bulletin">
         <span>营销简报</span>
         <div class="btn">
-          <button :style="style" @click="date('today')">今日</button><button :style="style1" @click="date('month')">本月</button>
+          <button :style="style" @click="date('today')">今日</button
+          ><button :style="style1" @click="date('month')">本月</button>
         </div>
       </div>
-      <section class='one'>
+      <section class="one">
         <div class="module">
           <span>转发次数</span>
-          <span>{{shareNumber}}次</span>
+          <span>{{ shareNumber }}次</span>
         </div>
         <div class="module">
           <span>带来流量</span>
-          <span>{{trajectoryNumber}}个</span>
+          <span>{{ trajectoryNumber }}个</span>
         </div>
         <div class="module">
           <span>新增联系人</span>
-          <span>{{contactNumber}}个</span>
+          <span>{{ contactNumber }}个</span>
         </div>
         <div class="module">
           <span>联系客户</span>
-          <span>{{contactCustomerNumber}}次</span>
-        </div>
-        <div class="module">
-          <span>新增推广豆</span>
-          <span>{{coinNumber}}个</span>
+          <span>{{ contactCustomerNumber }}次</span>
         </div>
         <div class="module">
           <span>新增订单</span>
-          <span>{{orderNumber}}个</span>
+          <span>{{ orderNumber }}个</span>
+        </div>
+        <div class="module">
+          <span>新增推广豆</span>
+          <span>{{ coinNumber }}个</span>
         </div>
       </section>
       <h1>营销素材库</h1>
-      <section class='two'>
+      <section class="two">
         <van-badge class="two-view">
-          <img src="../../public/img/icon/企业名片.png" alt="" @click="skip('card')">
+          <img
+            src="../../public/img/icon/企业名片.png"
+            alt=""
+            @click="skip('card')"
+          />
           <span>企业名片</span>
         </van-badge>
         <van-badge class="two-view">
-          <img src="../../public/img/icon/宣传彩页.png" alt="" @click="skip('colorPage')">
+          <img
+            src="../../public/img/icon/宣传彩页.png"
+            alt=""
+            @click="skip('colorPage')"
+          />
           <span>宣传彩页</span>
         </van-badge>
         <van-badge class="two-view">
-          <img src="../../public/img/icon/视频素材.png" alt="" @click="skip('video')">
+          <img
+            src="../../public/img/icon/企业微站.png"
+            alt=""
+            @click="skip('MicroStation')"
+          />
+          <span>企业微站</span>
+        </van-badge>
+        <van-badge class="two-view">
+          <img
+            src="../../public/img/icon/海报素材.png"
+            alt=""
+            @click="skip('poster')"
+          />
+          <span>海报素材</span>
+        </van-badge>
+        <van-badge class="two-view">
+          <img
+            src="../../public/img/icon/软文素材.png"
+            alt=""
+            @click="skip('advertorial')"
+          />
+          <span>软文素材</span>
+        </van-badge>
+        <van-badge class="two-view">
+          <img
+            src="../../public/img/icon/视频素材.png"
+            alt=""
+            @click="skip('video')"
+          />
           <span>视频素材</span>
         </van-badge>
       </section>
       <h1>营销过程管理</h1>
-      <section class='two'>
+      <section class="two">
         <van-badge class="two-view">
-          <img src="../../public/img/icon/客户管理.png" alt="" @click="skip('manage')">
+          <img
+            src="../../public/img/icon/客户管理.png"
+            alt=""
+            @click="skip('manage')"
+          />
           <span>客户管理</span>
         </van-badge>
       </section>
       <h1>内部公告</h1>
-      <ul class='two' style="padding: 10px 20px;" v-if="Notice.length > 0">
-        <template v-for="(item,index) in Notice">
-          <li :key="index" class="notice"> <span class="circle"></span><span style="margin-right:5px">{{item.createTimes}}</span>{{item.content}}</li>
+      <ul class="two" style="padding: 10px 20px" v-if="Notice.length > 0">
+        <template v-for="(item, index) in Notice">
+          <li :key="index" class="notice">
+            <span class="circle"></span
+            ><span style="margin-right: 5px">{{ item.createTimes }}</span
+            >{{ item.content }}
+          </li>
         </template>
       </ul>
     </van-pull-refresh>
     <!-- 企业微信验证码 -->
-    <van-popup v-model="show" :close-on-click-overlay="false" position="bottom" :style="{ height: '45%' }" overlay-class="popup">
+    <van-popup
+      v-model="show"
+      :close-on-click-overlay="false"
+      position="bottom"
+      :style="{ height: '45%' }"
+      overlay-class="popup"
+    >
       <div class="hView">
         <div class="hint">
           <van-icon name="warning" size="25px" />
-          <p class="qy-hint">
-            企业微信绑定
-          </p>
+          <p class="qy-hint">企业微信绑定</p>
         </div>
         <p class="qy-hint1">当前账号没有绑定乐语，请输入手机号进行绑定</p>
       </div>
-      <van-field v-model="sms" type="tel" center clearable label="手机号" class="inp" placeholder="请输入手机号">
+      <van-field
+        v-model="sms"
+        type="tel"
+        center
+        clearable
+        label="手机号"
+        class="inp"
+        placeholder="请输入手机号"
+      >
         <template #button>
-          <van-button size="small" type="primary" @click="clicksendCode" :disabled="times < 60">{{ sendings }}</van-button>
+          <van-button
+            size="small"
+            type="primary"
+            @click="clicksendCode"
+            :disabled="times < 60"
+            >{{ sendings }}</van-button
+          >
         </template>
       </van-field>
-      <van-field v-model="codes" type="digit" center clearable label="验证码" class="inp" placeholder="请输入验证码">
+      <van-field
+        v-model="codes"
+        type="digit"
+        center
+        clearable
+        label="验证码"
+        class="inp"
+        placeholder="请输入验证码"
+      >
         <template #button>
-          <van-button size="small" type="danger" @click="bindlooyuCode" class="bind">绑定</van-button>
+          <van-button
+            size="small"
+            type="danger"
+            @click="bindlooyuCode"
+            class="bind"
+            >绑定</van-button
+          >
         </template>
       </van-field>
     </van-popup>
@@ -222,23 +303,25 @@ export default {
       });
     },
     skip(data) {
-      console.log('你好')
-      console.log(data)
+      let compId = local.get('userinfo')?.bind_comp_id;
+      if (!compId) {  // 没有加入公司 模块全部不让进
+        this.$notify({ type: 'danger', message: '当前未加入公司' }); return;
+      }
       if (data == 'manage') { //  管理
         sessionStorage.setItem('active', 'Home')
         this.$router.push('/home')
       } else if (data == 'card') {
-        // this.$toast.fail('该模块正在开发中...');
-        // return;
         this.$router.push('/card')
       } else if (data == 'colorPage') {
-        // this.$toast.fail('该模块正在开发中...');
-        // return;
         this.$router.push('/colorPage')
       } else if (data == 'video') {
-        // this.$toast.fail('该模块正在开发中...');
-        // return;
         this.$router.push('/video')
+      } else if (data == 'MicroStation') {
+        this.$router.push('/microStation')
+      } else if (data == 'poster') {
+        this.$router.push('/poster')
+      } else if (data == 'advertorial') {
+        this.$router.push('/advertorial')
       }
     },
     clicksendCode() {
@@ -296,8 +379,6 @@ export default {
         });
     },
     bindlooyuCode() {
-      this.bindLooyu();
-      return;
       // 验证码验证是否正确 验证码正确调用确认绑定
       let that = this;
       let signature = generateSignature8(this.sms, 1, 3, timeout, nonce);
@@ -315,7 +396,6 @@ export default {
             that.$toast.fail("验证码错误");
           } else {
             that.bindLooyu();
-
           }
         })
         .catch(function (error) {
@@ -353,7 +433,6 @@ export default {
         });
     },
     getConsole() {
-      console.log(this.$U || local.U())
       let signature = generateSignature3(this.$U || local.U(), timeout, nonce);
       this.$get("/api/request/console/data",
         {
@@ -432,7 +511,7 @@ export default {
       }
       this.getConsole()
 
-    }
+    },
   },
   async created() {
     // this.firstLodding();
@@ -517,7 +596,6 @@ export default {
       width: 25%;
       justify-content: center;
       align-items: center;
-      margin-right: 5px;
       padding: 0.2rem;
       flex-direction: column;
       img {

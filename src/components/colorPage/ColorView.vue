@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-01-12 13:56:29 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-01-29 12:16:09
+ * @Last Modified time: 2021-02-02 14:00:16
  8 此模块用于彩页，软文列表
  */
 <template>
@@ -92,7 +92,7 @@ export default {
   computed: {},
   methods: {
     onLoad() {  // 触底事件、
-      console.log(this.configs.current , this.configs.total)
+      console.log(this.configs.current, this.configs.total)
       if (this.configs.current >= this.configs.total) {
         this.finished = true;
         return;
@@ -115,59 +115,12 @@ export default {
     },
     onRefresh() {  // 下拉刷新
       this.$emit('refreshEmpty')
-      this.refreshing = false;
       this.finished = false;
       this.loading = true;
+      setTimeout(() => {
+        this.refreshing = false;
+      }, 1000);
       this.onLoad();
-    },
-    getList() {  // 获取当前列表
-      // this.$toast.loading({
-      //   message: '加载中...',
-      //   forbidClick: true,
-      //   loadingType: 'spinner',
-      // });
-      let categroyId = sessionStorage.getItem("colorId")
-      let signature = generateSignature3(
-        this.$U,
-        timeout,
-        nonce
-      );
-      let data = {
-        userId: this.$U,
-        category: this.category,
-        type: 5,
-        timeout: timeout,
-        nonce: nonce,
-        signature: signature,
-        current: this.page.current,
-        size: 20,
-        categroyId
-      }
-      this.$get("/api/request/itr/page/recommend/result", {
-        params: data,
-      })
-        .then((res) => {
-          this.trajectoryCount = res.trajectoryCount;
-          this.userMap = res.user;
-          res.formCount.forEach(item => {
-            this.formCount[item.id] = item.counts;
-          })
-          res.trajectoryCount.forEach(item => {
-            this.trajectoryCount[item.id] = item.counts;
-          })
-          this.totalPageCount = res.totalPageCount;
-          this.loading = false;
-          this.list = this.list.concat(res.data).map(item => {
-            return {
-              ...item,
-              time: item.lastUpdateTime.split(' ')[0]
-            }
-          });
-          console.log(this.list)
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
     },
     clickColor(item) {
       this.$router.push({
@@ -182,7 +135,7 @@ export default {
       })
     },
     createContent(item) {
-      console.log(item)
+      // console.log(item)
       this.showShare = true;
       this.ShareContent = {
         title: item.title,

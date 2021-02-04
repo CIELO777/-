@@ -48,7 +48,7 @@ import local from "../uilts/localStorage";
 import Utils from "../uilts/utils";
 import Update from "../uilts/update";
 import navBar from "../components/NavBar";
-import { pullMixin } from '@/uilts/pull'
+import { pullMixin } from '@/uilts/pull';
 
 import communication from "../uilts/communication";
 // import { initWxConfig, wxAgentConfig } from '../uilts/wx-js-sdk/wxConfig'

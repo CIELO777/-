@@ -1,6 +1,10 @@
 <template>
   <div class="colorPage">
-    <van-search :clearable="false" v-model="value" show-action placeholder="请输入搜索关键词" @search="search" @cancel="onCancel" />
+    <van-search :clearable="false" v-model="value" show-action placeholder="请输入搜索关键词" @search="search">
+      <template #action>
+        <div @click="onCancel">取消</div>
+      </template>
+    </van-search>
     <!-- {{treeData[id].data.lenght > 0}} -->
     <!-- {{treeData[id].data}} -->
     <!-- v-if="isShowTab" -->
@@ -101,6 +105,12 @@ export default {
     ColorIds(index) {  // 点击tab事件
       this.id = this.tabArray[index].id;
       if (this.treeData[this.id].config.total == -1) { // == -1 证明第一次点击该标签a
+        this.$toast.loading({
+          message: '加载中...',
+          forbidClick: true,
+          duration: 800,
+          overlay: true,
+        });
         this.getList()
       } else {
         this.atData = this.treeData[this.id].data;
@@ -216,7 +226,6 @@ export default {
       this.onSearch(this.treeData[this.id].config.current);
     },
     onSearch(cur) {
-      console.log(cur)
       this.treeData[this.id].config.current = cur;
       let signature = generateSignature3(
         this.$U || local.U(),
@@ -286,8 +295,9 @@ export default {
       // console.log(this.treeData)
     },
     onCancel() {
-      if(this.value === '')return;
+      // if (this.value === '') return;
       this.state = 'list';
+      this.treeData[this.id].config.current = 1;
       document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
       this.getList()
     }

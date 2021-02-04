@@ -1,3 +1,9 @@
+
+const path = require('path');
+
+function resolve(dir) {
+    return path.join(__dirname, dir)
+}
 module.exports = {
     publicPath: '/wx-crmTest/',
     // assetsSubDirectory: 'static',
@@ -30,6 +36,29 @@ module.exports = {
                     '^/aliyun': '/aliyun'//base_api是自定义用来代替http://www.baidu.com/的
                 }
             },
+            '/itver': {
+                target: 'https://wxa.jiain.net/',
+                // target: 'http://122.51.207.208:8088/',
+                changeOrigin: true,
+                // 路径重写： 下面的意思是重写访问路径中的  '/api' 为 '' ，如果没有重写, /api 代表 http://127.0.0.1:8090/api
+                pathRewrite: {
+                    '^/itver': '/itver'//base_api是自定义用来代替http://www.baidu.com/的
+                }
+            },
+            '/view': {
+                target: 'https://wxa.jiain.net/',
+                // target: 'http://122.51.207.208:8088/',
+                changeOrigin: true,
+                // 路径重写： 下面的意思是重写访问路径中的  '/api' 为 '' ，如果没有重写, /api 代表 http://127.0.0.1:8090/api
+                pathRewrite: {
+                    '^/view': '/view'//base_api是自定义用来代替http://www.baidu.com/的
+                }
+            },
         }
+    },
+    chainWebpack: (config) => {
+        //修改文件引入自定义路径
+        config.resolve.alias
+            .set('@', resolve('src'))
     }
 };

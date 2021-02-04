@@ -116,7 +116,6 @@ export default {
             this.atData = JSON.parse(JSON.stringify(this.treeData[this.id].data))  // 传入当前数组
             this.userMap = JSON.parse(JSON.stringify(this.treeData[this.id].userMap))  // 传入当前对象
             this.config = JSON.parse(JSON.stringify(this.treeData[this.id].config));  // 总页数
-            console.log(this.treeData)
           } else {
             that.$toast.fail("请求失败，请稍后再试");
           }
@@ -128,6 +127,12 @@ export default {
     ColorIds(index) {  // 点击tab事件
       this.id = this.tabArray[index].id;
       if (this.treeData[this.id].config.total == -1) { // == -1 证明第一次点击该标签a
+        this.$toast.loading({
+          message: '加载中...',
+          forbidClick: true,
+          duration: 800,
+          overlay: true,
+        });
         this.getList()
       } else {
         this.atData = this.treeData[this.id].data;
@@ -197,8 +202,9 @@ export default {
         });
     },
     onCancel() {
-      if (this.value === '') return;
+      // if (this.value === '') return;
       this.state = 'list';
+      this.treeData[this.id].config.current = 1; 
       document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
       this.getList()
     },

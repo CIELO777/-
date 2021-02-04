@@ -56,7 +56,6 @@ export default {
     onSelect(option) { // 分享
       let name = option.name;
       var a = document.createElement('a');
-      console.log(this.ShareContents)
       if (name == '好友') {
         wx.invoke(
           "shareWechatMessage", {

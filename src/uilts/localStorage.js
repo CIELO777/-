@@ -10,7 +10,7 @@ local.set = function (key, value) {
 };
 
 local.get = function (key) {
-	return window.sessionStorage.getItem(key);
+	return JSON.parse(window.sessionStorage.getItem(key));
 };
 /**
  * get 获取本地存储数据

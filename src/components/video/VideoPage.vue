@@ -74,9 +74,11 @@ export default {
   methods: {
     onRefresh() {
       this.$emit('refreshEmpty')
-      this.refreshing = false;
       this.finished = false;
       this.loading = true;
+      setTimeout(() => {
+        this.refreshing = false;
+      }, 1000);
       this.onLoad();
     },
     onLoad() {

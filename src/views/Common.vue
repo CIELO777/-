@@ -176,7 +176,6 @@ export default {
     async getAgentConfig() {  // 拉取
       let param = new URLSearchParams();
       let url = location.href.split('#')[0];
-      console.log(url, '请求的url');
       let itrId = JSON.parse(sessionStorage.getItem("userinfo")).id;
       param.append("timeout", timeout / 1000);
       param.append("nonce", nonce);

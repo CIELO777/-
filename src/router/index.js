@@ -109,6 +109,26 @@ const routes = [
     name: 'Iframe',
     component: () => import(/* webpackChunkName: "about" */ '../components/colorPage/Iframe.vue')
   },
+  {
+    path: '/microStation',
+    name: 'MicroStation',
+    component: () => import(/* webpackChunkName: "about" */ '../views/MicroStation.vue')
+  },
+  {
+    path: '/poster',
+    name: 'Poster',
+    component: () => import(/* webpackChunkName: "about" */ '../views/Poster.vue')
+  },
+  {
+    path: '/advertorial',
+    name: 'Advertorial',
+    component: () => import(/* webpackChunkName: "about" */ '../views/Advertorial.vue')
+  },
+  {
+    path: '/document',
+    name: 'Document',
+    component: () => import(/* webpackChunkName: "about" */ '../components/poster/document.vue')
+  },
 ]
 
 const router = new VueRouter({

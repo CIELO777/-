@@ -14,6 +14,8 @@ import { generateTimeout, generateNonce, generateSignature3, generateSignatureQr
 let timeout = generateTimeout()
 let nonce = generateNonce();
 import sha1 from "../uilts/sha1";
+import local from '../uilts/localStorage';
+
 export default {
   name: "Card",
   components: {},
@@ -22,11 +24,8 @@ export default {
     return {
       url: '',
       showShare: false,
-      noncestr: "",
-      timestamp: "",
-      noncestr2: "",
-      signature2: "",
-      Qcory: "",
+      ShareContent: {},
+      remark: '',
     };
   },
   watch: {},
@@ -38,15 +37,34 @@ export default {
       this.ShareContent = {
         title: JSON.parse(sessionStorage.getItem('userinfo')).nickname + '的名片，请惠存',
         imgUrl: JSON.parse(sessionStorage.getItem('userinfo')).portrait,
-        desc: "",
+        desc: this.remark,
         url: `https://page.weishang99.net/itver/remote/${userinfo.id}/profile/${userinfo.id}/${userinfo.bind_comp_id}`
       }
-
+    },
+    initMineInfo() {
+      this.$get("/itver/remote/user/profile", {
+        params: {
+          userId: this.$U || local.U() + 1,
+          curLogin: this.$U || local.U(),
+        },
+      })
+        .then((res) => {
+          if (res.url !== null) {
+            this.url = res.url;
+          }
+          if (res.remark) {
+            this.remark = res.remark;
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+        });
     }
   },
   async created() {
-    let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
-    this.url = `https://page.weishang99.net/itver/remote/${userinfo.id}/profile/${userinfo.id}/${userinfo.bind_comp_id}`
+    console.log(this.initMineInfo())
+    // let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
+    // this.url = `https://page.weishang99.net/itver/remote/${userinfo.id}/profile/${userinfo.id}/${userinfo.bind_comp_id}`
     // await this.getAgentConfig(); // 同步执行 否则会报错
     // await this.getWxJsJdk();
   },
