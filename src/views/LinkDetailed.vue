@@ -1,35 +1,56 @@
 <template>
   <div class="detail">
     <!-- :lazy-render="false"  -->
-    <van-tabs swipeable v-model="active" :lazy-render="false" color="#51BBBA" @change="tabsChange" class="tabs" offset-top="0" sticky>
-      <van-tab title="客户信息">
+    <van-tabs
+      swipeable
+      v-model="active"
+      :lazy-render="false"
+      color="#51BBBA"
+      @change="tabsChange"
+      class="tabs"
+    >
+      <van-tab title="联系人信息">
         <keep-alive>
-          <Forms :sourceData="sourceData" ref="forms" :form="form" :crmInfo="crmInfos" v-if="Object.keys(crmInfos).length >0 && active==0" :active.sync="active" @getCrm="getCrm"></Forms>
+          <Forms
+            :sourceData="sourceData"
+            ref="forms"
+            :form="form"
+            :crmInfo="crmInfos"
+            v-if="Object.keys(crmInfos).length > 0 && active == 0"
+            :active.sync="active"
+            @getCrm="getCrm"
+          ></Forms>
         </keep-alive>
       </van-tab>
       <van-tab title="跟进记录">
         <keep-alive>
-          <FollowPage v-if="active == 0 || active == 1"></FollowPage>
+          <FollowPage v-if="active == 1"></FollowPage>
         </keep-alive>
       </van-tab>
       <van-tab title="订单">
         <keep-alive>
-          <Order v-if="active == 2"></Order>
+          <Order v-if="active == 2" ref="Order"></Order>
         </keep-alive>
       </van-tab>
       <van-tab title="日程">
-        <Agenda v-if="active == 3"></Agenda>
-      </van-tab>
-      <van-tab title="雷达">
-        <Radar v-if="active == 4"></Radar>
+        <keep-alive>
+          <Agenda v-if="active == 3"></Agenda>
+        </keep-alive>
       </van-tab>
       <van-tab title="操作记录">
-        <Operating v-if="active == 5"></Operating>
+        <keep-alive>
+          <!-- {{active}} -->
+          <Operating v-if="active == 4"></Operating>
+        </keep-alive>
+      </van-tab>
+      <van-tab title="雷达">
+        <keep-alive>
+          <Radar v-if="active == 5"></Radar>
+        </keep-alive>
       </van-tab>
     </van-tabs>
   </div>
 </template>
-
 <script>
 import { generateTimeout, generateNonce, generateSignature3 } from '../uilts/tools';
 import FollowPage from '../components/FollowPage';
@@ -47,7 +68,7 @@ export default {
   name: 'LinkDetailed',
   data() {
     return {
-      active: 1,
+      active: 0,
       navigationList: [
         { name: '客户信息' },
         { name: '跟进记录' },
@@ -78,6 +99,23 @@ export default {
   components: {
     [ImagePreview.Component.name]: ImagePreview.Component,
   },
+  activated() {
+    let tabnum = sessionStorage.getItem('tabNum');
+    if (tabnum == 1) {
+      this.active = 1;
+    } else if (tabnum == 2) {
+      this.active = 2;
+    } else if (tabnum == 3) {
+      this.active = 3;
+    } else if (tabnum == 0) {
+      this.active = 0;
+    }
+    if (this.$route.params.userId) { // 如果参数，证明新增成功了
+      this.$refs.Order.orderList.length = 0;
+      this.$refs.Order.current = 1;
+      this.$refs.Order.getOrderList()
+    }
+  },
   created() {
     let tabnum = sessionStorage.getItem('tabNum');
     if (tabnum == 1) {
@@ -91,7 +129,7 @@ export default {
     }
     // sessionStorage.setItem('TabIndex', this.active)
     this.getCrm();
-    this.getCid()
+    this.getCid();
   },
   methods: {
     getCrm() { // 获取基本信息
@@ -109,20 +147,32 @@ export default {
         },
       })
         .then((res) => {
-          console.log(res)
           if (!res.error) {
             let shareStr = '';
             res.share.forEach(item => { // 遍历循环字符串
               shareStr = shareStr + res.user[item.userId].nickname + ','
             })
-            console.log(shareStr)
+            let ownerNickname = '';
+            if (sessionStorage.getItem('active') === 'HighSeas') {
+              if (res.ownerType == '0') {
+                ownerNickname = '总公司公海'
+              } else if (res.ownerType == '1') {
+                ownerNickname = '分公司公海'
+              } else if (res.ownerType == '2') {
+                ownerNickname = '部门公海'
+              } else if (res.ownerType == '4') {
+                ownerNickname = '个人公海'
+              }
+            } else {
+              ownerNickname = res.user[res.ownerId]?.nickname || '';
+            }
             let a = {
               ...res,
-              status: res.status == 1 ? '未知' : '有效',
+              status: res.status == 0 ? '无效' : (res.status == 1 ? "未知" : "有效"),
               sourceType: res.sourceType == 0 ? '手动录入' : res.sourceType == 1 ? '表单导入' : '订单导入',
               itrNickname: res.user[res.creator].nickname,
-              ownerNickname: res.user[res.ownerId]?.nickname || '',
-              starLevel: res.starLevel == 0 ? '未知' : res.starLevel + '星客户',
+              ownerNickname: ownerNickname,
+              starLevel: this.conversionNum(res.starLevel),
               gender: res.gender == 2 ? '未知' : res.gender == 1 ? '男' : '女',
               companyOcc: this.cooList[res.companyOcc == -1 ? 7 : res.companyOcc],
               contactNumber: res.contactNumber + '次',
@@ -143,6 +193,23 @@ export default {
         .catch(function (error) {
           console.log(error);
         });
+    },
+    conversionNum(data) {
+      let result = '';
+      if (data == 0) {
+        result = '未知'
+      } else if (data == 1) {
+        result = '一星'
+      } else if (data == 2) {
+        result = '二星'
+      } else if (data == 3) {
+        result = '三星'
+      } else if (data == 4) {
+        result = '四星'
+      } else if (data == 5) {
+        result = '五星'
+      }
+      return result;
     },
     getCid() {
       // 来源方式下拉框接口请求
@@ -211,14 +278,17 @@ export default {
     Radar
   },
   beforeRouteEnter: (to, from, next) => {
+    console.log(from.name, 'from.namefrom.name')
     next(vm => {
       if (from.name == 'detailFilter') {
         vm.$store.commit("cache", "Home,Common,HighSeas,detailFilter");
-      } else {
+      } else if (from.name == 'sheetimg') { // 跟进记录
         vm.$store.commit("cache", "Home,Common,HighSeas");
-
+      } else if (from.name == 'OrderDetailInfo') {
+        vm.$store.commit("cache", "Order,LinkDetailed");
+      } else {
+        vm.$store.commit("cache", "Home,Common,HighSeas,LinkDetailed");
       }
-
     })
   },
   mounted() {
@@ -246,16 +316,21 @@ export default {
     width: 100%;
     height: 44px;
     margin-bottom: 3px;
+    background: #fff;
+    z-index: 9;
     /deep/ .van-tabs__nav--line {
       padding-bottom: 14px;
     }
+  }
+  /deep/ .van-sticky--fixed {
+    z-index: 1;
   }
   .backGo {
     width: 1rem;
     height: 45px;
     position: fixed;
     top: 0;
-    z-index: 999;
+    z-index: 9999;
     left: 0;
     background: #5c5c5c;
     i {

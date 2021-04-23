@@ -6,24 +6,30 @@
       <van-field v-model="compName" name="pattern" placeholder="输入公司名称" />
       <van-field v-model="weChat" name="pattern" placeholder="输入客户微信号" />
       <van-field v-model="qq" name="pattern" placeholder="输入客户QQ号" />
-      <div style="margin: 16px;">
-        <van-button round block type="default" native-type="submit" class="btn" @click="onSubmit">
+      <div style="margin: 16px">
+        <van-button
+          round
+          block
+          type="default"
+          native-type="submit"
+          class="btn"
+          @click="onSubmit"
+        >
           查询
         </van-button>
       </div>
     </van-form>
-    <van-popup v-model="show" position="bottom" :style="{ height: '100%' }">
-      <!-- <div class='text-ali'>查重结果@close="closePop"</div> -->
+    <!-- <van-popup v-model="show" position="bottom" :style="{ height: '100%' }">
       <div @scroll="scrollEvent" id="abc">
         <div class="checkView" v-for="(item,index) in data" :key="index">
-          <p><span class="title">{{item.nickname}}</span><span>（{{user[item.ownerId].nickname}}）</span></p>
+          <p><span class="title">{{item.nickname}}</span><span>（{{user[item.ownerId] ? user[item.ownerId].nickname :""}}）</span></p>
           <p>{{item.company === null ? "未填写公司名称" : item.company}}</p>
         </div>
       </div>
       <button @click="closePop" class="backBtn">
         返回上一层
       </button>
-    </van-popup>
+    </van-popup> -->
   </div>
 </template>
 <script>
@@ -74,17 +80,19 @@ export default {
       } else {
         // 请求并且跳转页面
         this.$post1("/api/request/itr/comp/customer/rechecking", param)
-          .then(function (res) {
-            if (res.data.length === 0) {
-              that.$toast.fail('未查询到相关客户信息');
-            } else {
-              let datasss = res.data;
-              that.data = that.current == 1 ? res.data : that.data.concat(res.data);
-              that.user = res.user;
-              that.show = true;
-              that.total = res.totalPageCount;
-              that.$toast.clear()
-            }
+          .then((res) => {
+            // if (res.data.length === 0) {
+            //   that.$toast.fail('未查询到相关客户信息');
+            // } else {
+            // let datasss = res.data;
+            // that.data = that.current == 1 ? res.data : that.data.concat(res.data);
+            // that.user = res.user;
+            // that.show = true;
+            // that.total = res.totalPageCount;
+            // that.$toast.clear()
+            // }
+            let str = res.data.length > 0 ? "您所查找的客户信息已存在" : "您所查找的客户信息不存在";
+            this.$dialog({ message: str, title: '温馨提示' });
           })
           .catch(function (error) {
             console.log(error);
@@ -93,7 +101,7 @@ export default {
     },
     closePop() {
       this.current = 1;
-      this.show =false;
+      this.show = false;
     },
     scrollEvent() {
       let read = document.querySelector('#abc')
@@ -176,9 +184,9 @@ export default {
     width: 100%;
     height: 44px;
     font-size: 16px;
-    background:rgb(81, 187, 186) ;
-    color:#fff;
-    border:none;
+    background: rgb(81, 187, 186);
+    color: #fff;
+    border: none;
   }
 }
 </style>

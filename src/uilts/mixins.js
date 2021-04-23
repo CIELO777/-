@@ -13,10 +13,9 @@ export const ScorllMixin = {
 			var windowHeight = document.documentElement.clientHeight || document.body.clientHeight;
 			var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
 			this.$store.commit("ScrollSave", scrollTop);
-			let nav = document.querySelector('.nav');
 			// setTimeout(() => {
-			if (scrollTop + windowHeight == scrollHeight && scrollTop > 20) {
-				console.log('到底了');
+			if (scrollTop + windowHeight == scrollHeight && scrollTop > 15) {
+				console.log('到底了',);
 				this.$store.commit("SoundCurNum", "follow");
 				// 记录scrollTop的位置，防止页面都scrolltop耦合
 			}

@@ -5,7 +5,6 @@ const instance = axios.create();
 // 请求前做拦截，用于判断
 const requestInterceptor = instance.interceptors.request.use(
 	(config) => {
-	
 		if (config.url.indexOf("upload") !== -1) {
 		} else if (config.url.indexOf("sms") !== -1 || config.url.indexOf("login") !== -1) {
 			config.headers['Company-Id'] = 0; //如果本地里面有用户数据，请求头带comp参数
@@ -13,6 +12,8 @@ const requestInterceptor = instance.interceptors.request.use(
 			let userInfo = JSON.parse(sessionStorage.getItem('userinfo'))?.bind_comp_id;
 			if (userInfo) {
 				config.headers['Company-Id'] = userInfo; //如果本地里面有用户数据，请求头带comp参数
+			} else {
+				config.headers['Company-Id'] = 0; //如果本地里面有用户数据，请求头带comp参数
 			}
 		}
 		return config;

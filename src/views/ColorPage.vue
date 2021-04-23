@@ -1,24 +1,34 @@
 <template>
   <div class="colorPage">
-    <van-search :clearable="false" v-model="value" show-action placeholder="请输入搜索关键词" @search="search">
+    <van-search
+      @clear="onCancel"
+      v-model="value"
+      show-action
+      placeholder="请输入搜索关键词"
+    >
       <template #action>
-        <div @click="onCancel">取消</div>
+        <div @click="search">搜索</div>
       </template>
     </van-search>
-    <!-- {{treeData[id].data.lenght > 0}} -->
-    <!-- {{treeData[id].data}} -->
-    <!-- v-if="isShowTab" -->
-    <Tab :states="state" :tabArrays="tabArray" @ColorId="ColorIds" :datas="atData" :trajectoryCounts="trajectoryCount" :userMaps="userMap" :configs="config" :formCounts="formCount" @mySonChagne="mySonChagne" @onSearch="onSearch" @refreshEmpty="refreshEmptys"></Tab>
-    <!-- <template v-for="(item,index) in tabArray">
-      <ColorView :show="id == item.id" :cid="id" :key="index" :ref="`colorView${index}`" :datas="data"></ColorView>
-    </template> -->
+    <Tab
+      :states="state"
+      :tabArrays="tabArray"
+      @ColorId="ColorIds"
+      :datas="atData"
+      :trajectoryCounts="trajectoryCount"
+      :userMaps="userMap"
+      :configs="config"
+      :formCounts="formCount"
+      @mySonChagne="mySonChagne"
+      @onSearch="onSearch"
+      @refreshEmpty="refreshEmptys"
+    ></Tab>
   </div>
 </template>
 <script>
 import Tab from '../components/colorPage/Tab';
 import local from '../uilts/localStorage';
 
-import ColorView from '../components/colorPage/ColorView';
 import {
   generateTimeout,
   generateNonce,
@@ -26,10 +36,13 @@ import {
 } from "../uilts/tools";
 let timeout = generateTimeout();
 let nonce = generateNonce();
+
+import { Toolbar } from '../uilts/toolbarMixin';
 export default {
   name: "ColorPage",
   components: {},
   props: [],
+  mixins: [Toolbar],
   data() {
     return {
       value: "",
@@ -51,7 +64,11 @@ export default {
       atData: [],
       userMap: {},
       config: {},
-      state: 'list'
+      state: 'list',
+      code: '',
+      UserId: '',
+      open_userid: '',
+      CorpId: '',
     };
   },
   watch: {},
@@ -76,27 +93,25 @@ export default {
         signature: signature,
         sort: "topState",
       };
-      this.$get("/api/request/itr/page/category/list", {
+      await this.$get("/api/request/itr/page/category/list", {
         params: data,
       })
         .then((res) => {
-          if (res.length > 0) {
-            this.tabArray = res;
-            this.tabArray.splice(0, 0, { title: "全部", id: 1 }, { title: "管理员", id: 2 }, { title: "我的", id: 3 })
-            this.tabArray.forEach(item => {  // 创建多维对象数组；
-              this.treeData[item.id] = {
-                data: [],
-                trajectoryCount: {},
-                userMap: {},
-                config: {
-                  scroll: 0,
-                  current: 1,
-                  total: -1,
-                },
-                formCount: {},
-              }
-            })
-          }
+          this.tabArray = res;
+          this.tabArray.splice(0, 0, { title: "全部", id: 1 }, { title: "管理员", id: 2 }, { title: "我的", id: 3 })
+          this.tabArray.forEach(item => {  // 创建多维对象数组；
+            this.treeData[item.id] = {
+              data: [],
+              trajectoryCount: {},
+              userMap: {},
+              config: {
+                scroll: 0,
+                current: 1,
+                total: -1,
+              },
+              formCount: {},
+            }
+          })
         })
         .catch(function (error) {
           console.log(error);
@@ -138,9 +153,10 @@ export default {
         signature: signature,
         current: cur || 1,
         size: 20,
+        version: 1,
         categroyId: this.id
       }
-      this.$get("/api/request/itr/page/recommend/result", {
+      await this.$get("/api/request/itr/page/recommend/result", {
         params: data,
       })
         .then((res) => {
@@ -148,17 +164,20 @@ export default {
           let bb = qq.data.concat(res.data).map(item => {
             return {
               ...item,
-              time: item.lastUpdateTime.split(' ')[0]
+              time: item.lastUpdateTime.split(' ')[0],
+              shareNumber1: item.shareNumber > 10000 ? Math.round((item.shareNumber / 10000) * 1000) / 1000 + '万' : item.shareNumber,
             }
           });
           let cc = res.data.map(item => {
             return {
               ...item,
-              time: item.lastUpdateTime.split(' ')[0]
+              time: item.lastUpdateTime.split(' ')[0],
+              shareNumber1: item.shareNumber > 10000 ? Math.round((item.shareNumber / 10000) * 1000) / 1000 + '万' : item.shareNumber,
             }
           });
           qq.data = (cur == 1 || cur == undefined) ? cc : bb;
-          qq.userMap = res.user;
+          console.log(qq.data)
+          qq.userMap = Object.assign(qq.userMap, res.user);
           res.formCount.forEach(item => {
             qq.formCount[item.id] = item.counts;
           })
@@ -173,6 +192,7 @@ export default {
           this.userMap = JSON.parse(JSON.stringify(this.treeData[this.id].userMap))  // 传入当前对象
           this.config = JSON.parse(JSON.stringify(this.treeData[this.id].config));  // 总页数
           this.formCount = JSON.parse(JSON.stringify(this.treeData[this.id].formCount))  // 传入当前对象
+          this.$toast.clear()
         })
         .catch(function (error) {
           console.log(error);
@@ -247,22 +267,24 @@ export default {
       })
         .then((res) => {
           if (res.data.length > 0) {
-
             let qq = this.treeData[this.id];
             let bb = qq.data.concat(res.data).map(item => {
               return {
                 ...item,
-                time: item.lastUpdateTime.split(' ')[0]
+                time: item.lastUpdateTime.split(' ')[0],
+                shareNumber1: item.shareNumber > 10000 ? Math.round((item.shareNumber / 10000) * 1000) / 1000 + '万' : item.shareNumber
               }
             });
             let cc = res.data.map(item => {
               return {
                 ...item,
-                time: item.lastUpdateTime.split(' ')[0]
+                time: item.lastUpdateTime.split(' ')[0],
+                shareNumber1: item.shareNumber > 10000 ? Math.round((item.shareNumber / 10000) * 1000) / 1000 + '万' : item.shareNumber
+
               }
             });
             qq.data = (cur == 1 || cur == undefined) ? cc : bb;
-            qq.userMap = res.user;
+            qq.userMap = Object.assign(qq.userMap, res.user);
             res.formCount.forEach(item => {
               qq.formCount[item.id] = item.counts;
             })
@@ -300,14 +322,22 @@ export default {
       this.treeData[this.id].config.current = 1;
       document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
       this.getList()
-    }
+    },
+    loading() {
+      this.$toast.loading({
+        message: '加载中...',
+        forbidClick: true,
+        overlay: true,
+        forbidClick: true,
+        duration: 0
+      });
+    },
+
   },
   activated() {
-    console.log('activated')
   },
   async created() {
-    await this.getTabList()
-    await this.getList();
+    // mixin
   },
   mounted() {
     window.addEventListener('scroll', this.scrollToTop)
@@ -316,8 +346,12 @@ export default {
   },
   components: {
     Tab,
-    ColorView
-  }
+  },
+  beforeRouteEnter: (to, from, next) => {
+    next(vm => {
+      vm.$store.commit("cache", to.name);
+    })
+  },
 };
 </script>
 

@@ -13,6 +13,8 @@ import './uilts/reset.css'
 import setTitle from './uilts/SetTitle'
 import wx from "weixin-js-sdk";
 import Vconsole from 'vconsole';
+import UUID from 'vue-uuid'
+Vue.use(UUID)
 // new Vconsole();
 Vue.prototype.$wx = wx; // 挂载wx-jdk 插件
 Vue.prototype.$post = post;
@@ -22,11 +24,9 @@ Vue.prototype.$U = local.U();  // Userid
 Vue.prototype.$C = local.C();  // Compid
 Vue.config.productionTip = false;
 router.beforeEach((to, from, next) => {
-  // console.log(to);
   let toP = to.name;
   let fromP = from.name;
-
-  sessionStorage.setItem('route', toP)
+  sessionStorage.setItem('route', toP);
   setTitle(toP || to.fullPath);// 设置表头
   if (toP == 'Home') {
     sessionStorage.setItem('TabIndex', 6);
@@ -38,14 +38,15 @@ router.beforeEach((to, from, next) => {
     sessionStorage.setItem('TabIndex', 9);
   }
   // 路由中是否包含即将要进入的路由，如果不包含直接跳转到首页
-  let include = router.options.routes.find(item => item.name == toP);
-  if (include) {
-    next()
-  } else {
-    next({
-      path: '/'
-    })
-  }
+  next();
+  // let include = router.options.routes.find(item => item.name == toP);
+  // if (include) {
+  //   next()
+  // } else {
+  //   next({
+  //     path: '/'
+  //   })
+  // }
 });
 
 Vue.use(Vant);

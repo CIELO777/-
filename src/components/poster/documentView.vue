@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-02-03 14:12:55 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-02-04 13:45:54
+ * @Last Modified time: 2021-03-25 12:06:17
  * 文档数据展示
  */
 <template>
@@ -29,20 +29,35 @@
             <img :src="item.img" alt="" />
           </div>
           <div class="info">
-            <p>{{ item.description }}</p>
-            <span>
-              {{ item.time }}
-              <span>
-                {{
-                  userMaps[item.userId]
-                    ? userMaps[item.userId].nickname || userMaps.nickname
-                    : ""
-                }}</span
-              ></span
+            <p>{{ item.title }}</p>
+            <span
+              style="
+                font-size: 13px;
+                display: flex;
+                width: 94%;
+                align-items: center;
+                justify-content: space-between;
+              "
             >
-          </div>
-          <div class="share" @click.stop="createContent(item)">
-            <van-icon name="share-o" />分享
+              <span style="margin-right: 5px"
+                >{{ item.time }}
+                <span>
+                  {{
+                    userMaps[item.userId]
+                      ? userMaps[item.userId].nickname || userMaps.nickname
+                      : ""
+                  }}</span
+                >
+              </span>
+              <div @click.stop="createContent(item)" class="ShareCenter">
+                <img
+                  style="width: 15px; margin-right: 3px"
+                  src="../../../public/img/icon/share.png"
+                  alt=""
+                />
+                <span style="font-size: 13px">分享</span>
+              </div></span
+            >
           </div>
         </div>
       </van-list>
@@ -82,7 +97,6 @@ export default {
   computed: {},
   methods: {
     onLoad() {
-      console.log('111')
       console.log(this.configs.current, this.configs.total)
       if (this.configs.current >= this.configs.total) {
         this.finished = true;
@@ -113,7 +127,7 @@ export default {
       this.$router.push({
         name: 'Iframe',
         params: {
-          url: item.shareUrl,
+          url: item.initialUrl,
           title: item.title,
           desc: item.description,
           imgUrl: item.thumb
@@ -121,14 +135,32 @@ export default {
       })
     },
     createContent(item) {
-      console.log(item)
-      this.showShare = true;
-      this.ShareContent = {
-        title: item.title,
-        imgUrl: `https://dist.jiain.net/itr/dom/svg_type_${item.fileSuffix}.png`,
-        desc: item.description,
-        url: item.shareUrl
+      if (sessionStorage.getItem('Single')) { //单聊模式发送  正常模式赋值
+        wx.invoke('sendChatMessage', {
+          msgtype: "news", //消息类型，必填
+          news: {
+            link: item.shareUrl, //H5消息页面url 必填
+            title: item.title, //H5消息标题
+            desc: item.description, //H5消息摘要
+            imgUrl: `https://dist.jiain.net/itr/dom/svg_type_${item.fileSuffix}.png`, //H5消息封面图片URL
+          },
+        }, function (res) {
+          console.log('服务指引返回结果', res);
+          if (res.err_msg == 'sendChatMessage:ok') {
+            //发送成功
+          }
+        })
+      } else {
+        this.showShare = true;
+        this.ShareContent = {
+          title: item.title,
+          imgUrl: `https://dist.jiain.net/itr/dom/svg_type_${item.fileSuffix}.png`,
+          desc: item.description,
+          url: item.shareUrl
+        }
+
       }
+
     },
     getImgUrl(item) {
       return require("./fileType/" + item + ".png");
@@ -149,7 +181,7 @@ export default {
   .card {
     display: flex;
     margin: 0 10px;
-    padding: 13px 13px;
+    padding: 0.36rem 0.26rem;
     background: #fff;
     margin-bottom: 8px;
     border-radius: 5px;
@@ -158,7 +190,7 @@ export default {
     align-items: center;
     .share {
       position: absolute;
-      right: 10px;
+      right: 12px;
       bottom: 10px;
       display: flex;
       align-items: center;
@@ -171,19 +203,19 @@ export default {
   .imgView {
     .top {
       position: absolute;
-      left: 0;
-      top: 0;
+      left: 0px;
+      top: 1px;
       background: #f6c110;
       width: 29px;
       border-radius: 3px;
       color: #000;
       font-size: 10px;
       text-align: center;
-      padding: 0px;
+      padding: 2px;
     }
     img {
-      width: 40px;
-      height: 40px;
+      width: 0.9rem;
+      height: 0.9rem;
     }
   }
   .info {
@@ -192,25 +224,32 @@ export default {
     justify-content: space-between;
     margin-left: 8px;
     font-size: 14px;
-    height: 40px;
+    height: auto;
+    width: 90%;
+    flex-shrink: 0;
+    // min-height: 60px;
     p {
       width: 90%;
-      margin-bottom: 4px;
-      white-space: nowrap;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
       overflow: hidden;
-      text-overflow: ellipsis;
+      line-height: 20px;
     }
     span {
-      color: #999;
+      color: #807e7e;
     }
   }
   /deep/ .van-list__loading {
     width: 100%;
-    margin-bottom: 45px;
   }
   /deep/ .van-list__finished-text {
     width: 100%;
-    margin-bottom: 45px;
+  }
+  .ShareCenter {
+    display: flex;
+    align-items: center;
   }
 }
 </style>

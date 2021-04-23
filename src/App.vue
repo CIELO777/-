@@ -9,18 +9,36 @@
       </div>
     </div>
     <!-- 下拉弹框 -->
-    <van-popup closeable v-model="show" position="bottom" :style="{ height: '300px' }" class="popUnbind">
+    <van-popup
+      closeable
+      v-model="show"
+      round
+      :style="{ height: '350px', width: '75%' }"
+      class="popUnbind"
+    >
       <div class="unbindnav">
+        <img src="./assets/img/unbind1.png" alt="" />
         <div class="hint">
-          <van-icon name="warning" size="25px" />
-          <p class="qy-hint" style="padding-left:0">
-            解绑
-          </p>
+          <p class="qy-hint" style="padding-left: 0">解绑</p>
+          <van-icon name="warning" size="22px" color="red" />
         </div>
-        <p>您是否要解绑乐语id <span style="color:red">{{userinfo}}</span></p>
-        <input type="text" v-model="unvalue" placeholder="请输入unbind以确认解绑该账号（不区分大小写）">
+        <p style="text-align: center; font-size: 15px; line-height: 25px">
+          您是否要解绑乐语ID:<span style="color: red">{{ userinfo }}</span>
+        </p>
+        <input
+          type="text"
+          v-model="unvalue"
+          placeholder="请输入unbind以确认解绑该账号（不区分大小写）"
+        />
       </div>
-      <van-button type="danger" size="large" class="unbindbtn" @click="unbindSave">解绑</van-button>
+      <van-button
+        type="danger"
+        size="large"
+        class="unbindbtn"
+        round
+        @click="unbindSave"
+        >解绑</van-button
+      >
     </van-popup>
     <Taber v-if="$store.state.tabarShow"></Taber>
     <keep-alive :include="cacheState">
@@ -33,6 +51,7 @@ import Taber from './components/Tabbar';
 import { generateTimeout, generateNonce, generateSignature3, generateSignature4 } from './uilts/tools';
 let timeout = generateTimeout();
 let nonce = generateNonce();
+import websocket from './uilts/websocket'
 import Utils from './uilts/utils';
 export default {
   components: {
@@ -44,7 +63,6 @@ export default {
       unbind: this.unbind,
     }
   },
-
   data() {
     return {
       tabbarShow: true,
@@ -127,6 +145,9 @@ export default {
       }
     })
   },
+  created() {
+    // websocket.Init(); // 开启socket 连接
+  }
 }
 </script>
 <style lang="less">
@@ -227,16 +248,24 @@ body {
   margin-left: -10px;
 }
 .unbindnav {
-  padding: 0.4rem;
+  // padding: 0.4rem;
   font-size: 0.34rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   p:nth-child(2) {
     margin-top: 0.3rem;
   }
+  img {
+    width: 100%;
+    height: 120px;
+  }
   .hint {
     display: flex;
-  }
-  .hint i {
-    margin-top: 14px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.2rem;
   }
   .qy-hint {
     font-size: 0.4rem;
@@ -247,24 +276,25 @@ body {
   }
   input {
     border: 1px solid #eee;
-    width: 95%;
+    width: 90%;
     margin-top: 0.3rem;
-    font-size: 0.28rem;
-    padding: 5px 0;
+    font-size: 12px;
+    padding: 8px 0;
   }
 }
 .popUnbind {
   overflow-y: hidden;
   .unbindbtn {
     position: fixed;
-    left: 0;
-    bottom: 0;
+    bottom: 0.4rem;
+    left: 10%;
     height: 44px;
     font-size: 12px;
-    width: 100%;
+    width: 80%;
   }
 }
 .van-empty {
   background: #f1f1f1;
 }
+
 </style>

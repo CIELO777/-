@@ -1,78 +1,328 @@
 <template>
   <div class="deaContant">
-    <div class="dTitle" style="display:flex;justify-content: space-between;">
-      <span>客户信息</span>
-      <span @click="UnbindContact" style="margin-right: 10px;">解绑外部联系人</span>
+    <div class="allocation">
+      <div class="waooo" @click="shareOpera" style="margin-right: 15px">
+        <img src="../assets/img/svg_customer_share.png" />
+        <span class="handleTxt">共享</span>
+      </div>
+      <div class="waooo" @click="allocation" style="margin-right: 15px">
+        <img src="../assets/img/svg_customer_distribution.png" />
+        <span class="handleTxt">分配</span>
+      </div>
+      <div class="waooo">
+        <div
+          v-if="block != 0 && block != 1 && block != 2 && block != 4"
+          @click="release"
+          class="waooo"
+        >
+          <img src="../assets/img/svg_customer_principal.png" />
+          <span class="handleTxt">释放</span>
+        </div>
+        <div v-else @click="pickup" class="waooo">
+          <img src="../assets/img/svg_customer_pickup.png" />
+          <span class="handleTxt">拾取</span>
+        </div>
+      </div>
+    </div>
+    <div class="dTitle" style="display: flex; justify-content: space-between">
+      <span>联系人信息</span>
+      <span @click="UnbindContact" style="margin-right: 10px"
+        >解绑外部联系人</span
+      >
     </div>
     <!-- 默认字段 -->
     <template v-for="(item, index) in form">
-      <van-cell style="max-height:44px;" v-if="item._checked" :key="index" :is-link="item.nolink==false" @click="showPopup(item.key, crmInfo[item.key])" :title="item.title" :value="(crmInfo[item.key] === null) ? '' : crmInfo[item.key]+''"></van-cell>
+      <van-cell
+        style="max-height: 44px"
+        v-if="item._checked"
+        :key="index"
+        :is-link="item.nolink == false"
+        @click="showPopup(item.key, crmInfo[item.key])"
+        :title="item.title"
+        :value="crmInfo[item.key] === null ? '' : crmInfo[item.key] + ''"
+      ></van-cell>
     </template>
     <!-- 自定义字段  -->
     <!-- <template v-for="(item, index) in formDiy">
       <van-cell :key="index" :placeholder="item.placeholder" is-link @click="showPopup(item.name, crmInfo[item.name],item.type)" :title="item.label" :value="crmInfo[item.name] == undefined ? '' : crmInfo[item.name]"></van-cell>
     </template> -->
 
-    <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.nickname" closeable position="bottom" :style="{ height: '180px' }">
+    <van-popup
+      close-icon-position="top-left"
+      :safe-area-inset-bottom="true"
+      v-model="popShow.nickname"
+      closeable
+      position="bottom"
+      :style="{ height: '180px' }"
+    >
       <p class="pop-tit">姓名</p>
-      <van-field label="" v-model="formData.nickname" placeholder="请输入姓名" />
-      <van-button size="mini" color="#60C6C6" type="primary" @click="FormSave(formData.nickname, 'nickname', 'nickname')" class="btnTb">保存</van-button>
+      <van-field
+        label=""
+        v-model="formData.nickname"
+        placeholder="请输入姓名"
+        :autofocus="true"
+      />
+      <van-button
+        size="mini"
+        color="#60C6C6"
+        type="primary"
+        @click="FormSave(formData.nickname, 'nickname', 'nickname')"
+        class="btnTb"
+        >保存</van-button
+      >
     </van-popup>
-    <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.phone" closeable position="bottom" :style="{ height: '200px' }">
+    <van-popup
+      close-icon-position="top-left"
+      :safe-area-inset-bottom="true"
+      v-model="popShow.phone"
+      closeable
+      position="bottom"
+      :style="{ height: '200px' }"
+    >
       <p class="pop-tit">手机</p>
-      <van-field label="" type="tel" v-model="formData.phone" placeholder="请输入手机号" />
-      <van-button color="#60C6C6" size="mini" type="primary" @click="FormSave(formData.phone, 'phone', 'phone')" class="btnTb">保存</van-button>
+      <van-field
+        label=""
+        type="tel"
+        v-model="formData.phone"
+        placeholder="请输入手机号"
+      />
+      <van-button
+        color="#60C6C6"
+        size="mini"
+        type="primary"
+        @click="FormSave(formData.phone, 'phone', 'phone')"
+        class="btnTb"
+        >保存</van-button
+      >
     </van-popup>
-    <van-action-sheet :actions="validityactions" v-model="popShow.status" @select="onSelectStatus" />
-    <van-action-sheet :actions="sourceData" v-model="popShow.customSourceType" @select="onSelectCID" />
-    <van-action-sheet :actions="actionsStar" v-model="popShow.starLevel" @select="onSelectStart" />
-    <van-action-sheet :actions="actionsSex" v-model="popShow.gender" @select="onSelectSex" />
+    <van-popup
+      close-icon-position="top-left"
+      :safe-area-inset-bottom="true"
+      v-model="popShow.workNumber"
+      closeable
+      position="bottom"
+      :style="{ height: '200px' }"
+    >
+      <p class="pop-tit">手机2</p>
+      <van-field
+        label=""
+        type="tel"
+        v-model="formData.workNumber"
+        placeholder="请输入手机号"
+      />
+      <van-button
+        color="#60C6C6"
+        size="mini"
+        type="primary"
+        @click="FormSave(formData.workNumber, 'workNumber', 'workNumber')"
+        class="btnTb"
+        >保存</van-button
+      >
+    </van-popup>
+    <van-action-sheet
+      :actions="validityactions"
+      v-model="popShow.status"
+      @select="onSelectStatus"
+    />
+    <van-action-sheet
+      :actions="sourceData"
+      v-model="popShow.customSourceType"
+      @select="onSelectCID"
+    />
+    <van-action-sheet
+      :actions="actionsStar"
+      v-model="popShow.starLevel"
+      @select="onSelectStart"
+    />
+    <van-action-sheet
+      :actions="actionsSex"
+      v-model="popShow.gender"
+      @select="onSelectSex"
+    />
     <!-- <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.comp" closeable position="bottom" :style="{ height: '100%' }"> -->
     <!-- 公司信息 -->
-    <compInfo height="calc(100% - 94px)" route="LinkDetailed" :companys.sync="company" ref="compInfo" :totalPageCounts="totalPageCount" :compshow.sync="compListShow" :user="users" :list="compLists">
+    <compInfo
+      :height="
+        routeType == 'LinkDetailed' ? 'calc(100% - 94px)' : 'calc(100% - 140px)'
+      "
+      :route="routeType"
+      :companys.sync="company"
+      ref="compInfo"
+      :totalPageCounts="totalPageCount"
+      :compshow.sync="compListShow"
+      :user="users"
+      :list="compLists"
+      @allocationChange="allocationChange"
+      @allocaCur="allocaCurs"
+      @search="searchs(arguments)"
+    >
     </compInfo>
+
     <!-- 共享客户 -->
-    <shareUser :ids.sync="share.ids" height="calc(100% - 94px)" ref="shareUser" :totalPageCounts="share.Count" :shareshow.sync="share.show" :list="share.list">
+    <shareUser
+      :ids.sync="share.ids"
+      height="calc(100% - 94px)"
+      ref="shareUser"
+      :totalPageCounts="share.Count"
+      :shareshow.sync="share.show"
+      :list="share.list"
+    >
     </shareUser>
     <!-- <p class="pop-tit">公司信息</p> -->
     <!-- <van-field label="" v-model="formData.comp" placeholder="请输入公司信息" /> -->
     <!-- <van-button color="#60C6C6" round size="mini" class="btnTb" type="primary" block @click="FormSave(formData.comp,'company','comp')">保存</van-button> -->
     <!-- </van-popup> -->
-    <van-action-sheet :actions="actionsCoo" v-model="popShow.companyOcc" @select="onSelectJob" />
-    <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.remark" closeable position="bottom" :style="{ height: '250px' }">
+    <van-action-sheet
+      :actions="actionsCoo"
+      v-model="popShow.companyOcc"
+      @select="onSelectJob"
+    />
+    <van-popup
+      close-icon-position="top-left"
+      :safe-area-inset-bottom="true"
+      v-model="popShow.remark"
+      closeable
+      position="bottom"
+      :style="{ height: '250px' }"
+    >
       <p class="pop-tit">备注</p>
-      <van-field label="" v-model="formData.remark" type="textarea" rows="4" placeholder="请输入备注" />
-      <van-button color="#60C6C6" size="mini" type="primary" @click="FormSave(formData.remark, 'remark', 'remark')" class="btnTb">保存</van-button>
+      <van-field
+        label=""
+        v-model="formData.remark"
+        type="textarea"
+        rows="4"
+        placeholder="请输入备注"
+      />
+      <van-button
+        color="#60C6C6"
+        size="mini"
+        type="primary"
+        @click="FormSave(formData.remark, 'remark', 'remark')"
+        class="btnTb"
+        >保存</van-button
+      >
     </van-popup>
-    <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.birthday" position="bottom" :style="{ height: '45%' }">
-      <van-datetime-picker v-model="formData.birthday" type="date" title="出生日期" @confirm="birthdayOk" :formatter="formatter" />
-    </van-popup>
-    <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.wx" closeable position="bottom" :style="{ height: '180px' }">
+    <van-popup
+      close-icon-position="top-left"
+      :safe-area-inset-bottom="true"
+      v-model="popShow.birthday"
+      position="bottom"
+      :style="{ height: '45%' }"
+    >
+      <van-datetime-picker
+        v-model="formData.birthday"
+        type="date"
+        title="出生日期"
+        @confirm="birthdayOk"
+        :formatter="formatter"
+        :min-date="minDate"
+        :max-date="maxDate"
+      />
+    </van-popup> 
+    <van-popup
+      close-icon-position="top-left"
+      :safe-area-inset-bottom="true"
+      v-model="popShow.wx"
+      closeable
+      position="bottom"
+      :style="{ height: '180px' }"
+    >
       <p class="pop-tit">微信</p>
       <van-field label="" v-model="formData.wx" placeholder="请输入微信号" />
-      <van-button color="#60C6C6" size="mini" type="primary" block @click="FormSave(formData.wx, 'wx', 'wx')" class="btnTb">保存</van-button>
+      <van-button
+        color="#60C6C6"
+        size="mini"
+        type="primary"
+        block
+        @click="FormSave(formData.wx, 'wx', 'wx')"
+        class="btnTb"
+        >保存</van-button
+      >
     </van-popup>
-    <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.qq" closeable position="bottom" :style="{height: '180px'}">
+    <van-popup
+      close-icon-position="top-left"
+      :safe-area-inset-bottom="true"
+      v-model="popShow.qq"
+      closeable
+      position="bottom"
+      :style="{ height: '180px' }"
+    >
       <p class="pop-tit">QQ</p>
       <van-field label="" v-model="formData.qq" placeholder="请输入QQ号" />
-      <van-button color="#60C6C6" size="mini" type="primary" @click="FormSave(formData.qq, 'qq', 'qq')" class="btnTb">保存</van-button>
+      <van-button
+        color="#60C6C6"
+        size="mini"
+        type="primary"
+        @click="FormSave(formData.qq, 'qq', 'qq')"
+        class="btnTb"
+        >保存</van-button
+      >
     </van-popup>
-    <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.email" closeable position="bottom" :style="{ height: '180px' }">
+    <van-popup
+      close-icon-position="top-left"
+      :safe-area-inset-bottom="true"
+      v-model="popShow.email"
+      closeable
+      position="bottom"
+      :style="{ height: '180px' }"
+    >
       <p class="pop-tit">邮箱</p>
       <van-field label="" v-model="formData.email" placeholder="请输入邮箱号" />
-      <van-button color="#60C6C6" size="mini" type="primary" @click="FormSave(formData.email, 'email', 'email')" class="btnTb">保存</van-button>
+      <van-button
+        color="#60C6C6"
+        size="mini"
+        type="primary"
+        @click="FormSave(formData.email, 'email', 'email')"
+        class="btnTb"
+        >保存</van-button
+      >
     </van-popup>
     <!-- <div class="dTitle">跟进记录</div>
     <div class="dTitle">成交记录</div> -->
     <!-- 自定义表单 -->
-    <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="diy.show" closeable position="bottom" :style="{ height: '200px' }">
-      <p class="pop-tit">修改{{diy.name}}</p>
+    <van-popup
+      close-icon-position="top-left"
+      :safe-area-inset-bottom="true"
+      v-model="diy.show"
+      closeable
+      position="bottom"
+      :style="{ height: '200px' }"
+    >
+      <p class="pop-tit">修改{{ diy.name }}</p>
       <div v-if="diy.type === 'text' || diy.type === 'textarea'">
-        <van-field :type="diy.type" label="" v-model="diy.price" :placeholder="diy.placeholder" />
+        <van-field
+          type="textarea"
+          autosize
+          v-model="diy.price"
+          :placeholder="diy.placeholder"
+          :maxlength="100"
+          rows="4"
+        />
       </div>
-      <van-button size="mini" color="#60C6C6" type="primary" @click="FormSave(diy.price, diy.headline, 'show')" class="btnTb">保存</van-button>
+      <van-button
+        size="mini"
+        color="#60C6C6"
+        type="primary"
+        @click="FormSave(diy.price, diy.headline, 'show')"
+        class="btnTb"
+        >保存</van-button
+      >
     </van-popup>
-    <van-action-sheet v-model="diy.showaction" :actions="diy.item" @select="onSelect" />
+    <van-action-sheet
+      v-model="diy.showaction"
+      :actions="diy.item"
+      @select="onSelect"
+    />
+    <van-popup v-model="shortPop" :style="{ width: '60%' }" class="shortPop">
+      <!-- 选择成交状态 -->
+      <div>
+        <h2>选择要释放的公海</h2>
+        <p class="shortRow" @click="releaseSelect('0')">总公司公海</p>
+        <p class="shortRow" @click="releaseSelect('1')">分公司公海</p>
+        <p class="shortRow" @click="releaseSelect('2')">所属部门公海</p>
+        <p class="shortRow" @click="releaseSelect('4')">个人公海</p>
+      </div>
+    </van-popup>
   </div>
 </template>
 
@@ -89,13 +339,15 @@ import local from "../uilts/localStorage";
 import compInfo from "./detailFilter/CompInfo";
 import communication from "../uilts/communication";
 import shareUser from './detailFilter/shareUser'
+// import { delete } from 'vue/types/umd';
 export default {
   name: "forms",
   props: ["crmInfo"],
   data() {
     return {
       sourceData: [],
-      minDate: 0,
+      minDate: new Date(1900, 0, 1),
+      maxDate: new Date(2060, 10, 1),
       formatter(type, value) {
         if (type === "year") {
           return `${value}年`;
@@ -123,6 +375,7 @@ export default {
         relation: false,
         follow: false,
         followDate: false,
+        workNumber: false,
       },
       formData: {
         nickname: "",
@@ -137,11 +390,12 @@ export default {
         gender: "",
         companyOcc: "",
         remark: "",
-        birthday: "",
+        birthday: new Date(),
         company: "",
         relation: "",
         follow: "",
         followDate: "",
+        workNumber: "",
       },
       cooList: [
         "职员",
@@ -159,6 +413,10 @@ export default {
         { name: "有效", status: 2 },
       ],
       actionsStar: [
+        {
+          name: "未知",
+          starLevel: 0,
+        },
         {
           name: "一星",
           starLevel: 1,
@@ -254,7 +512,12 @@ export default {
         Count: 0,
         list: [],
         ids: "",
-      }
+      },
+      block: "",
+      orderList: [],
+      queryType: 3,
+      routeType: '',
+      shortPop: false,
     };
   },
   methods: {
@@ -262,7 +525,16 @@ export default {
       return this.formDiy.find(item => name === item.name)
     },
     showPopup(e, d) {
-      console.log(e, d);
+      // 如果在公海并且点击了相关人， 那么就不让他进去
+      let route = sessionStorage.getItem("active");
+      if (route == 'HighSeas' && e == 'share') {
+        this.$dialog.alert({
+          title: '温馨提示',
+          message: '公海客户不能共享!',
+        }).then(() => {
+        });
+        return;
+      };
       //  如果包含字段进行数据合并，垃圾。自定义数据不再一个接口里，在这做处理，目的获取当前自定义表单的一些详细信息（type，lable）
       if (e.includes("column")) {
         let item = this.findSelect(e);
@@ -293,14 +565,16 @@ export default {
           this.followUp();
         }
         if (e == "company") {
+          this.compList();
           this.compListShow = true;
+          this.routeType = 'LinkDetailed';
         }
         if (e == "share") { // 共享客户弹框
           this.share.show = true;
           this.share.ids = this.crmInfo.share1.map(item => {
             return item.userId
           }).join(',')
-          console.log(this.share.ids)
+          // console.log(this.share.ids)
           this.$refs.shareUser.clickshare(this.share.ids) // 触发子元素方法目的请求已经共享的数据
         };
         this.popShow[e] = true; // 打开弹框
@@ -316,6 +590,7 @@ export default {
       this.FormSave(e.value, this.diy.headline, 'showaction')
     },
     FormSave(data, type, ourType) {
+      console.log(data, type, ourType)
       // 保存表单数据
       let that = this;
       let crm = {};
@@ -353,7 +628,6 @@ export default {
         });
         return;
       }
-      console.log(data, type, ourType)
       switch (type) {
         case "nickname":
           crm[type] = data;
@@ -373,6 +647,9 @@ export default {
           crm[type] = data;
           break;
         case "remark":
+          crm[type] = data;
+          break;
+        case "workNumber":
           crm[type] = data;
           break;
         case "company":
@@ -396,6 +673,13 @@ export default {
               that.diy[ourType] = false
             }
             that.$emit("getCrm");  // 更新列表信息
+          } else {
+            if (lock == 0) {
+              that.popShow[ourType] = false
+            } else {
+              that.diy[ourType] = false
+            }
+            that.$toast(res.errMsg)
           }
         })
         .catch(function (error) {
@@ -403,6 +687,7 @@ export default {
         });
     },
     onSelectStatus(item, index) {
+      console.log(item, index)
       this.saveSelect("status", item.status, "status");
     },
     onSelectCID(item, index) {
@@ -421,7 +706,6 @@ export default {
       this.saveSelect("birthday", formatDate(value), "birthday");
     },
     saveSelect(key, data, ourName) {
-      console.log(key, data, ourName)
       // 下拉表单提交
       let that = this;
       let crm = {};
@@ -440,8 +724,7 @@ export default {
       crm.nonce = nonce;
       crm.signature = signature;
       // 手动更新列表数据，防止返回刷新，scrolltop 丢失；
-      console.log(key, data, ourName)
-
+      // console.log(key, data, ourName)
       crm[key] = data;
       if (key == 'gender') {
         that.$store.commit("ManualUpdate", { target: "gender", data }); // 更新列表数据
@@ -452,6 +735,9 @@ export default {
       if (crm.companyOcc == 7) {
         crm.companyOcc = -1;
       }
+      // if(crm.starLevel == 0 || crm.starLevel === undefined){
+      //   delete crm.starLevel 
+      // }
       this.$get("/api/request/itr/comp/customer/save", {
         params: crm,
       })
@@ -537,6 +823,49 @@ export default {
           console.log(error);
         });
     },
+    searchcompList(cur, DATAS) {
+      console.log(cur, DATAS)
+      // 来源方式下拉框接口请求
+      let that = this;
+      let timeout = generateTimeout();
+      let nonce = generateNonce();
+      let compID = JSON.parse(sessionStorage.getItem("userinfo"))?.bind_comp_id;
+      let signature = generateSignature3(compID, timeout, nonce);
+      let data = {
+        current: cur[0] || 1,
+        size: 20,
+        compId: compID,
+        timeout: timeout,
+        nonce: nonce,
+        signature: signature,
+      };
+      if (DATAS !== '') {
+        console.log('JINLAILE1')
+        data.fuzzy = cur
+      } else {
+        delete data.fuzzy
+      };
+      this.$get("/api/request/itr/comp/customer/company/result", {
+        params: data,
+      })
+        .then((res) => {
+          if (!res.error && res.data.length > 0) {
+            let data = res.data.map((item) => {
+              var reg = /^(\d{3})\d{4}(\d{4})$/;
+              return {
+                ...item,
+                encrypt: item.ownerId.replace(reg, "$1****$2"),
+              };
+            });
+            this.compLists = cur == 1 ? data : this.compLists.concat(data);
+            this.totalPageCount = res.totalPageCount;
+            this.users = res.user;
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
     getColumn() {
       // 请求自定义列表
       let signature = generateSignature3(
@@ -554,7 +883,6 @@ export default {
       this.$post1("/api/request/itr/comp/column/config/detail", param)
         .then((res) => {
           let form = JSON.parse(res.data);
-          // console.log(form)
           if (form.length !== 0) {
             // 数组转对象。偷个懒去控制显隐。这个只支持默认表单隐藏
             var obj = {};
@@ -577,6 +905,9 @@ export default {
                   item.nolink = true;
                 } else {
                   item.nolink = false;
+                }
+                if (item.title === '公司信息') {
+                  item.title = '所属公司'
                 }
                 return item;
               });
@@ -669,21 +1000,294 @@ export default {
           console.log(error);
         });
     },
+    shareOpera() {
+      if (this.block == 0 || this.block == 1 || this.block == 2 || this.block == 4) {
+        this.$dialog.alert({
+          title: '温馨提示',
+          message: '公海客户不能共享!',
+        }).then(() => {
+        });
+        return
+      }
+      this.share.show = true;
+      this.share.ids = this.crmInfo.share1.map(item => {
+        return item.userId
+      }).join(',')
+      this.$refs.shareUser.clickshare(this.share.ids) // 触发子元素方法目的请求已经共享的数据
+    },
+    async allocation() {
+      let role = sessionStorage.getItem('role');
+      let route = sessionStorage.getItem('active');
+      let name = JSON.parse(sessionStorage.getItem('userinfo')).nickname;
+      if (route === 'Home') {  // 如果是home 页面如果是三种权限并且nickname == ‘负责人的name’
+        if (role == 'true' || this.crmInfo.ownerNickname === name) {
+          this.routeType = 'allocation';
+          this.queryType = 3;
+          this.compLists.length = 0;
+          await this.allocationList()
+          this.compListShow = true;
+        } else {
+          this.$toast('该联系人没有分配权限')
+          return;
+        }
+      } else if (route === 'HighSeas') {
+        this.routeType = 'allocation';
+        this.queryType = 3;
+        this.compLists.length = 0;
+        await this.allocationList()
+        this.compListShow = true;
+      }
+    },
+    release() {
+      let role = sessionStorage.getItem('role');
+      let route = sessionStorage.getItem('active');
+      let name = JSON.parse(sessionStorage.getItem('userinfo')).nickname;
+      if (route === 'Home') {  // 如果是home 页面如果是三种权限并且nickname == ‘负责人的name’
+        if (role == 'true' || this.crmInfo.ownerNickname === name) {
+          this.$dialog.confirm({
+            title: '温馨提示',
+            message: '确定要释放该客户么？',
+          })
+            .then(() => {
+              this.shortPop = true;
+            })
+            .catch(() => {
+              // on cancel
+            });
+        } else {
+          this.$toast('该联系人没有释放权限')
+        }
+      } else if (route === 'HighSeas') {
+        if (role == 'true') {
+          this.$dialog.confirm({
+            title: '温馨提示',
+            message: '确定要释放该客户么？',
+          })
+            .then(() => {
+              this.shortPop = true;
+            })
+            .catch(() => {
+              // on cancel
+            });
+        } else {
+          this.$toast('该联系人没有释放权限')
+        }
+
+      }
+
+    },
+    releaseSelect(data) {  // 释放
+      this.block = 0;
+      let signature = generateSignature3(
+        this.$U || local.U(),
+        this.$C || local.C(),
+        timeout,
+        nonce
+      );
+      let crmInfo = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
+      let param = new URLSearchParams();
+      param.append("timeout", timeout);
+      param.append("nonce", nonce);
+      param.append("signature", signature);
+      param.append("from", crmInfo);
+      param.append("toType", data);
+      param.append("type", 3);
+      param.append("userId", this.$U || local.U());
+      param.append("compId", this.$C || local.C());
+      this.$post1("/api/request/itr/comp/customer/opt", param)
+        .then((res) => {
+          if (res.error == 'success') {
+            let idx = sessionStorage.getItem('ManualIdx')
+            communication.$emit("release", Number(idx), data);
+            this.$toast('释放成功')
+          }
+          this.shortPop = false;
+        })
+        .catch(function (error) {
+          console.log(error);
+          this.shortPop = false;
+        });
+    },
+    pickup() {
+      this.block = 1;
+      let signature = generateSignature3(
+        this.$U || local.U(),
+        this.$C || local.C(),
+        timeout,
+        nonce
+      );
+      let crmInfo = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
+      let param = new URLSearchParams();
+      param.append("timeout", timeout);
+      param.append("nonce", nonce);
+      param.append("signature", signature);
+      param.append("from", crmInfo);
+      param.append("type", 4);
+      param.append("userId", this.$U || local.U());
+      param.append("compId", this.$C || local.C());
+      this.$post1("/api/request/itr/comp/customer/opt", param)
+        .then((res) => {
+          if (res.error == 'success') {
+            this.$dialog.alert({
+              title: '温馨提示',
+              message: '拾取成功',
+            }).then(() => {
+              let Idx = sessionStorage.getItem('TabIndex')
+              let data = JSON.parse(sessionStorage.getItem('_crm_info'));
+              let name = JSON.parse(sessionStorage.getItem('userinfo')).nickname;
+              let ownerId = JSON.parse(sessionStorage.getItem('userinfo')).id;
+              let str = '';
+              if (data.ownerType == 0) {
+                str = `${name}从公司公海拾取了这个联系人`;
+                // '释放联系人到公司公海';
+              } else if (data.ownerType == 1) {
+                str = `${name}从分公司公海拾取了这个联系人`;
+              } else if (data.ownerType == 2) {
+                str = `${name}从部门公海拾取了这个联系人`;
+              } else if (data.ownerType == 4) {
+                str = `${name}从个人公海拾取了这个联系人`;
+              }
+              communication.$emit("collect", Idx, str, data, ownerId); // 清空followPage本地数据，
+
+            });
+          } else {
+            this.$dialog.alert({
+              title: '温馨提示',
+              message: '拾取失败，请稍后再试！',
+            })
+          }
+        })
+        .catch(function (error) {
+        });
+
+    },
+    allocationChange(data) {
+      document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
+      this.queryType = data;
+      this.allocationList();
+    },
+    allocaCurs(data) {
+      this.allocationList(data)
+    },
+    async allocationList(cur) {
+      console.log('来了');
+      let staff_id = JSON.parse(sessionStorage.getItem('userinfo'))?.bind_staff_id;
+      let signature = generateSignature3(this.$C || local.C(), this.$U || local.U(), timeout, nonce);
+      await this.$get('/api/request/itr/comp/staff/result', {
+        params: {
+          userId: this.$U || local.U(),
+          compId: this.$C || local.C(),
+          current: cur || 1,
+          size: 20,
+          queryType: this.queryType,
+          signature,
+          timeout,
+          nonce,
+        },
+      })
+        .then((res) => {
+          if (!res.error) {
+            if (res.data && res.data.length > 0) {
+              let datas = res.data.map(item => {
+                var reg = /^(\d{3})\d{4}(\d{4})$/;
+                item.userId1 = item.userId.replace(reg, "$1****$2");
+                return item;
+              });
+              this.compLists = cur ? this.compLists.concat(datas) : datas;
+              this.totalPageCount = res.totalPageCount;
+              this.$toast.clear()
+            } else {
+              this.compLists = [];
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    searchs(data) {
+      let signature = generateSignature3(this.$C || local.C(), timeout, nonce);
+      this.$get('/api/request/itr/comp/staff/ids/result', {
+        params: {
+          compId: this.$C || local.C(),
+          current: data[1] || 1,
+          fuzzy: data[0],
+          filter: 1,
+          ids: '',
+          queryStatus: 0,
+          size: 20,
+          signature,
+          timeout,
+          nonce,
+        },
+      })
+        .then((res) => {
+          if (!res.error) {
+            if (res.data && res.data.length > 0) {
+              let datas = res.data.map(item => {
+                var reg = /^(\d{3})\d{4}(\d{4})$/;
+                item.userId1 = item.userId.replace(reg, "$1****$2");
+                return item;
+              });
+              this.compLists = data[1] === 1 ? datas : this.compLists.concat(datas);
+              this.totalPageCount = res.totalPageCount;
+              this.$toast.clear()
+            } else {
+              console.log('wolieai')
+              this.compLists.length = 0;
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    // 营销架构是否过期
+    outData(cid) {
+      let signature = generateSignature3(
+        this.$U || local.U(),
+        timeout,
+        nonce
+      );
+      this.$get("/api/request/itr/comp/permission/current", {
+        params: {
+          userId: cid || this.$U || local.U(),
+          timeout: timeout,
+          nonce: nonce,
+          signature: signature
+        },
+      }).then((res) => {
+        if (res.company.role == 1 || res.company.role == 2 || res.company.role == 3 || res.company.role == 6) {
+          sessionStorage.setItem('role', true)
+        } else {
+          sessionStorage.setItem('role', false)
+        }
+      })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
 
   },
   mounted() {
     this.getCid();
     // this.action = ;
   },
+  beforeCreate() {
+    sessionStorage.setItem("TabIndex", 0); // 清空tabindex 防止表单触发触底事件
+
+  },
   created() {
     this.getColumn(); //
+    this.outData();
     this.getColumnConfig()
     this.action = sessionStorage.getItem("active");
-    sessionStorage.setItem("TabIndex", 0); // 清空tabindex 防止表单触发触底事件
-    this.compList();
+    this.block = JSON.parse(sessionStorage.getItem('_crm_info')).ownerType;
     // this.getShareList();
+    // console.log(this.crmInfo)
   },
   activated() {
+    this.outData();
     document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.form; // 设置每个页面的scrollTop
   },
   updated() {
@@ -695,7 +1299,7 @@ export default {
 
 <style lang="less" scoped>
 .deaContant {
-  margin-top: 44px;
+  margin-top: 85px;
   .btnTb {
     position: fixed;
     right: 0;
@@ -721,6 +1325,51 @@ export default {
     white-space: nowrap;
     display: inline-block;
     width: 3rem;
+    color: rgb(124, 120, 120);
+  }
+  .allocation {
+    height: 40px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 43px;
+    z-index: 999;
+  }
+  .waooo {
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    font-size: 0.28rem;
+    img {
+      padding-right: 5px;
+      width: 15px;
+      height: 15px;
+    }
+    .handleTxt {
+      font-size: 0.25rem;
+    }
+  }
+  .shortPop {
+    font-size: 0.28rem;
+    text-align: center;
+    padding: 0 !important;
+    background: #fff !important;
+    border-radius: 10px;
+    h2 {
+      height: 40px;
+      line-height: 40px;
+      font-weight: 600;
+      border-bottom: 0.5px solid #eee;
+    }
+    .shortRow {
+      height: 40px;
+      line-height: 40px;
+      border-bottom: 0.5px solid #eee;
+    }
   }
 }
 </style>

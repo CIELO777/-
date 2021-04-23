@@ -1,97 +1,319 @@
 <template>
   <div class="detailFilter">
-    <div v-if="searchList.length == 0" style="margin-bottom:44px;">
+    <div v-if="searchList.length == 0" style="margin-bottom: 44px">
       <div class="module">
-        <van-cell is-link title="日期区间" @click="lately('date')" :value="module.date">
+        <van-cell
+          is-link
+          title="日期区间"
+          @click="lately('date')"
+          :value="module.date"
+        >
         </van-cell>
-        <van-cell is-link title="最近未联系" @click="clickCell(0)" :value="clientData.nolately ? clientData.nolately.value : ''">
+        <van-cell
+          is-link
+          title="最近未联系"
+          @click="clickCell(0)"
+          :value="clientData.nolately ? clientData.nolately.value : ''"
+        >
         </van-cell>
-        <van-cell is-link title="最近已联系" @click="lately('yetslately')" :value="module.yetslately">
+        <van-cell
+          is-link
+          title="最近已联系"
+          @click="lately('yetslately')"
+          :value="module.yetslately"
+        >
         </van-cell>
         <!-- 日期区间最近已经联系 -->
-        <van-popup v-model="module.module1" round :style="{ height: '53%',width:'60%'}">
+        <van-popup
+          v-model="module.module1"
+          round
+          :style="{ height: '53%', width: '60%' }"
+        >
           <div v-if="module.module1Type === 'date'">
-            <datainterval :modules.sync="module.module1" @timeData="timeDatas(arguments)" ref="dataInt" :module="diyTime" :shows.sync="show" :type.sync="TimeType" @updating="updatings(arguments)"></datainterval>
+            <datainterval
+              :modules.sync="module.module1"
+              @timeData="timeDatas(arguments)"
+              ref="dataInt"
+              :module="diyTime"
+              :shows.sync="show"
+              :type.sync="TimeType"
+              @updating="updatings(arguments)"
+            ></datainterval>
           </div>
           <div v-else-if="module.module1Type === 'yetslately'">
-            <datainterval :modules.sync="module.module1" @timeData="timeDatas(arguments)" ref="dataInt" :module="diyTime" :shows.sync="show" :type.sync="TimeType" @updating="updatings(arguments)"></datainterval>
+            <datainterval
+              :modules.sync="module.module1"
+              @timeData="timeDatas(arguments)"
+              ref="dataInt"
+              :module="diyTime"
+              :shows.sync="show"
+              :type.sync="TimeType"
+              @updating="updatings(arguments)"
+            ></datainterval>
           </div>
         </van-popup>
         <!-- 最近未联系 -->
-        <van-action-sheet v-model="module.nolatelyShow" :actions="nolatelyList" @select="onSelect" />
+        <van-action-sheet
+          v-model="module.nolatelyShow"
+          :actions="nolatelyList"
+          @select="onSelect"
+        />
 
         <!-- <van-action-sheet v-model="module.nolatelyShow" :actions="nolatelyList" @select="onSelect" /> -->
         <!--  日期区间最近已经联系 自定义时间 -->
         <van-popup v-model="show" position="bottom" :style="{ height: '30%' }">
-          <van-datetime-picker @confirm="Timeok" @cancel="TimeCancel" v-model="currentDate" type="date" title="选择年月日" />
+          <van-datetime-picker
+            @confirm="Timeok"
+            @cancel="TimeCancel"
+            v-model="currentDate"
+            type="date"
+            title="选择年月日"
+          />
         </van-popup>
       </div>
       <div class="module">
-        <van-field label="" rows="4" placeholder="姓名/手机号/公司名称/微信号/QQ号" v-model="name" />
-        <van-field center clearable label="" placeholder="创建者姓名/手机号" v-model="company2">
+        <van-field
+          label=""
+          rows="4"
+          placeholder="姓名/手机号/公司名称/微信号/QQ号"
+          v-model="name"
+        />
+        <van-field
+          center
+          clearable
+          label=""
+          placeholder="创建人姓名/手机号"
+          v-model="company2"
+        >
           <template #button>
-            <van-icon name="arrow" size="16" color="#9699A6" @click="createName('选择创建人')" />
+            <van-icon
+              name="arrow"
+              size="16"
+              color="#9699A6"
+              @click="createName('选择创建人')"
+            />
           </template>
         </van-field>
-        <van-field center clearable label="" placeholder="所属者姓名/手机号" v-model="company">
+        <van-field
+          center
+          clearable
+          label=""
+          placeholder="负责人姓名/手机号"
+          v-model="company"
+          v-if="$route.name == 'Home'"
+        >
           <template #button>
-            <van-icon name="arrow" size="16" color="#9699A6" @click="createName('选择所属人')" />
+            <van-icon
+              name="arrow"
+              size="16"
+              color="#9699A6"
+              @click="createName('选择所属人')"
+            />
           </template>
         </van-field>
         <van-field label="" rows="4" placeholder="备注信息" v-model="note" />
-        <compInfo height="calc(100% - 40px)" :title="tit" :companys.sync="company" :companys2.sync="company2" ref="compInfo" route="detailfilter" :totalPageCounts="totalPageCount" :compshow.sync="compListShow" :user="users" :list="compLists"></compInfo>
+        <compInfo
+          height="calc(100% - 40px)"
+          :title="tit"
+          :companys.sync="company"
+          :companys2.sync="company2"
+          ref="compInfo"
+          route="detailfilter"
+          :totalPageCounts="totalPageCount"
+          :compshow.sync="compListShow"
+          :user="users"
+          :list="compLists"
+        ></compInfo>
       </div>
-      <div class="module">
-        <van-cell is-link title="客户等级" :value="clientData.starLeve ? clientData.starLeve.value : ''" @click="clickCell(1)">
+      <div class="module" style="padding-bottom: 50px">
+        <van-cell
+          is-link
+          title="联系人等级"
+          :value="clientData.starLeve ? clientData.starLeve.value : ''"
+          @click="clickCell(1)"
+        >
         </van-cell>
-        <van-cell is-link title="客户状态" :value="clientData.status ? clientData.status.value : ''" @click="clickCell(2)">
+        <van-cell
+          is-link
+          title="联系人状态"
+          :value="clientData.status ? clientData.status.value : ''"
+          @click="clickCell(2)"
+        >
         </van-cell>
-        <van-cell is-link title="来源方式" :value="clientData.sourceType ? clientData.sourceType.value : ''" @click="clickCell(3)">
+        <van-cell
+          is-link
+          title="来源方式"
+          :value="clientData.sourceType ? clientData.sourceType.value : ''"
+          @click="clickCell(3)"
+        >
         </van-cell>
-        <van-cell is-link title="来源类型" :value="clientData.title ? clientData.title.value : ''" @click="clickCell(4)">
+        <van-cell
+          is-link
+          title="来源类型"
+          :value="clientData.title ? clientData.title.value : ''"
+          @click="clickCell(4)"
+        >
         </van-cell>
-        <van-cell is-link title="联系次数" :value="maxData['5'].min && maxData['5'].max ? maxData['5'].min +'至'+maxData['5'].max :maxData['5'].min && !maxData['5'].max ? maxData['5'].min :maxData['5'].max" @click=" clickCell(5)">
+        <van-cell
+          is-link
+          title="联系次数"
+          :value="
+            maxData['5'].min && maxData['5'].max
+              ? maxData['5'].min + '至' + maxData['5'].max
+              : maxData['5'].min && !maxData['5'].max
+              ? maxData['5'].min
+              : maxData['5'].max
+          "
+          @click="clickCell(5)"
+        >
         </van-cell>
-        <van-cell is-link title="消费次数" :value="maxData['6'].min && maxData['6'].max ? maxData['6'].min +'至'+maxData['6'].max :maxData['6'].min && !maxData['6'].max ? maxData['6'].min :maxData['6'].max" @click="clickCell(6)">
+        <van-cell
+          is-link
+          title="消费次数"
+          :value="
+            maxData['6'].min && maxData['6'].max
+              ? maxData['6'].min + '至' + maxData['6'].max
+              : maxData['6'].min && !maxData['6'].max
+              ? maxData['6'].min
+              : maxData['6'].max
+          "
+          @click="clickCell(6)"
+        >
         </van-cell>
-        <van-cell is-link title="消费金额" :value="maxData['7'].min && maxData['7'].max ? maxData['7'].min +'至'+maxData['7'].max :maxData['7'].min && !maxData['7'].max ? maxData['7'].min :maxData['7'].max" @click="clickCell(7)">
+        <van-cell
+          is-link
+          title="消费金额"
+          :value="
+            maxData['7'].min && maxData['7'].max
+              ? maxData['7'].min + '至' + maxData['7'].max
+              : maxData['7'].min && !maxData['7'].max
+              ? maxData['7'].min
+              : maxData['7'].max
+          "
+          @click="clickCell(7)"
+        >
         </van-cell>
-        <van-cell is-link title="支付状态" :value="clientData.paymentStatus ? clientData.paymentStatus.value : ''" @click="clickCell(8)">
+        <van-cell
+          is-link
+          title="支付状态"
+          :value="
+            clientData.paymentStatus ? clientData.paymentStatus.value : ''
+          "
+          @click="clickCell(8)"
+        >
         </van-cell>
-        <van-cell is-link title="发货状态" :value="clientData.supplyStatus ? clientData.supplyStatus.value : ''" @click="clickCell(9)">
+        <van-cell
+          is-link
+          title="发货状态"
+          :value="clientData.supplyStatus ? clientData.supplyStatus.value : ''"
+          @click="clickCell(9)"
+        >
         </van-cell>
-        <van-cell is-link title="开票状态" :value="clientData.billStatus ? clientData.billStatus.value : ''" @click="clickCell(10)">
+        <van-cell
+          is-link
+          title="开票状态"
+          :value="clientData.billStatus ? clientData.billStatus.value : ''"
+          @click="clickCell(10)"
+        >
         </van-cell>
-        <van-cell is-link title="成交状态" :value="clientData.orderStatus ? clientData.orderStatus.value : ''" @click="clickCell(11)">
+        <van-cell
+          is-link
+          title="成交状态"
+          :value="clientData.orderStatus ? clientData.orderStatus.value : ''"
+          @click="clickCell(11)"
+        >
         </van-cell>
         <template v-for="(item, index) in diyColumn">
-          <van-cell is-link :key="index" v-if="item.display== 1" @click="showPopup(item,index)" :title="item.label" :value="item.value"></van-cell>
+          <van-cell
+            is-link
+            :key="index"
+            v-if="item.display == 1"
+            @click="showPopup(item, index)"
+            :title="item.label"
+            :value="item.value"
+          ></van-cell>
         </template>
         <!-- {{clientData}} -->
         <!-- 自定义表单 -->
-        <van-popup :safe-area-inset-bottom="true" v-model="diy.show" position="bottom" :style="{ height: '200px' }">
-          <p class="pop-tit">修改{{diy.name}}</p>
+        <van-popup
+          :safe-area-inset-bottom="true"
+          v-model="diy.show"
+          position="bottom"
+          :style="{ height: '200px' }"
+        >
+          <p class="pop-tit">修改{{ diy.name }}</p>
           <div v-if="diy.type === 'text' || diy.type === 'textarea'">
-            <van-field :type="diy.type" label="" v-model="diy.price" :placeholder="diy.placeholder" />
+            <van-field
+              :type="diy.type"
+              label=""
+              v-model="diy.price"
+              :placeholder="diy.placeholder"
+            />
           </div>
-          <van-button size="mini" color="#60C6C6" @click="DiySave" type="primary" class="btnTb">保存</van-button>
+          <van-button
+            size="mini"
+            color="#60C6C6"
+            @click="DiySave"
+            type="primary"
+            class="btnTb"
+            >保存</van-button
+          >
         </van-popup>
-        <van-action-sheet v-model="diy.showaction" :actions="diy.item" @select="onSelect" />
+        <van-action-sheet
+          v-model="diy.showaction"
+          :actions="diy.item"
+          @select="onSelect"
+        />
         <!--  @savaForm="savaForms" -->
-        <addpop ref="addpop" @MaxinSava="MaxinSavas(arguments)" route="detailfilter" :data="data" @savasheet="savasheets(arguments)" @childClose="close"></addpop>
+        <addpop
+          ref="addpop"
+          @MaxinSava="MaxinSavas(arguments)"
+          route="detailfilter"
+          :data="data"
+          @savasheet="savasheets(arguments)"
+          @childClose="close"
+        ></addpop>
       </div>
 
       <div class="bcc">
         <van-button type="default" @click="empty()">清空</van-button>
-        <van-button color="rgb(81, 187, 186)" @click="Save(1)" type="primary">搜索</van-button>
+        <van-button color="rgb(81, 187, 186)" @click="Save(1)" type="primary"
+          >搜索</van-button
+        >
       </div>
     </div>
+    <van-action-sheet v-model="diy.checkoutPop" @close="actionSheet">
+      <template v-for="(item, index) in diy.item">
+        <van-checkbox
+          @click="checkBoxChange(item, index)"
+          :key="index"
+          v-model="item.check"
+          :data-check="item.check"
+          style="
+            font-size: 14px;
+            height: 40px;
+            border-bottom: 1px solid #eee;
+            padding: 0 20px;
+          "
+          >{{ item.label }}</van-checkbox
+        >
+      </template>
+    </van-action-sheet>
     <div v-if="searchList.length > 0">
-      <linkman padding="0px" @userIdSave="userIdSaves(arguments)" @userIDLength="userIDLengths" @chengParentCur="chengParentCurs" ref="mychild" :list="searchList" :totals="searchTotal" :users="searchUser" :userMaps="userMap">
+      <linkman
+        padding="0px"
+        label="Seas"
+        @userIdSave="userIdSaves(arguments)"
+        @userIDLength="userIDLengths"
+        @chengParentCur="chengParentCurs"
+        ref="mychild"
+        :list="searchList"
+        :totals="searchTotal"
+        :users="searchUser"
+        :userMaps="userMap"
+      >
       </linkman>
-      <van-button class="btn" @click="goBack">
-        返回
-      </van-button>
+      <van-button class="btn" @click="goBack"> 返回 </van-button>
     </div>
   </div>
 </template>
@@ -108,7 +330,6 @@ import {
 } from "../uilts/tools";
 import local from '../uilts/localStorage';
 import sha1 from '../uilts/sha1';
-
 import { formatDate } from '../uilts/date';
 let timeout = generateTimeout();
 let nonce = generateNonce();
@@ -189,6 +410,7 @@ export default {
         placeholder: "",
         item: [],
         price: "",
+        checkoutPop: false,
       }
     }
   },
@@ -213,7 +435,6 @@ export default {
       }, 100)
     },
     updatings(data) {  // 子组件更新日期，返回数组，【2015-09-15，2016-10-16】
-      console.log(data)
       if (this.module.module1Type == 'date') {
         data[1] == 7 ? this.module.date = "全部" : this.module.date = data[0].join().replace(',', '至')
       } else if (this.module.module1Type == 'nolately') {
@@ -235,23 +456,23 @@ export default {
               starLeve: 0,
             },
             {
-              name: "一星客户",
+              name: "一星",
               starLeve: 1,
             },
             {
-              name: "二星客户",
+              name: "二星",
               starLeve: 2,
             },
             {
-              name: "三星客户",
+              name: "三星",
               starLeve: 3,
             },
             {
-              name: "四星客户",
+              name: "四星",
               starLeve: 4,
             },
             {
-              name: "五星客户",
+              name: "五星",
               starLeve: 5,
             },
             {
@@ -299,6 +520,10 @@ export default {
             {
               name: "订单导入",
               sourceType: 2,
+            },
+            {
+              name: "全部",
+              sourceType: '',
             },
           ],
         }
@@ -349,6 +574,10 @@ export default {
               name: "部分支付",
               paymentStatus: 2,
             },
+            {
+              name: "全部",
+              paymentStatus: "",
+            },
           ],
           form: 'type',
         }
@@ -369,6 +598,10 @@ export default {
             {
               name: "部分发货",
               supplyStatus: 2,
+            },
+            {
+              name: "全部",
+              supplyStatus: "",
             },
           ],
           form: 'type',
@@ -391,6 +624,10 @@ export default {
               name: "部分开票",
               billStatus: 2,
             },
+            {
+              name: "全部",
+              billStatus: "",
+            },
           ],
           form: 'type',
         }
@@ -408,6 +645,10 @@ export default {
               name: "已成交",
               orderStatus: 1,
             },
+            {
+              name: "全部",
+              orderStatus: "",
+            },
           ],
           form: 'type',
         }
@@ -420,8 +661,8 @@ export default {
             { name: '从未联系过', nolately: 1 },
             { name: '超过1周未联系', nolately: 2 },
             { name: '超过2周未联系', nolately: 3 },
-            { name: '超过2周未联系', nolately: 4 },
-            { name: '超过2周未联系', nolately: 5 },
+            { name: '超过1月未联系', nolately: 4 },
+            { name: '超过2月未联系', nolately: 5 },
             { name: '超过3月未联系', nolately: 6 },
             { name: '全部', nolately: 0 },
           ],
@@ -557,6 +798,13 @@ export default {
       param.append("compId", this.$C || local.C());
       await this.$post1("/api/request/itr/comp/column/query", param)
         .then((res) => {
+          console.log(res);
+          res.forEach(item => {
+            if (item.type == 'select') {
+              let a = JSON.parse(item.items)
+              a.push({label:'全部'})
+            }
+          })
           this.diyColumn = res;
         })
         .catch(function (error) {
@@ -599,6 +847,7 @@ export default {
       this.note === '' ? "" : param.append("remark", this.note);
       (this.clientData.starLeve.key) === '' ? "" : param.append("starLevel", this.clientData.starLeve.key);
       (this.clientData.status.key) === '' ? "" : param.append("status", this.clientData.status.key);
+      console.log(this.clientData.sourceType);
       (this.clientData.sourceType.key) === '' ? "" : param.append("sourceType", this.clientData.sourceType.key);
       (this.clientData.title.key) === '' ? "" : param.append("customSourceType", this.clientData.title.key);
       (this.maxData['5'].min === '') ? "" : param.append("minContactNumber", this.maxData['5'].min);
@@ -627,6 +876,7 @@ export default {
             if (res.data.length != 0) {
               this.listShow = true;
               this.searchList = datas == 1 ? res.data : this.searchList.concat(res.data);
+              console.log(this.searchList)
               this.searchUser = res.user;
               this.userMap = Object.assign(this.userMap, res.user);
               this.searchTotal = res.totalPageCount;
@@ -838,9 +1088,26 @@ export default {
         });
     },
     showPopup(item, index) {  // 打开自定义表单
-      console.log(item)
+      console.log(item, index);
       if (item.type == 'text' || item.type == 'textarea') {
         this.diy.show = true;
+      } else if (item.type == 'checkbox') {
+        console.log(item);
+        let backItem = JSON.parse(item.items);
+        let a = backItem.find(item => item.check);
+        console.log(a, 'aaaaaa');
+        if (!a) {
+          this.diy.item = backItem.map(item => {
+            return {
+              ...item,
+              check: false
+            }
+          });
+        } else {
+          this.diy.item = backItem;
+        }
+        this.diy.checkoutPop = true;
+
       } else {
         this.diy.showaction = true;
       }
@@ -852,7 +1119,7 @@ export default {
       this.diy.item = JSON.parse(item.items).map(item => {
         return {
           ...item,
-          name: item.value
+          name: item.label
         }
       });
       // this.diy.price = d;
@@ -865,16 +1132,38 @@ export default {
       console.log(value)
       this.diyColumn[this.index].value = value.value;
       this.diy.showaction = false;
-    }
+    },
+    actionSheet() { // 当多选类型框关闭的时候，进行过滤
+      let value = '';
+      let label = '';
+      this.diy.item.forEach(item => {
+        if (item.check) {
+          value += item.id + ',';
+          label += item.label + ',';
+        }
+      });
+      console.log(this.diyColumn[this.index], 'diyColumndiyColumn', this.index)
+      this.diyColumn[this.index].value = label;
+      this.$set(this.diyColumn, this.index, this.diyColumn[this.index])
+      // this.diy.checkoutPop = false;
+    },
+    checkBoxChange(item, index) {  // 
+      this.diy.item[index].check = item.check;
+      let origin = JSON.parse(this.diyColumn[this.index].items);
+      let check = { check: item.check };
+      let result = { ...JSON.parse(this.diyColumn[this.index].items)[index], ...check }
+      origin[index] = JSON.parse(JSON.stringify(result));
+      this.diyColumn[this.index].items = JSON.stringify(origin);
+    },
   },
   components: { datainterval, addpop, compInfo, linkman },
   async created() {
-    console.log('created')
+    // console.log('created')
+    document.documentElement.scrollTop = document.body.scrollTop = 0;
     await this.getAgentConfig()
     await this.getWxJsJdk()
     await this.getColumnConfig()
     this.getCid()
-    document.documentElement.scrollTop = 0;
   },
   watch: {
     searchList(newName, oldName) {
@@ -885,7 +1174,6 @@ export default {
     }
   },
   activated() {
-    console.log('laile1activated')
   },
   beforeRouteEnter: (to, from, next) => {
     next(vm => {

@@ -1,13 +1,32 @@
 <template>
-  <div class='rader'>
-    <div class='product' v-for="(item,index) in recordList" :key="index" @click="productClick(item)">
-      <img :src='item.portrait + "?x-oss-process=image/resize,m_fill,h_200,w_200"' />
-      <div class='content'>
-        <span class='toh'><span class="toTit">{{item.nickname}}</span><span v-if="item.approve == 1" style="margin:0 5px" class='approve'>V</span><span class='member' v-if="item.member == 1">会员</span><span class="des">{{item.createTime}}来自{{sourceTypeMap[item.sourceType]}}</span></span>
-        <span class='toh desc'>{{ item.description}}</span>
+  <div class="rader">
+    <div
+      class="product"
+      v-for="(item, index) in recordList"
+      :key="index"
+      @click="productClick(item)"
+    >
+      <img
+        :src="item.portrait + '?x-oss-process=image/resize,m_fill,h_200,w_200'"
+      />
+      <div class="content">
+        <span class="toh"
+          ><span class="toTit">{{ item.nickname }}</span
+          ><span v-if="item.approve == 1" style="margin: 0 5px" class="approve"
+            >V</span
+          ><span class="member" v-if="item.member == 1">会员</span
+          ><span class="des"
+            >{{ item.createTime }}来自{{ sourceTypeMap[item.sourceType] }}</span
+          ></span
+        >
+        <span class="toh desc">{{ item.description }}</span>
       </div>
     </div>
-    <van-empty v-show="empty" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
+    <van-empty
+      v-show="empty"
+      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+      description="暂无相关消息"
+    />
   </div>
 </template>
 
@@ -115,7 +134,6 @@ export default {
             if (that.recordList.length == 0) that.empty = true; //如果数据大于0，就显示空信息
             that.total = res.totalPageCount;
             that.$toast.clear()
-
           }
         })
         .catch(function (error) {
@@ -163,7 +181,7 @@ export default {
     }
     .content {
       flex: 1;
-      padding-left: 0.4rem;
+      padding-left: 0.2rem;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
@@ -171,7 +189,7 @@ export default {
       width: calc(~"100% - 50px");
       max-width: calc(100% - 50px);
       .toh {
-        font-size: 14px;
+        font-size: 0.26rem;
         display: block;
         overflow: hidden;
         white-space: nowrap;
@@ -182,7 +200,8 @@ export default {
           font-weight: 600;
         }
         .approve {
-          font-size: 14px;
+          font-size: 0.28rem;
+
           font-style: italic;
           font-weight: bold !important;
           color: #f2711c !important;

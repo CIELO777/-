@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
+import router from '../router/index'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -29,7 +29,7 @@ export default new Vuex.Store({
       common: 1,
       highseas: 1,
       filter: 1,
-      form:1
+      form: 1
     },
     cacheState: '',
     SearchValue: "",  // taber搜索
@@ -39,7 +39,9 @@ export default new Vuex.Store({
       nickName: "",
       company: "",
       sheet: "",
-      gender:"",
+      gender: "",
+      userId:"",
+      name:""
     }
 
   },
@@ -74,6 +76,8 @@ export default new Vuex.Store({
     },
     ScrollSave(state, pathName) {  // 保存每个页面滚动条位置，防止页面滚动条位置耦合
       let tabIndex = sessionStorage.getItem('TabIndex');
+      let routerName = router.app._route.name;
+      console.log();
       if (tabIndex == 1) { // 跟进记录
         state.scroll.follow = pathName;
       } else if (tabIndex == 2) { // 订单
@@ -84,7 +88,7 @@ export default new Vuex.Store({
         state.scroll.radar = pathName;
       } else if (tabIndex == 5) {  // 操作记录
         state.scroll.operating = pathName;
-      } else if (tabIndex == 6) {  // 首页 Home
+      } else if (tabIndex == 6 && routerName == 'Home') {  // 首页 Home
         state.scroll.home = pathName;
       } else if (tabIndex == 7) {  // 常用
         state.scroll.common = pathName;
@@ -92,7 +96,7 @@ export default new Vuex.Store({
         state.scroll.highseas = pathName;
       } else if (tabIndex == 9) {// 详细过滤
         state.scroll.filter = pathName;
-      }else if(tabIndex == 0){
+      } else if (tabIndex == 0) {
         state.scroll.form = pathName;
       }
 

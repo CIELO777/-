@@ -3,17 +3,44 @@
     <!-- <div class="backGo" @click="backgo">
       <van-icon name="arrow-left" size="17px" color="#fff" />
     </div> -->
-    <van-field v-model="message" rows="4" autosize type="textarea" placeholder="请输入文字" />
+    <van-field
+      v-model="message"
+      rows="4"
+      autosize
+      type="textarea"
+      placeholder="请输入文字"
+    />
+    <van-checkbox class="boxcheck" v-model="checked" shape="square"
+      >发消息给客户负责人和相关人</van-checkbox
+    >
     <div class="waupolad">
-      <template v-for="(item,index) in imageList">
-        <van-image :key="index" width="1.6rem" height="1.6rem" fit="contain" :src="item" />
+      <template v-for="(item, index) in imageList">
+        <van-image
+          :key="index"
+          width="1.6rem"
+          height="1.6rem"
+          fit="contain"
+          :src="item"
+        />
       </template>
       <div class="uploadView">
-        <img src="../assets/img/addPhoto@2x.png" alt="">
-        <input type="file" class="upload" id="upload" @change="addImg" style="opacity:0" />
+        <img src="../assets/img/addPhoto@2x.png" alt="" />
+        <input
+          type="file"
+          class="upload"
+          id="upload"
+          @change="addImg"
+          style="opacity: 0"
+        />
       </div>
     </div>
-    <van-button type="primary" size="large" style="margin-top:20px;background:#51BBBA" @click="sheetSave">保存</van-button>
+    <van-button
+      type="primary"
+      size="large"
+      style="margin-top: 20px; background: #51bbba"
+      @click="sheetSave"
+      >保存</van-button
+    >
   </div>
 </template>
 
@@ -27,7 +54,8 @@ export default {
   data() {
     return {
       message: '',
-      imageList: []
+      imageList: [],
+      checked: '',
     }
   },
   methods: {
@@ -64,6 +92,8 @@ export default {
       param.append("timeout", data.timeout);
       param.append("title", data.title);
       param.append("type", data.type);
+      console.log(this.checked)
+      param.append("notifyMode", this.checked ? 1 : 0);
       this.$post1('/api/request/itr/comp/customer/record/save', param
       )
         .then(function (res) {
@@ -74,12 +104,9 @@ export default {
             });
             that.$store.commit("ManualUpdate", { target: 'sheet', data: data.title })
             setTimeout(() => {
-              that.$router.push({
-                name: 'LinkDetailed',
-              })
+              that.$router.replace('/linkDetailed')
               sessionStorage.setItem('tabNum', 1)
             }, 800)
-
           }
         })
         .catch(function (error) {
@@ -158,6 +185,7 @@ export default {
 
 <style lang="less" scoped>
 .sheetimg {
+  font-size: 0.28rem;
   padding: 0 0.2rem;
   .waupolad {
     display: flex;
@@ -207,6 +235,10 @@ export default {
     position: fixed;
     bottom: 0;
     left: 0;
+  }
+  .boxcheck {
+    margin: 0.4rem 0;
+    padding: 0 6px;
   }
 }
 </style>

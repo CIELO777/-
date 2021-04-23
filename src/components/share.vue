@@ -1,8 +1,16 @@
 <template>
   <div class="shareView">
-    <van-share-sheet @click-overlay="close" class="sharesheet" @select="onSelect" v-model="showShare" title="立即分享给好友" :options="options" />
+    <van-share-sheet
+      @click-overlay="close"
+      class="sharesheet"
+      @select="onSelect"
+      v-model="showShare"
+      title="立即分享给好友"
+      :options="options"
+      cancel-text=""
+    />
     <van-popup v-model="show">
-      <img :src="this.Qcory" alt="">
+      <img :src="this.Qcory" alt="" />
     </van-popup>
   </div>
 </template>
@@ -11,6 +19,7 @@
 import { generateTimeout, generateNonce, generateSignature3, generateSignatureQrcode } from '../uilts/tools';
 let timeout = generateTimeout()
 let nonce = generateNonce();
+import local from '../uilts/localStorage';
 import sha1 from "../uilts/sha1";
 
 export default {
@@ -24,14 +33,13 @@ export default {
       options: [
         [
           { name: '好友', icon: 'wechat' },
-          { name: '朋友圈', icon: 'wechat' },
+          // { name: '朋友圈', icon: 'wechat' },
           { name: '我的客户', icon: require('../assets/img/我的客户1.png') },
-          { name: '微博', icon: 'weibo' },
+          // { name: '微博', icon: 'weibo' },
         ],
         [
-          { name: '复制链接', icon: 'link' },
-          { name: '邮箱', icon: require('../assets/img/邮箱.png') },
-          { name: '短信', icon: require('../assets/img/短信.png') },
+          // { name: '邮箱', icon: require('../assets/img/邮箱.png') },
+          // { name: '短信', icon: require('../assets/img/短信.png') },
           // { name: '二维码', icon: 'qrcode' },
         ],
       ],
@@ -63,21 +71,35 @@ export default {
           desc: this.ShareContents.desc, // 分享描述
           link: this.ShareContents.url, // 分享链接
           imgUrl: this.ShareContents.imgUrl // 分享封面
-        }, function (res) {
-          console.log(res);
+        }, (res) => {
+          console.log(res, '分享接口')
+          if (res.err_msg == "shareWechatMessage:ok") {
+            this.shareCount()
+            this.$toast('分享成功')
+          } else {
+            this.$toast('分享失败,您的企业微信没有权限分享，请检查企业微信配置')
+          }
         }
         );
       } else if (name == '朋友圈') {
         this.$toast('请打开右上角菜单，选择朋友圈分享');
-      } else if (name == '企业微信联系人') {
+      } else if (name == '我的客户') {
         wx.invoke(
           "shareAppMessage", {
           title: this.ShareContents.title, // 分享标题
-          desc: this.ShareContents.desc, // 分享描述
+          desc: !this.ShareContents.desc ? this.ShareContents.title : this.ShareContents.desc, // 分享描述
           link: this.ShareContents.url, // 分享链接
           imgUrl: this.ShareContents.imgUrl // 分享封面
-        }, function (res) {
-          console.log(res, '分享到企业微信')
+        }, (res) => {
+          console.log(res, '我的客户')
+          if (res.err_msg == "shareAppMessage:ok") {
+            this.shareCount()
+            this.$toast('分享成功')
+          } else if (res.err_msg == 'shareAppMessage:cancel') {
+            this.$toast('分享取消')
+          } else {
+            this.$toast('分享失败,您的企业微信没有权限分享，请检查企业微信配置')
+          }
         }
         );
       } else if (name == '邮箱') {
@@ -156,7 +178,7 @@ export default {
           });
           wx.ready(function () {
             wx.hideMenuItems({
-              menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari'] // 要隐藏的菜单项
+              menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari', 'menuItem:refresh'] // 要隐藏的菜单项
             });
             // 朋友圈分享
 
@@ -166,6 +188,8 @@ export default {
               imgUrl: this.ShareContents.imgUrl, // 分享图标
               success: function () {
                 console.log('朋友圈成功')
+                that.shareCount()
+
                 // 用户确认分享后执行的回调函数
               },
               cancel: function () {
@@ -214,13 +238,27 @@ export default {
           // alert(err);
         });
     },
+    shareCount() {
+      this.$get("/itver/remote/share/callback", {
+        params: {
+          url: this.ShareContents.url,
+          uid: this.$U || local.U(),
+        },
+      })
+        .then((res) => {
+          console.log(res, '分享')
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   },
   async created() {
+    await this.getAgentConfig(); // 同步执行 否则会报错
+    await this.getWxJsJdk();
     let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
     // console.log(this.ShareContents)
     // this.url = this.ShareContents.url;
-    await this.getAgentConfig(); // 同步执行 否则会报错
-    await this.getWxJsJdk();
   },
   mounted() { }
 };

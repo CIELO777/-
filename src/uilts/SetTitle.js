@@ -1,11 +1,13 @@
 import store from '../store/index'
 
 export default function setTitle(data) {
+	// console.log(data,'--------------1234--------------');
+	let route = sessionStorage.getItem('route')
 	if (data.includes('Home')) {
 		store.commit('saveTitle', { title: '客户管理', leftShow: false, tabarShow: true });
 	} else if (data.includes('LinkDetailed')) {
 		store.commit('saveTitle', { title: '联系人详情', leftShow: true });
-	} else if (data.includes('OrderDetail')) {
+	} else if (data.includes('OrderDetail') && route == 'OrderDetail') {
 		store.commit('saveTitle', { title: '新增订单', leftShow: true });
 	} else if (data.includes('ChooseCommodity')) {
 		store.commit('saveTitle', { title: '未选择详情页', leftShow: true });
@@ -35,5 +37,21 @@ export default function setTitle(data) {
 		store.commit('saveTitle', { title: '视频', leftShow: false, tabarShow: false });
 	}else if (data.includes('ColorPage')) {
 		store.commit('saveTitle', { title: '全部彩页', leftShow: false, tabarShow: false });
+	}else if (data.includes('Document')) {
+		store.commit('saveTitle', { title: '营销文档', leftShow: false, tabarShow: false });
+	}else if (data.includes('Advertorial')) {
+		store.commit('saveTitle', { title: '软文素材', leftShow: false, tabarShow: false });
+	}else if (data.includes('Poster')) {
+		store.commit('saveTitle', { title: '海报素材', leftShow: false, tabarShow: false });
+	}else if (data.includes('HaiRing')) { 
+		store.commit('saveTitle', { title: '发圈素材', leftShow: false, tabarShow: false });
+	}else if (data.includes('Verbal')) { 
+		store.commit('saveTitle', { title: '营销话术', leftShow: false, tabarShow: false });
+	}else if (data.includes('Radar')) { 
+		store.commit('saveTitle', { title: '流量管理', leftShow: false, tabarShow: false });
+	}else if (data.includes('Order')) { 
+		store.commit('saveTitle', { title: '订单管理', leftShow: false, tabarShow: false });
+	}else if (data.includes('NoticeView')) { 
+		store.commit('saveTitle', { title: '公告详情', leftShow: false, tabarShow: false });
 	}
 }

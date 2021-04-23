@@ -1,9 +1,13 @@
 <template>
-  <div class="iframe">
+  <div class="iframesss">
     <div class="share" @click="createContent">
       <van-icon name="share" size="20px" />
     </div>
-    <share :ShareContents="ShareContent" v-show="showShare" :showShares.sync="showShare"></share>
+    <share
+      :ShareContents="ShareContent"
+      v-show="showShare"
+      :showShares.sync="showShare"
+    ></share>
     <iframe id="iframe" :src="url" frameborder="0" scrolling="auto"></iframe>
   </div>
 </template>
@@ -37,22 +41,17 @@ export default {
     }
   },
   created() {
+    console.log(this.$route.params.url, 'paramsUrl')
     this.url = this.$route.params.url;
   },
-  beforeRouteEnter: (to, from, next) => {
-    console.log(from)
-    next(vm => {
-      vm.$store.commit("cache", from.name);
-    })
-  },
-  mounted() { }
+
+  mounted() { },
 };
 </script>
 
 <style lang="less" scoped>
-.iframe {
+.iframesss {
   position: relative;
-
   #iframe {
     height: 100vh;
     width: 100vw;

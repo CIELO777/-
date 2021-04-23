@@ -6,17 +6,29 @@
       </div>
       <span>添加日程</span>
     </div>
-    <div class="agendaCont">
-      <div class="scheduleMain" v-for="(item,index) in scheduleList" :key="index" @click="AgendaDetail(item)">
-        <h1 style="">{{item.title}}</h1>
+    <div class="agendaCont" v-if="scheduleList.length > 0">
+      <div
+        class="scheduleMain"
+        v-for="(item, index) in scheduleList"
+        :key="index"
+        @click="AgendaDetail(item)"
+      >
+        <h1 style="">{{ item.title }}</h1>
         <div class="smMain">
-          <span class="qs-gray">{{item.time}}</span>
-          <span :class="[item.status==0?'qs-org':'qs-green']" class="remind">{{item.status==0?'未提醒':'已提醒'}}</span>
+          <span class="qs-gray">{{ item.time }}</span>
+          <span
+            :class="[item.status == 0 ? 'qs-org' : 'qs-green']"
+            class="remind"
+            >{{ item.status == 0 ? "未提醒" : "已提醒" }}</span
+          >
         </div>
       </div>
-      <van-empty v-show="empty" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
-
     </div>
+    <van-empty
+      v-show="empty"
+      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+      description="暂无相关消息"
+    />
   </div>
 </template>
 <script>
@@ -66,6 +78,7 @@ export default {
           if (!res.error) {
             that.scheduleList = that.current == 1 ? res.data : that.scheduleList.concat(res.data);
             that.total = res.totalPageCount;
+            console.log(that.scheduleList.length);
             if (that.scheduleList.length == 0) that.empty = true; //如果数据大于0，就显示空信息
             that.$toast.clear()
           }
@@ -103,6 +116,10 @@ export default {
   created() {
     this.getAgendaList();
     this.current = 1;
+  },
+  activated() {
+    console.log('2312');
+    this.getAgendaList();
 
   }
 }
@@ -167,12 +184,21 @@ export default {
   // .qs-green {
   //   color: #3d8329;
   // }
-  // .qs-gray {
-  //   color: #9c9c9c;
-  //   font-size: 15px;
-  // }
+  .qs-gray {
+    // color: #9c9c9c;
+    font-size: 0.27rem;
+  }
   // .qs-org {
   //   color: #ff8000;
   // }
+  .van-empty {
+    padding-top: 2.9rem;
+  }
+  .qs-green {
+    color: #3d8329;
+  }
+  .qs-org {
+    color: #ff8000;
+  }
 }
 </style>

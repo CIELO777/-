@@ -3,7 +3,11 @@
     <div class="share" @click="createContent">
       <van-icon name="share" size="20px" />
     </div>
-    <share v-if="showShare" :ShareContents="ShareContent" :showShares.sync="showShare"></share>
+    <share
+      v-if="showShare"
+      :ShareContents="ShareContent"
+      :showShares.sync="showShare"
+    ></share>
     <iframe id="iframe" :src="url" frameborder="0" scrolling="auto"></iframe>
   </div>
 </template>
@@ -33,24 +37,24 @@ export default {
   methods: {
     createContent() {
       this.showShare = true;
-      let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
       this.ShareContent = {
         title: JSON.parse(sessionStorage.getItem('userinfo')).nickname + '的名片，请惠存',
         imgUrl: JSON.parse(sessionStorage.getItem('userinfo')).portrait,
         desc: this.remark,
-        url: `https://page.weishang99.net/itver/remote/${userinfo.id}/profile/${userinfo.id}/${userinfo.bind_comp_id}`
+        url: this.url
       }
     },
     initMineInfo() {
       this.$get("/itver/remote/user/profile", {
         params: {
-          userId: this.$U || local.U() + 1,
+          userId: this.$U || local.U(),
           curLogin: this.$U || local.U(),
         },
       })
         .then((res) => {
           if (res.url !== null) {
-            this.url = res.url;
+            this.url = res.initialUrl;
+            this.$toast.clear();
           }
           if (res.remark) {
             this.remark = res.remark;
@@ -59,10 +63,29 @@ export default {
         .catch((error) => {
           console.log(error)
         });
+    },
+    loading() {
+      this.$toast.loading({
+        message: '加载中...',
+        forbidClick: true,
+        overlay: true,
+        forbidClick: true,
+        duration: 0
+      });
     }
   },
   async created() {
-    console.log(this.initMineInfo())
+    if (sessionStorage.getItem('userinfo')) {
+      this.loading()
+      this.initMineInfo()
+    } else {
+      this.$toast.fail({
+        message: '此模块不支持聊天工具栏。',
+        forbidClick: true,
+        duration: 0,
+        overlay: true,
+      });
+    }
     // let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
     // this.url = `https://page.weishang99.net/itver/remote/${userinfo.id}/profile/${userinfo.id}/${userinfo.bind_comp_id}`
     // await this.getAgentConfig(); // 同步执行 否则会报错

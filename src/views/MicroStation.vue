@@ -3,11 +3,14 @@
     <div class="share" @click="createContent">
       <van-icon name="share" size="20px" />
     </div>
-    <share v-if="showShare" :ShareContents="ShareContent" :showShares.sync="showShare"></share>
+    <share
+      v-if="showShare"
+      :ShareContents="ShareContent"
+      :showShares.sync="showShare"
+    ></share>
 
     <iframe id="iframe" :src="url" frameborder="0" scrolling="auto"></iframe>
   </div>
-
 </template>
 
 <script>
@@ -40,7 +43,7 @@ export default {
     initMineInfo() { // 获取当前店铺url地址，店铺ID 。
       this.$get("/itver/remote/user/profile", {
         params: {
-          userId: this.$U || local.U() + 1,
+          userId: this.$U || local.U(),
           curLogin: this.$U || local.U(),
         },
       })
@@ -48,8 +51,8 @@ export default {
           if (res?.mall?.url !== null) {
             this.url = res.mall.url;
             this.shopId = res.mall.title;
-            this.getHome()
-
+            this.getHome();
+            this.$toast.clear();
           }
         })
         .catch((error) => {
@@ -81,10 +84,29 @@ export default {
         .catch((error) => {
           console.log(error);
         });
+    },
+    loading() {
+      this.$toast.loading({
+        message: '加载中...',
+        forbidClick: true,
+        overlay: true,
+        forbidClick: true,
+        duration: 0
+      });
     }
   },
   created() {
-    this.initMineInfo()
+    if (sessionStorage.getItem('userinfo')) {
+      this.loading()
+      this.initMineInfo()
+    } else {
+      this.$toast.fail({
+        message: '此模块不支持聊天工具栏。',
+        forbidClick: true,
+        duration: 0,
+        overlay: true,
+      });
+    }
   },
   mounted() { },
   components: { share }

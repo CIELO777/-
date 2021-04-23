@@ -9,7 +9,7 @@
     <van-tabbar-item name="Common">
       <template #icon="props">
         <img :src="props.active ? Common.active : Common.inactive" class="barImg" />
-        <span :style="{color:props.active ? 'red' : '#000'}" class="barText">常用</span>
+        <span :style="{color:props.active ? 'red' : '#000'}" class="barText">批注</span>
       </template>
     </van-tabbar-item>
     <van-tabbar-item name="HighSeas">
@@ -37,8 +37,8 @@ export default {
         inactive: require('../assets/img/contact_new_unselect@2x.png'),
       },
       Common: {
-        active: require('../assets/img/contact_top_select@2x.png'),
-        inactive: require('../assets/img/contact_top_unselect@2x.png'),
+        active: require('../assets/img/contact_audit_select@2x.png'),
+        inactive: require('../assets/img/contact_audit_unselect@2x.png'),
       },
       HighSeas: {
         active: require('../assets/img/contact_opensea_select@2x.png'),
@@ -52,15 +52,16 @@ export default {
   },
   methods: {
     tabbarChange(event) {
+      console.log(event)
       sessionStorage.setItem('active', event);
-      if (event == 'Home') {
-        sessionStorage.setItem('TabIndex', 6);
-      } else if (event == 'Common') {
-        sessionStorage.setItem('TabIndex', 7);
-      } else if (event == 'HighSeas') {
-        sessionStorage.setItem('TabIndex', 8);
-      }
-      this.active = sessionStorage.getItem('active');
+      // if (event == 'Home') {
+      //   sessionStorage.setItem('TabIndex', 6);
+      // } else if (event == 'Common') {
+      //   sessionStorage.setItem('TabIndex', 7);
+      // } else if (event == 'HighSeas') {
+      //   sessionStorage.setItem('TabIndex', 8);
+      // }
+      // this.active = sessionStorage.getItem('active');
       this.$router.replace({ name: event })
     },
   },

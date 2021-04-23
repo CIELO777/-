@@ -129,10 +129,66 @@ const routes = [
     name: 'Document',
     component: () => import(/* webpackChunkName: "about" */ '../components/poster/document.vue')
   },
+  {
+    path: '/order',
+    name: 'Order',
+    component: () => import(/* webpackChunkName: "about" */ '../views/Order.vue')
+  },
+  {
+    path: '/radar',
+    name: 'Radar',
+    component: () => import(/* webpackChunkName: "about" */ '../views/Radar.vue')
+  },
+  {
+    path: '/searchView',
+    name: 'SearchView',
+    component: () => import(/* webpackChunkName: "about" */ '../components/RadarView/SearchView.vue')
+  },
+  {
+    path: '/haiRing',
+    name: 'HaiRing',
+    component: () => import(/* webpackChunkName: "about" */ '../views/HaiRing.vue')
+  },
+  {
+    path: '/verbal',
+    name: 'Verbal',
+    component: () => import(/* webpackChunkName: "about" */ '../views/Verbal.vue')
+  },
+  {
+    path: '/verBalDetail',
+    name: 'VerBalDetail',
+    component: () => import(/* webpackChunkName: "about" */ '../components/verBal/VerBalDetail.vue')
+  },
+  {
+    path: '/haringDetail',
+    name: 'HaringDetail',
+    component: () => import(/* webpackChunkName: "about" */ '../components/HaringView/HaringDetail.vue')
+  },
+  {
+    path: '/haringHistroy',
+    name: 'HaringHistroy',
+    component: () => import(/* webpackChunkName: "about" */ '../components/HaringView/HaringHistroy.vue')
+  },
+  {
+    path: '/noticeView',
+    name: 'NoticeView',
+    component: () => import(/* webpackChunkName: "about" */ '../components/Notice/noticeView.vue')
+  },
+  {
+    path: '/chatConfig',
+    name: 'ChatConfig',
+    component: () => import(/* webpackChunkName: "about" */ '../components/ChatConfig.vue')
+  },
+  {
+    path: '/chatRecord',
+    name: 'ChatRecord',
+    component: () => import(/* webpackChunkName: "about" */ '../components/ChatRecord.vue')
+  },
 ]
 
 const router = new VueRouter({
   mode: 'history',
+  // base: '/wx-crm/',
   base: '/wx-crmTest/',
   routes
 })

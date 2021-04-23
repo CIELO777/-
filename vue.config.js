@@ -5,7 +5,9 @@ function resolve(dir) {
     return path.join(__dirname, dir)
 }
 module.exports = {
+    // publicPath: '/wx-crm/',
     publicPath: '/wx-crmTest/',
+
     // assetsSubDirectory: 'static',
     // assetsPublicPath: '/',
     devServer: {

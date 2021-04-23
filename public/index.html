@@ -14,12 +14,15 @@
         i = "orientationchange" in window ? "orientationchange" : "resize",
         d = function () {
           var n = t.clientWidth;
-          n && (t.style.fontSize = n / 7.5 + "px");
+          if (n && n / 7.5 > 80) { // 为兼容企业微信PC 客户端，跟字体限制80px，
+            t.style.fontSize = "50px";
+          } else {
+            t.style.fontSize = n / 7.5 + "px"; //反之正常计算跟字体大小 
+          }
         };
-      n.addEventListener &&
-        (e.addEventListener(i, d, !1),
-          n.addEventListener("DOMContentLoaded", d, !1));
+      n.addEventListener && (e.addEventListener(i, d, !1), n.addEventListener("DOMContentLoaded", d, !1));
     })(document, window);
+
     // window.onbeforeunload = function (e) {  // 监听用户是否按住了f5刷新，如果刷新了，那么就把参数都指向home
     //   console.log(e)
     //   e = e || window.event;
@@ -37,6 +40,7 @@
     }
   </style>
 </head>
+<!-- onunload="return test()" -->
 
 <body>
   <noscript>
@@ -44,10 +48,14 @@
       properly without JavaScript enabled. Please enable it to
       continue.</strong>
   </noscript>
-  <div id="app">
-
-  </div>
+  <div id="app"></div>
   <!-- built files will be auto injected -->
+
 </body>
+<script>
+  // function test() {
+  //   return "你确定要离开吗";
+  // }
+</script>
 
 </html>

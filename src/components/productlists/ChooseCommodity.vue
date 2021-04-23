@@ -1,34 +1,52 @@
 <template>
   <div class="choose" @scroll="scrollEvent">
-    <van-popup v-model="addListshow" position="bottom"  :style="{ height: '100%' }" >
+    <van-popup
+      v-model="addListshow"
+      position="bottom"
+      :style="{ height: '100%' }"
+    >
       <!-- <div class='text-ali'>请选择详情页</div> -->
       <div id="abc" @scroll="scrollEventselect">
-        <div v-for="(item,index) in list" :key="index" @click="checkChange(item,index)" class="chooseView">
-          <van-checkbox v-model="item.check" class="check" ></van-checkbox>
+        <div
+          v-for="(item, index) in list"
+          :key="index"
+          @click="checkChange(item, index)"
+          class="chooseView"
+        >
+          <van-checkbox v-model="item.check" class="check"></van-checkbox>
           <div class="img-text">
-            <img :src="item.thumb" alt="">
+            <img :src="item.thumb" alt="" />
             <div>
-              <p>{{item.title}}</p>
-              <p>{{item.description}}</p>
+              <p>{{ item.title }}</p>
+              <p>{{ item.description }}</p>
             </div>
           </div>
         </div>
-        <div class="btn">
-          <van-button @click="closePop">返回</van-button>
-          <van-button type="primary" @click="closePop">添加</van-button>
-        </div>
+      </div>
+      <div class="btn">
+        <van-button @click="closeBack" style="color: #000">返回</van-button>
+        <van-button type="primary" @click="closePop" color="#51BBBA"
+          >添加</van-button
+        >
       </div>
     </van-popup>
-    <div v-if="selectList.length > 0">
-      <template v-for="(item,index) in selectList">
+    <div v-if="selectList.length > 0" id="abc1">
+      <template v-for="(item, index) in selectList">
         <div :key="index" class="chooseViewselect">
-          <img :src="item.thumb" alt="">
+          <img :src="item.thumb" alt="" />
           <div class="chooseText">
-            <p>{{item.title}}</p>
-            <p>{{item.description}}</p>
+            <p>{{ item.title }}</p>
+            <p>{{ item.description }}</p>
           </div>
-          <van-button class="delBTN" type="primary" color="red" size="mini" plain @click="dele(item.id)">移除</van-button>
-
+          <van-button
+            class="delBTN"
+            type="primary"
+            color="red"
+            size="mini"
+            plain
+            @click="dele(item.id, index)"
+            >移除</van-button
+          >
         </div>
       </template>
     </div>
@@ -40,9 +58,10 @@
     </div>
     <div class="btn">
       <van-button @click="goBack">确认</van-button>
-      <van-button type="primary" @click="addList">添加</van-button>
+      <van-button type="primary" @click="addList" color="#51BBBA"
+        >添加</van-button
+      >
     </div>
-
   </div>
 </template>
 
@@ -64,16 +83,15 @@ export default {
     }
   },
   methods: {
-    getChooseList(filter) {   // filter 0已选列表。 1 全部列表
+    getChooseList(filter, concat) {   // filter 0已选列表。 1 全部列表
       let that = this;
-      let crmInfo = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
       let nonce = randomWord(true, 32, 32)
       let signature = generateSignature3(this.$C || local.C(), timeout, nonce);
       let ids = sessionStorage.getItem('shelvesIds');
-      let idss
+      let idss;
       if (ids) {
-        console.log(ids);
-        idss = JSON.parse(ids).join(',')
+        idss = JSON.parse(ids).join(',');
+        console.log(idss.split(',').length);
       }
       this.$get('/api/request/mall/product/ids/result', {
         params: {
@@ -86,6 +104,7 @@ export default {
           shelvesStatus: 1,
           signature,
           timeout,
+          size: filter == 0 ? 9999 : 20
         },
       })
         .then(function (res) {
@@ -99,14 +118,16 @@ export default {
               });
               that.list = that.current == 1 ? datas : that.list.concat(datas);
               that.total = res.totalPageCount;
-              that.$toast.clear()
+              that.$toast.clear();
             } else {
+              // if (concat) {
+              //   that.selectList
+              // }
               that.selectList = that.current == 1 ? res.data : that.selectList.concat(res.data);
               that.total = res.totalPageCount;
-              that.$toast.clear()
+              console.log(res.data);
+              that.$toast.clear();
             }
-
-
           }
         })
         .catch(function (error) {
@@ -121,6 +142,14 @@ export default {
       this.current = 1;
       this.total = 0;
       this.getChooseList(1);
+      console.log(this.list);
+      this.$nextTick(() => {
+        console.log(1231);
+        let read1 = document.querySelector('.choose')
+        let read = document.querySelector('#abc')
+        read.scrollTop = 0;
+        read1.scrollTop = 0;
+      })
 
     },
     closePop() {
@@ -138,15 +167,20 @@ export default {
         if (!shelvesIds) {  // 如果之前没有东西，证明是第一次选中；数据存本地；
           sessionStorage.setItem('shelvesIds', JSON.stringify(list))  //选中iD 存入本地listData
           sessionStorage.setItem('shelvesData', JSON.stringify(listData))  //选中iD数据 存入本地
+          this.current = 1;
           this.getChooseList(0);
         } else {  // 证明之前选择过东西，这时候需要数组合并，吧之前选择的东西，和现在合并
           let allList = list.concat(JSON.parse(shelvesIds))
           let allListData = listData.concat(JSON.parse(shelvesData))
           sessionStorage.setItem('shelvesData', JSON.stringify(allListData))  //选中iD数据 存入本地
           sessionStorage.setItem('shelvesIds', JSON.stringify(allList))  //选中iD 存入本地listData
+          this.current = 1;
           this.getChooseList(0);
         }
       }
+      this.addListshow = false;
+    },
+    closeBack() {
       this.addListshow = false;
     },
     backgo() { // 点击上面的返回上一层按钮清空数据
@@ -158,7 +192,7 @@ export default {
       var windowHeight = read.clientHeight;
       var scrollHeight = read.scrollHeight;
       if (scrollTop + windowHeight == scrollHeight) {
-        console.log('============已选数据列表到底了========');
+        // console.log('============已选数据列表到底了========');
         this.current = ++this.current;
         if (this.total < this.current) return;
         this.$toast.loading('加载中...');
@@ -180,16 +214,19 @@ export default {
         this.getChooseList(1);
       }
     },
-    dele(id) { // 移除商品
+    dele(id, index) { // 移除商品
+      // console.log(id);
       let sIds = sessionStorage.getItem('shelvesIds');
+      // console.log(sIds, JSON.parse(sIds).length);
       let shelveData = sessionStorage.getItem('shelvesData');
-      console.log(sIds);
       if (sIds && JSON.parse(sIds).length > 1) { // 有商品ID 并且大于一个
-        let qqs = JSON.parse(sIds).filter(item => item !== id)
+        let qqs = JSON.parse(sIds).filter(item => item !== id);
         sessionStorage.setItem('shelvesIds', JSON.stringify(qqs))  // 重新设置本地数据；
         let finalArr = JSON.parse(shelveData).filter((item) => item.id !== id);  // 设置 列表数据
-        sessionStorage.setItem('shelvesData', JSON.stringify(finalArr))  // 重新设置本地数据；
-        this.getChooseList(0)
+        sessionStorage.setItem('shelvesData', JSON.stringify(finalArr));  // 重新设置本地数据；
+        this.selectList.splice(index, 1) // 手动删除
+        // console.log(this.selectList);
+
       } else if (sIds && JSON.parse(sIds).length == 1) { //  只剩一个
         sessionStorage.removeItem('shelvesIds')  // 如果不包含，只有一项商品ID了，这时候直接remove 就ok
         sessionStorage.removeItem('shelvesData')
@@ -344,17 +381,17 @@ export default {
     // box-sizing: border-box;
   }
   .btn {
-    display: block;
     width: 100%;
+    color: #fff;
     position: fixed;
     bottom: 0;
     left: 0;
-    background: rgb(81, 187, 186);
+    right: 0;
     height: 44px;
     border: none;
-    color: #fff;
     button {
       width: 50%;
+      z-index: 999;
     }
   }
 }

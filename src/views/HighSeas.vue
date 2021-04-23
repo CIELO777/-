@@ -1,12 +1,36 @@
-<template>
+  <template>
   <div class="about">
-    <navBar @unbinds="unbindsss" @ClearList="ClearLists" @Typefilter="Typefilters(arguments)" ref="navBar" :SearchtotalPageCounts="SearchtotalPageCount" :modes.sync="mode"></navBar>
+    <navBar
+      @unbinds="unbindsss"
+      @ClearList="ClearLists"
+      @Typefilter="Typefilters(arguments)"
+      ref="navBar"
+      :SearchtotalPageCounts="SearchtotalPageCount"
+      :modes.sync="mode"
+      @fastComp="fastComp"
+      :contactStatus.sync="contactStatus"
+    ></navBar>
     <!-- <van-pull-refresh class="pull"  :success-text="successtext"  v-model="isLoading" @refresh="onRefresh"> -->
-    <linkman ref="mychild" @userIDLength="userIDLengths" @userIdSave="userIdSaves(arguments)" @chengParentCur="chengParentCurs" :totals="total" label="Seas" v-if="data.length>0" :list="data" :users="user" :userMaps="userMap">
+    <linkman
+      ref="mychild"
+      @userIDLength="userIDLengths"
+      @userIdSave="userIdSaves(arguments)"
+      @chengParentCur="chengParentCurs"
+      :totals="total"
+      label="Seas"
+      v-if="data.length > 0"
+      :list="data"
+      :users="user"
+      :userMaps="userMap"
+      padding="85px"
+    >
     </linkman>
-    <van-empty v-show="empty" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
+    <van-empty
+      v-else
+      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+      description="暂无相关消息"
+    />
     <!-- </van-pull-refresh> -->
-
   </div>
 </template>
 <script>
@@ -43,15 +67,17 @@ export default {
       jsapi2: "",
       mode: 'list', // 监听是搜索还是默认列表
       SearchtotalPageCount: 0,
+      ownerType: 0,
+      contactStatus: 9  //顶部时间筛选的数值
     }
   },
   methods: {
-    getList(datas) {// 下拉联系人列表
+    getList(datas, params) {// 下拉联系人列表
       let that = this;
       let timeout = generateTimeout();
       let nonce = generateNonce();
-      let userinfo = JSON.parse(sessionStorage.getItem('userinfo'))
-      let signature = generateSignature3(userinfo?.id, userinfo?.bind_comp_id, timeout, nonce)
+      let userinfo = JSON.parse(sessionStorage.getItem('userinfo'));
+      let signature = generateSignature3(userinfo?.id, userinfo?.bind_comp_id, timeout, nonce);
       let data = {
         userId: userinfo.id,
         compId: userinfo.bind_comp_id,
@@ -62,13 +88,27 @@ export default {
         signature,
         type: 1,
         ownerId: 0,
-        // total: 0,
+        ownerType: this.ownerType
       };
+      if (this.contactStatus && this.contactStatus !== 9) {
+        data.contactStatus = this.contactStatus;
+      }
+      // // 追加日期等参数
+      if (params && Object.keys(params).length > 0) {
+        for (const key in params) {
+          data[key] = params[key]
+        }
+      }
       this.$get('/api/request/itr/comp/customer/query', {
         params: data,
       })
         .then(function (res) {
           if (!res.error) {
+            res.data.forEach(item => { // 云外呼处理
+              if (item.workNumber) {
+                item.YunCall = [item.phone, item.workNumber];
+              }
+            })
             that.data = datas == 1 ? res.data : that.data.concat(res.data);
             if (that.data.length == 0) that.empty = true; //如果数据大于0，就显示空信息
             that.userMap = Object.assign(that.userMap, res.user);
@@ -126,9 +166,12 @@ export default {
             jsApiList: ['agentConfig', 'selectExternalContact'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
           });
           wx.ready(function () {
-            wx.hideAllNonBaseMenuItem();
-
+            // wx.hideAllNonBaseMenuItem();
             // that.getAgentConfigApi()
+            // wx.hideOptionMenu();
+            // wx.hideMenuItems({
+            //   menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari','menuItem:refresh'] // 要隐藏的菜单项
+            // });
             wx.agentConfig({
               corpid: that.appid2, // 必填，企业微信的corpid，必须与当前登录的企业一致
               agentid: res.agentId, // 必填，企业微信的应用id （e.g. 1000247）
@@ -250,10 +293,8 @@ export default {
         });
     },
     chengParentCurs(data) {
-      // console.log(this.mode)
+      console.log(this.mode, 'this.mode')
       if (sessionStorage.getItem("route") == 'LinkDetailed' || sessionStorage.getItem("route") == 'Addcustomer') return;// 如果是 LinkDetailed 就return掉
-
-
       if (this.mode === 'list') { // mode 是判断是否是搜索分页还是列表分页 
         this.$toast.loading('加载中...');
         this.current = data;  // 备份当前的页数，目的微=为了保存时候获取到请求的当页数
@@ -314,7 +355,8 @@ export default {
       this.SearchtotalPageCount = data[0].totalPageCount;
     },
     ClearLists() { // 清空数组
-      this.data = this.data.length = 0;
+      this.data.length = 0;
+      this.data = [];
       this.empty = true;
     },
     initscroll() { // 初始化滚动条
@@ -326,16 +368,26 @@ export default {
     // 更新数据
     ManualUpdate(index, wxid) {
       this.data[index].wxCrmId = wxid;
+    },
+    fastComp(data) {
+      this.ownerType = data;
+      this.data.length = 0;
+      document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
+      this.getList(1, this.$refs.navBar.Params);
+      console.log(this.$refs.navBar.Params)
     }
   },
   async created() {
+    console.log(this.$route)
     this.totalLodding();
-    this.getList()
+    this.getList();
     await this.getAgentConfig();
     await this.getWxJsJdk();
   },
   async activated() {
-    document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.common;
+    console.log(this.$route)
+
+    document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.highseas;
     // 如果ManualData：true 证明姓名，电话，跟进记录修改过，这样的话就重新赋值把。
     let index = sessionStorage.getItem('ManualIdx');
     let { nickName, company, sheet, gender } = this.$store.state.ManualData;
@@ -386,6 +438,26 @@ export default {
       if (msg.route !== 'HighSeas') return;
       this.ManualUpdate(msg.index, msg.wxId);
     })
+    communication.$on('AddDatabase', (msg, data) => {
+      console.log(data, this.ownerType)
+      if (data == this.ownerType || this.ownerType == 9) {
+        // 只有当 Home页面的释放类型和当前的标签类型一样时候才会进行追加
+        this.data.unshift(msg);
+      }
+    })
+    communication.$on('AssignContacts', (msg, data) => { // 接收公海分配过来的输
+      console.log(data)
+      let ChangeData = this.data[msg];
+      this.data.splice(msg, 1) // 本地删除原数组
+      let name = JSON.parse(sessionStorage.getItem('userinfo')).nickname
+      ChangeData.ownerId = data.userId;
+      ChangeData.lastContactRecord = name + '给' + data.nickname + '分配了一个联系人';
+      communication.$emit("linkman", ChangeData);
+    })
+    communication.$on('collect', (msg, str, data, id) => { // 公海拾取操作。删除公海的数据并追加联系人的数据
+      this.data.splice(msg, 1) // 本地删除原数组
+      communication.$emit("collectLinkman", str, data, id);
+    })
   },
   beforeRouteEnter: (to, from, next) => {
     next(vm => {
@@ -396,6 +468,17 @@ export default {
       vm.$store.commit("cache", "Home,Common,HighSeas");
     })
   },
+  // beforeRouteLeave(to, from, next) {
+  //   if (from.name == 'HighSeas') {
+  //     if (to.name === 'Navigation') {
+  //       next();
+  //     } else {
+  //       next();
+  //     }
+  //   } else {
+  //     next();
+  //   }
+  // }
 }
 </script>
 

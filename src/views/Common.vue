@@ -1,11 +1,36 @@
 <template>
   <div class="about">
-    <navBar @ClearList="ClearLists" @Typefilter="Typefilters(arguments)" ref="navBar" :SearchtotalPageCounts="SearchtotalPageCount" @unbinds="unbindsss" :modes.sync="mode"></navBar>
+    <van-search
+      @clear="onCancel"
+      v-model="search"
+      show-action
+      placeholder="搜索批注内容"
+    >
+      <template #action>
+        <div @click="onSearch">搜索</div>
+      </template>
+    </van-search>
     <!-- <van-pull-refresh class="pull" :success-text="successtext" style="min-height: 100vh;" head-height="40" v-model="isLoading" @refresh="onRefresh"> -->
-    <linkman ref="mychild" @userIDLength="userIDLengths" @userIdSave="userIdSaves(arguments)" v-if="data.length>0" :list="data" :totals="total" :users="user" :userMaps="userMap" @chengParentCur="chengParentCurs"></linkman>
-    <van-empty v-show="empty" class="van-empty" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
+    <linkman
+      ref="mychild"
+      @userIDLength="userIDLengths"
+      @userIdSave="userIdSaves(arguments)"
+      v-if="data.length > 0"
+      :list="data"
+      :totals="total"
+      :users="user"
+      :userMaps="userMap"
+      @chengParentCur="chengParentCurs"
+      padding="0"
+      label="Seas"
+    ></linkman>
+    <van-empty
+      v-else
+      class="van-empty"
+      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+      description="暂无相关消息"
+    />
     <!-- </van-pull-refresh> -->
-
   </div>
 </template>
 <script>
@@ -42,10 +67,13 @@ export default {
       jsapi2: "",
       mode: 'list', // 监听是搜索还是默认列表
       SearchtotalPageCount: 0,
+      updateIndex: -1,
+      search: '',
+      fuzzy: '',
     }
   },
   methods: {
-    getList(datas, id) {// 下拉联系人列表
+    getLists(datas, id) {// 下拉联系人列表
       let that = this;
       let timeout = generateTimeout();
       let nonce = generateNonce();
@@ -66,14 +94,10 @@ export default {
       })
         .then(function (res) {
           if (!res.error) {
-            // console.log(datas, id);
-            // console.log(that.data);
-            // console.log(res.data);
             that.data = datas == 1 ? res.data : that.data.concat(res.data);
             that.userMap = Object.assign(that.userMap, res.user);
-            that.user = res.user
+            that.user = res.user;
             that.total = res.totalPageCount;
-            // console.log(that.data);
             that.$refs?.mychild?.$toast.clear();
             if (that.data.length == 0) that.empty = true; //如果数据大于0，就显示空信息
             that.successtext = '刷新成功';
@@ -89,6 +113,55 @@ export default {
           that.successtext = '刷新失败';
           console.log(error);
           that.$toast.fail('请求失败，请稍后再试');
+        });
+    },
+    getList(datas, id) {// 下拉联系人列表
+      let that = this;
+      let timeout = generateTimeout();
+      let nonce = generateNonce();
+      let signature = generateSignature3(this.$C || local.C(), timeout, nonce)
+      let data = {
+        auditToId: this.$U || local.U(),
+        auditToHide: 0,
+        compId: this.$C || local.C(),
+        timeout: timeout,
+        nonce: nonce,
+        signature: signature,
+        current: datas || 1,
+        size: 20,
+      };
+      if (this.fuzzy) {
+        data.fuzzy = this.fuzzy;
+      };
+      let arr = this.data;
+      if (arr.length > 100) {
+        arr = []
+      }
+      this.$get('/api/request/itr/comp/customer/record/result', {
+        params: data,
+      })
+        .then((res) => {
+          let qqd = [];
+          if (datas == 1) { // 等于1直接把获取的数据赋值；
+            qqd = res.data
+          } else { // 不等第一页时候需要判断，如果updateIndex 这个参数为-1证明用户没点击过，非0直接从数据中删除
+            if (this.updateIndex == -1) {
+              qqd = arr.concat(res.data) // 没点击过直接赋值；
+            } else {
+              var item = arr.concat(res.data);
+              var cc = item.splice(this.updateIndex, 1)
+              qqd = item;
+            }
+          }
+          this.userMap = Object.assign(this.userMap, res.user);
+          this.data = qqd;
+          this.total = res.totalPageCount;
+          this.$toast.clear();
+        })
+        .catch((error) => {
+          this.isLoading = false;  // 如果是刷新的情况那么就 关闭刷新状态
+          this.successtext = '刷新失败';
+          this.$toast.fail('请求失败，请稍后再试');
         });
     },
     totalLodding() {
@@ -122,8 +195,6 @@ export default {
           this.noncestr = nonce;
           this.timestamp = timeout / 1000;
           let url = location.href.split('#')[0];
-          console.log(url, 'url')
-
           let str1 =
             'jsapi_ticket=' + res.jsapi_ticket
             + '&noncestr=' + this.noncestr2
@@ -140,8 +211,11 @@ export default {
             jsApiList: ['agentConfig', 'selectExternalContact', 'openEnterpriseChat'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
           });
           wx.ready(function () {
-            wx.hideAllNonBaseMenuItem();
-
+            // wx.hideAllNonBaseMenuItem();
+            // wx.hideOptionMenu();
+            // wx.hideMenuItems({
+            //   menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari', 'menuItem: refresh'] // 要隐藏的菜单项
+            // });
             wx.agentConfig({
               corpid: that.appid2, // 必填，企业微信的corpid，必须与当前登录的企业一致
               agentid: res.agentId, // 必填，企业微信的应用id （e.g. 1000247）
@@ -276,7 +350,6 @@ export default {
     chengParentCurs(data) {
       console.log(this.mode, data, 'common')
       if (sessionStorage.getItem("route") == 'LinkDetailed' || sessionStorage.getItem("route") == 'Addcustomer') return;// 如果是 LinkDetailed 就return掉
-
       if (this.mode === 'list') { // mode 是判断是否是搜索分页还是列表分页 
         this.$toast.loading('加载中...');
         // this.current = data;  // 备份当前的页数，目的微=为了保存时候获取到请求的当页数
@@ -353,7 +426,30 @@ export default {
     ManualUpdate(index, wxid) {
       this.data[index].wxCrmId = wxid;
       // console.log(this.data[index]);
-    }
+    },
+    firstLodding() {  // 初始化时候防流氓加载
+      this.$toast.loading({
+        message: "搜索中...",
+        forbidClick: true,
+        duration: 0, // 持续展示 toast
+        forbidClick: true,
+        overlay: true,
+      });
+    },
+    onSearch(val) {
+      console.log(val);
+      this.fuzzy = val;
+      this.getList(1)
+      this.firstLodding()
+    },
+    onCancel() {
+      document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
+      this.search = '';
+      this.fuzzy = '';
+      this.state = 'list';
+      this.$store.commit('SearchfuzzyReset', 'off');
+      this.getList(1)
+    },
 
   },
   async created() {
@@ -364,9 +460,9 @@ export default {
 
   },
   activated() {
+    let index = sessionStorage.getItem('ManualIdx');
     document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.common;
     // 如果ManualData：true 证明姓名，电话，跟进记录修改过，这样的话就重新赋值把。
-    let index = sessionStorage.getItem('ManualIdx');
     let { nickName, company, sheet, gender } = this.$store.state.ManualData;
     try {  // 不为空的情况下回显手动更改数据
       if (nickName !== '') { this.data[index].nickname = nickName; }
@@ -418,6 +514,16 @@ export default {
       if (to.name == 'Common' && from.name == 'Addcustomer' && to.params.status == 'success') {
         vm.getList(1);
         document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
+      } else if (from.name === 'LinkDetailed') {  // 返回的时候消除小圆点
+        let index = sessionStorage.getItem('ManualIdx');
+        if (vm.data[index]) {
+          try {
+            vm.data[index].auditToRead = 1;
+          }
+          catch (err) {
+            console.log('518')
+          }
+        }
       }
       vm.$store.commit("cache", "Home,Common,HighSeas");
     })

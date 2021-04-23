@@ -1,21 +1,40 @@
 <template>
   <div class="orderList" @scroll="scrollEvent">
     <div class="search">
-      <van-search plain class="a" v-model="SearchValue" placeholder="请输入搜索关键词" @input="searchChange" />
-      <span class="geu" type="primary" plain size="mini" @click="goback">关闭</span>
+      <van-search
+        plain
+        class="a"
+        v-model="SearchValue"
+        placeholder="请输入搜索关键词"
+        @input="searchChange"
+      />
+      <span class="geu" type="primary" plain size="mini" @click="goback"
+        >关闭</span
+      >
     </div>
-    <div v-for="(item,index) in orderList " :key="index" class="orderViews" @click="orderSelect(item.nickname,item.userId)">
-      <img :src="item.portrait" alt="">
+    <div
+      v-for="(item, index) in orderList"
+      :key="index"
+      class="orderViews"
+      @click="orderSelect(item.nickname, item.userId)"
+    >
+      <img :src="item.portrait" alt="" />
       <div class="orderText">
-        <p><span>{{item.nickname}}</span><span>({{item.userId1}})</span></p>
+        <p>
+          <span style="font-size: 15px">{{ item.nickname }}</span>
+          <!-- <span v-if="item.member == 1" class="approve">V</span> -->
+        </p>
+        <p>
+          <span style="font-size: 12px">{{ item.userId1 }}</span>
+        </p>
+        <!-- <p><span>{{item.nickname}}</span><span>({{item.userId1}})</span></p>
         <p>
           <span>{{item.nodeName}}</span>
           <span>{{item.groupName}}</span>
           <span>{{item.roleName}}</span>
-        </p>
+        </p> -->
       </div>
     </div>
-
   </div>
 </template>
 
@@ -45,13 +64,6 @@ export default {
       }
       sessionStorage.setItem('orderSelectInfo', JSON.stringify(data));
       this.$router.push('/OrderDetail')
-      // this.$router.push({
-      //   name: 'OrderDetail',
-      //   params: {
-      //     name,
-      //     id
-      //   }
-      // })
     },
     scrollEvent() {  // 滚动触底方法
       let read = document.querySelector('.orderList')
@@ -145,7 +157,7 @@ export default {
         });
     },
     goback() { // 返回上一层
-      this.$router.replace('/OrderDetail');
+      this.$router.go(-1);
     }
   },
   watch: {
@@ -216,6 +228,17 @@ export default {
       display: inline-block;
       margin-right: 10px;
     }
+  }
+  .member {
+    background-color: #f7831c;
+    color: #fff;
+    font-size: 0.22rem !important;
+    display: inline-block;
+    padding: 0px 3px;
+    line-height: 15px !important;
+    border-radius: 2px;
+    text-align: center;
+    margin-left: 5px;
   }
 }
 </style> 

@@ -1,21 +1,47 @@
 <template>
   <div class="RadarDetail">
     <div class="main">
-      <div class='visitor-info'>
-        <span class='promote line2'>推广人员 : {{visitorInfo.toName}}({{visitorInfo.to}})</span>
-        <span class='name line1'>访客信息 : {{visitorInfo.nickname}}</span>
-        <div catchtap="handelClickPhone" class='name line1'>访客电话 : {{visitorInfo.id.length==11?visitorInfo.id:'无'}}</div>
-      </div>
-    </div>
-    <div class="visitor_radar">
-      <div class="i-sticky-demo">
-        <div v-for="(item,index) in dateMap" :key="index">
-          <div class='date-title'>{{index}} </div>
-          <div v-for="(items,idxs) in item" :key="idxs" class="i-sticky-demo-item"><span>{{items.date}} </span><span>{{items.description}}</span></div>
+      <div class="visitor-info">
+        <span class="promote line2"
+          >推广人员 : {{ visitorInfo.toName }}({{ visitorInfo.to }})</span
+        >
+        <span class="name line1">访客信息 : {{ visitorInfo.nickname }}</span>
+        <div catchtap="handelClickPhone" class="name line1">
+          访客电话 : {{ visitorInfo.id.length == 11 ? visitorInfo.id : "无" }}
         </div>
       </div>
+      <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+        <van-list
+          class="vanList"
+          :immediate-check="false"
+          v-model="loading"
+          :finished="finished"
+          finished-span="没有更多了"
+          @load="onLoad"
+        >
+          <div class="visitor_radar">
+            <div class="i-sticky-demo">
+              <div v-for="(item, index) in dateMap" :key="index">
+                <div class="date-title">{{ index }}</div>
+                <div
+                  v-for="(items, idxs) in item"
+                  :key="idxs"
+                  class="i-sticky-demo-item"
+                >
+                  <span>{{ items.date }} </span
+                  ><span>{{ items.description }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </van-list>
+        <!-- <van-empty
+          v-else
+          image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+          description="暂无相关消息"
+        /> -->
+      </van-pull-refresh>
     </div>
-
   </div>
 </template>
 
@@ -27,6 +53,9 @@ export default {
   name: 'RadarDetail',
   data() {
     return {
+      loading: false,
+      finished: false,
+      refreshing: false,
       visitorInfo: {},
       optMap: {
         "0": "正在访问",
@@ -63,7 +92,9 @@ export default {
       },
       start: "【",
       end: "】",
-      dateMap: {}
+      dateMap: {},
+      total: 0,
+      current: 1
     }
   },
   created() {
@@ -71,12 +102,34 @@ export default {
     this.loadingRadarDetail();
   },
   methods: {
-    loadingRadarDetail() {
+    onRefresh() {
+      // this.$emit('refreshEmpty')
+      console.log('1111')
+      this.finished = false;
+      this.loading = true;
+      setTimeout(() => {
+        this.refreshing = false;
+      }, 1000);
+      this.loadingRadarDetail();
+    },
+    onLoad() {
+      if (this.current >= this.total) {
+        this.finished = true;
+        return;
+      }
+      this.current = ++this.current;
+      this.loadingRadarDetail();
+      setTimeout(() => {
+        this.loading = false;
+      }, 1800)
+    },
+    loadingRadarDetail(cur) {
       let that = this;
       let to = JSON.parse(sessionStorage.getItem('visitor_info'))?.to;
       let id = JSON.parse(sessionStorage.getItem('visitor_info'))?.id;
       let signature = generateSignature3(timeout, nonce);
-      let dateMap = {};
+      let dateMap = this.dateMap;
+      console.log(dateMap)
       this.$get('/api/request/itr/comp/trajectory/detail', {
         params: {
           from: id,
@@ -84,11 +137,10 @@ export default {
           timeout: timeout,
           nonce: nonce,
           signature: signature,
-          current: 1
+          current: this.current
         },
       })
         .then(function (res) {
-          console.log(res);
           if (!res.error) {
             res.data.forEach(item => {
               let createTimeStr = item.createTime;
@@ -108,9 +160,10 @@ export default {
               }
               dateMap[key].push(item);
             })
+            that.dateMap = JSON.parse(JSON.stringify(dateMap));
+            that.total = res.totalPageCount;
           }
-          console.log(dateMap);
-          that.dateMap = dateMap;
+
         })
         .catch(function (error) {
           console.log(error);
@@ -141,6 +194,10 @@ export default {
       }
       return time;
     },
+  },
+  activated() {
+    console.log('actied')
+
   }
 }
 </script>
@@ -153,7 +210,7 @@ export default {
   .main {
     display: flex;
     flex-direction: row;
-    background-color: #fff;
+    background-color: #eee;
     justify-items: center;
     align-items: center;
     .visitor-info {
@@ -165,17 +222,23 @@ export default {
       line-height: 0.5rem;
       color: #000;
       flex: 1;
+      position: fixed;
+      left: 0;
+      top: 0;
+      right: 0;
+      z-index: 9;
     }
   }
   .visitor_radar {
     padding: 0 10px;
-
-    margin-top: 10px;
+    margin-top: 105px;
     background-color: #fff;
     display: flex;
     flex-direction: column;
+    width: 100vw;
+    box-sizing: border-box;
     .date-title {
-      font-size: 20px;
+      font-size: 0.28rem;
       font-weight: bold;
       padding: 7px 0;
     }

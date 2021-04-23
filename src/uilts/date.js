@@ -37,11 +37,18 @@ var yesterday = function getDay(num, str) { // 获取昨日日期：2015-03-19
 var lastSevent = function lastSevent(num) {
 	var date1 = new Date();
 	//今天时间
-	var time1 = date1.getFullYear() + "-" + (date1.getMonth() + 1) + "-" + date1.getDate()
 	var date2 = new Date(date1);
 	date2.setDate(date1.getDate() + num);
+	let Mon = date2.getMonth() + 1;
+	let date = date2.getDate();
+	if (Mon.toString().length == 1) {
+		Mon = '0' + Mon
+	};
+	if (date.toString().length == 1) {
+		date = '0' + date
+	};
 	//num是正数表示之后的时间，num负数表示之前的时间，0表示今天
-	var time2 = date2.getFullYear() + "-" + (date2.getMonth() + 1) + "-" + date2.getDate();
+	var time2 = date2.getFullYear() + "-" + Mon + "-" + date;
 	return time2;
 }
 
@@ -72,8 +79,8 @@ let month = function month() {
 	var timeStar = Date.parse(monthStartDate) / 1000;//s
 	var timeend = Date.parse(monthEndDate) / 1000;//s
 	return {
-		timeStar: formatTime(timeStar, 'Y/M/D'),
-		timeend: formatTime(timeend, 'Y/M/D')
+		timeStar: formatTime(timeStar, 'Y-M-D'),
+		timeend: formatTime(timeend, 'Y-M-D')
 	}
 }
 function formatTime(number, format) { // 时间戳转日期格式
@@ -120,10 +127,36 @@ let getCurrentDate = function getCurrentDate(format) {
 	}
 	//精确到分
 	else if (format == 2) {
-		time =year.toString() + month.toString() + date.toString() + hour.toString() + minu.toString() + sec		
+		time = year.toString() + month.toString() + date.toString() + hour.toString() + minu.toString() + sec
 	}
 	return time;
 }
+function getLastDay(year, month) {
+	let new_year = year;
+	let new_month = month++;//取下一个月的第一天，方便计算（最后一天不固定）
+	if (month > 12) {//如果当前大于12月，则年份转到下一年
+		new_month -= 12;//月份减
+		new_year++;//年份增
+	}
+	// 取当年当月对应的下个月的前一天，即当前月的最后一天
+	let last_date = new Date(new_year, new_month, 0).getDate();
+	return last_date;
+}
+function getFirstAndLastDay() {
+	let now = new Date();
+	let strLink = "-";
+	let year = now.getFullYear();
+	let month = now.getMonth() + 1;
+	if (month >= 1 && month <= 9) {
+		month = "0" + month;
+	}
+	let lastDay = getLastDay(year, month);
+	let firstDate = year + strLink + month + strLink + '01';
+	let lastDate = year + strLink + month + strLink + lastDay;
+	let returnArr = [firstDate, lastDate];//以数组形式返回
+	return returnArr;
+}
+// 获取即当月的第一天和最后一天
 export {
 	formatDate,
 	formatDateTime,
@@ -131,5 +164,6 @@ export {
 	lastSevent,
 	month,
 	getM,
-	getCurrentDate
+	getCurrentDate,
+	getFirstAndLastDay
 }

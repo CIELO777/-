@@ -26,8 +26,8 @@
               }"
             >
               <div class="mask">
-                <span>{{ item.time }}</span>
-                <span>{{
+                <span style="width: 60%">{{ item.time }}</span>
+                <span class="PosterTit">{{
                   userMaps[item.userId]
                     ? userMaps[item.userId].nickname || userMaps.nickname
                     : ""
@@ -37,7 +37,13 @@
               <div class="top" v-if="item.topState == 1">置顶</div>
             </div>
             <p class="title">{{ item.title }}</p>
-            <p class="share">分享数&nbsp;&nbsp;{{ item.shareNumber }}</p>
+            <p class="share">
+              <img
+                style="width: 15px; margin-right: 3px"
+                src="../../../public/img/icon/share.png"
+                alt=""
+              />&nbsp;&nbsp;{{ item.shareNumber }}次
+            </p>
             <!-- <div class="card">
             <img :src="item.thumb" alt="" style="width: 100px; height: 100px" />
           </div> -->
@@ -52,13 +58,14 @@
         description="暂无相关消息"
       />
     </van-pull-refresh>
+    <PostImg :src.sync="Pthumb"></PostImg>
   </div>
 </template>
-
 <script>
+import PostImg from '../../components/poster/PosterImg'; // 定制图片预览
 export default {
   name: "PosterView",
-  components: {},
+  components: { PostImg },
   props: ['datas', 'userMaps', 'configs', 'states'],
   data() {
     return {
@@ -68,6 +75,7 @@ export default {
       backWidth: 0,
       backHeight: 0,
       screenWidth: document.body.clientWidth,     // 屏幕宽
+      Pthumb: '',
     };
   },
   watch: {},
@@ -99,21 +107,12 @@ export default {
       this.onLoad();
     },
     clickColor(item) {
-      return;
-      this.$router.push({
-        name: 'Iframe',
-        params: {
-          url: item.url,
-          title: item.title,
-          desc: item.description,
-          imgUrl: item.thumb
-        }
-      })
+      this.Pthumb = item.thumb;
     }
   },
   created() {
     this.backWidth = this.screenWidth / 2;
-    this.backHeight = this.backWidth * 1.5;
+    this.backHeight = this.backWidth;
   },
   mounted() { }
 };
@@ -123,22 +122,26 @@ export default {
 .posterView {
   background: #eee;
   font-size: 0.32rem;
-  padding-top: 100px;
+  padding-top: 105px;
   .ww {
     display: flex;
     flex-wrap: wrap;
+    padding: 0 4px;
   }
   .card {
     position: relative;
   }
   .cont {
     width: 50%;
-    width: calc(100% / 2 - 5px);
-    margin: 0 calc(5px / 2) 10px;
+    width: calc(100% / 3 - 10px);
+    margin: 0 calc(10px / 2) 10px;
     .title {
       color: #000;
       font-size: 0.28rem;
       line-height: 30px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .share {
       display: flex;
@@ -178,7 +181,7 @@ export default {
       position: absolute;
       left: 8px;
       top: 9px;
-      background: #F6C110;
+      background: #f6c110;
       width: 35px;
       border-radius: 3px;
       color: #000;
@@ -194,6 +197,11 @@ export default {
   /deep/ .van-list__finished-text {
     width: 100%;
     margin-bottom: 45px;
+  }
+  .PosterTit {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 </style>

@@ -6,43 +6,72 @@
       </div>
       <span>新增订单</span>
     </div>
-    <div class="orderCont">
-      <div v-for="(item,index) in orderList" @click="handelClickOrderItem(item.id)" :key="index" style="border-bottom: 1px solid #f1f1f1">
+    <div class="orderCont" v-if="orderList.length > 0">
+      <div
+        v-for="(item, index) in orderList"
+        @click="handelClickOrderItem(item.id)"
+        :key="index"
+        style="border-bottom: 1px solid #f1f1f1"
+      >
         <div class="main-order">
           <div>
             <div class="line1">
               <span>客户信息：</span>
-              <span class='bold'>{{item.receiptName}}</span>
+              <span class="bold">{{ item.receiptName }}</span>
             </div>
             <div class="line1">
               <span>推广昵称：</span>
-              <span class="qs-gray">{{item.promoteName}}</span>
+              <span class="qs-gray">{{ item.promoteName }}</span>
             </div>
             <div class="line1">
               <span>订单金额：</span>
-              <span class="qs-red bold ">{{item.total}} 元</span>
+              <span class="qs-red bold">{{ item.total }} 元</span>
             </div>
             <div class="line1">
-              <span>支付状态：</span>
-              <span :class="item.paymentStatus==0?'qs-blue':'qs-green' .bold">{{item.paymentStatus==0?'未支付':'已支付'}}</span>
+              <span>付款状态：</span>
+              <span
+                :class="item.paymentStatus == 0 ? 'qs-blue' : 'qs-green'.bold"
+                >{{ item.paymentStatus == 0 ? "未支付" : "已支付" }}</span
+              >
             </div>
           </div>
           <div>
             <div class="line1">
               <span>提成状态：</span>
-              <span :class="item.commissionStatus==0?'qs-red':item.commissionStatus==1?'qs-green':'qs-red'">{{item.commissionStatus==0?'未确认':item.commissionStatus==1?'提成有效':'提成无效'}}</span>
+              <span
+                :class="
+                  item.commissionStatus == 0
+                    ? 'qs-red'
+                    : item.commissionStatus == 1
+                    ? 'qs-green'
+                    : 'qs-red'
+                "
+                >{{
+                  item.commissionStatus == 0
+                    ? "未确认"
+                    : item.commissionStatus == 1
+                    ? "提成有效"
+                    : "提成无效"
+                }}</span
+              >
             </div>
             <div class="line1">
               <span class="qs-gray">推广人员：</span>
-              <span class="qs-gray">{{item.promote === 'undefined' ? "":item.promote }}</span>
+              <span class="qs-gray">{{
+                item.promote === "undefined" || item.promote === null
+                  ? "无"
+                  : item.promote
+              }}</span>
             </div>
             <div class="line1">
-              <span class="qs-gray ">支付方式：</span>
-              <span class="qs-gray ">{{item.paymentTypeName}}</span>
+              <span class="qs-gray">支付方式：</span>
+              <span class="qs-gray">{{ item.paymentTypeName }}</span>
             </div>
             <div class="line1">
               <span>发货状态：</span>
-              <span :class="item.supplyStatus==0?'qs-blue':'qs-green'">{{item.supplyStatus==0?'未发货':'已发货'}}</span>
+              <span :class="item.supplyStatus == 0 ? 'qs-blue' : 'qs-green'">{{
+                item.supplyStatus == 0 ? "未发货" : "已发货"
+              }}</span>
             </div>
           </div>
           <div>
@@ -50,12 +79,19 @@
           </div>
         </div>
         <div class="order-date">
-          <span class="qs-gray line1 pl"><span style="color:#2C3E50">下单时间：</span>{{item.createTime}}</span>
+          <span class="qs-gray line1 pl"
+            ><span style="color: #2c3e50">下单时间：</span
+            >{{ item.createTime }}</span
+          >
         </div>
       </div>
-      <van-empty v-show="empty" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
-
     </div>
+    <van-empty
+      v-else
+      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+      description="暂无相关消息"
+      class="null"
+    />
   </div>
 </template>
 <script>
@@ -71,7 +107,7 @@ export default {
   data() {
     return {
       orderList: [],
-      // current: 1,
+      current: 1,
       total: 0,
       empty: false,
     }
@@ -125,7 +161,7 @@ export default {
 
   },
   created() {
-    console.log('created')
+    // console.log('created')
     this.getOrderList();
     this.current = 1;
   },
@@ -143,7 +179,7 @@ export default {
     },
   },
   activated() {
-    console.log('activated')
+    // console.log('activated')
     document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.order; // 设置每个页面的scrollTop
   },
 }
@@ -176,9 +212,10 @@ export default {
   .orderCont {
     // padding: 8px 8px;
     background-color: #fff;
+    padding-top: 95px;
     .main-order {
       padding: 0px 0.2rem;
-      background-color: #fff;
+      // background-color: #fff;
       font-size: 14px;
       margin-top: 2px;
       padding-top: 0.16rem;
@@ -215,7 +252,7 @@ export default {
       color: #0000ff;
     }
     .qs-gray {
-      color: #9c9c9c;
+      color: #6b6969;
     }
     .order-date {
       background-color: #fff;
@@ -226,8 +263,8 @@ export default {
       padding-left: 0.2rem;
     }
   }
-  .orderCont:nth-child(2) {
-    padding-top: 1.9rem;
+  .null {
+    padding-top: 2.9rem;
   }
   .van-empty {
     background: #f1f1f1;

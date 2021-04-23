@@ -1,45 +1,93 @@
 <template>
   <div class="VideoPage">
-    <div class="main" style="margin:35px 0px 0px 0px">
+    <div class="main" style="margin: 35px 0px 0px 0px">
       <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-        <van-list v-if="datas.length > 0" finished-text="没有更多了" :immediate-check="false" v-model="loading" :finished="finished" finished-span="没有更多了" @load="onLoad">
-          <div v-for="(item,index) in datas" :key="index" class="cont" @click="clickColor(item)">
-            <div class="card" style="background:#fff;">
-              <div class="bgc" :style="{backgroundImage:'url('+item.thumb+') ',height: backHeight +'px'}"></div>
+        <van-list
+          v-if="datas.length > 0"
+          finished-text="没有更多了"
+          :immediate-check="false"
+          v-model="loading"
+          :finished="finished"
+          finished-span="没有更多了"
+          @load="onLoad"
+        >
+          <div
+            v-for="(item, index) in datas"
+            :key="index"
+            class="cont"
+            @click="clickColor(item, index)"
+          >
+            <div class="card">
+              <div class="top" v-if="item.topState == 1">置顶</div>
+              <div
+                class="bgc"
+                :style="{
+                  backgroundImage: 'url(' + item.thumb + ') ',
+                  height: backHeight,
+                }"
+              ></div>
               <div class="mask">
                 <van-icon name="play" color="#fff" size="35" />
               </div>
+              <div class="mask1">
+                <span>{{ item.time }}</span>
+                <span>{{
+                  userMaps[item.userId]
+                    ? userMaps[item.userId].nickname || userMaps.nickname
+                    : ""
+                }}</span>
+              </div>
             </div>
-            <div style="line-height:25px;padding:5px 10px;background:#fff;  position: relative;">
-              <div class="line1">{{item.description}}</div>
+            <div class="HbTit">
+              <div class="line1">{{ item.description }}</div>
               <div class="ed">
                 <div class="wa">
-
-                  <van-icon name="eye-o" size='18' />
-                  <span style="margin-right:5px">
-                    {{item.visits}}
+                  <van-icon name="eye" size="18" />
+                  <span style="margin-right: 5px">
+                    {{ item.visits1 }}
                   </span>
-                  <van-icon name="share-o" size='18' />
-                  {{item.shares}}
+                  <img
+                    style="width: 15px; margin-right: 3px"
+                    src="../../../public/img/icon/share.png"
+                    alt=""
+                  />
+                  {{ item.shares }}
                 </div>
                 <div class="ca" @click.stop="createContent(item)">
-                  <van-icon name="share" size='18' />
+                  <img
+                    style="width: 15px; margin-right: 3px"
+                    :src="
+                      Single
+                        ? require('../../../public/img/icon/share.png')
+                        : require('../../../public/img/icon/menu.png')
+                    "
+                    alt=""
+                  />
                 </div>
               </div>
-
             </div>
           </div>
         </van-list>
-        <van-empty v-else class="custom-image" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
+        <van-empty
+          v-else
+          class="custom-image"
+          image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+          description="暂无相关消息"
+        />
       </van-pull-refresh>
-      <share :ShareContents="ShareContent" v-show="showShare" :showShares.sync="showShare"></share>
-
+      <share
+        :ShareContents="ShareContent"
+        v-show="showShare"
+        :showShares.sync="showShare"
+      ></share>
     </div>
   </div>
 </template>
 
 <script>
 import share from '../../components/share'
+import communication from "../../uilts/communication";
+import { getM } from '../../uilts/date';
 
 export default {
   name: "VideoPage",
@@ -48,28 +96,40 @@ export default {
   data() {
     return {
       id: 0,
-      screenWidth: document.body.clientWidth,     // 屏幕宽
+      screenWidth: document.body.clientWidth || document.documentElement.clientWidth,     // 屏幕宽
       backWidth: 0,
       backHeight: 0,
       loading: false,
       finished: false,
       refreshing: false,
       ShareContent: {},
-      showShare: false
-
+      showShare: false,
+      Single: false,
     };
   },
-  watch: {},
+  watch: {
+  },
   computed: {},
   methods: {},
   created() {
-    console.log('111')
-    console.log(this.screenWidth)
     this.backWidth = this.screenWidth / 2;
-    this.backHeight = this.backWidth * 1.5;
+    this.backHeight = (this.backWidth * 1.5) + 'px';
+    this.$nextTick(() => {
+      this.Single = sessionStorage.getItem('Single') || false;
+
+    })
+    console.log(this.Single);
   },
   mounted() {
-
+    const that = this;
+    window.onresize = () => {  // 兼容企业微信客户端pc 端高度;
+      return (() => {
+        window.screenWidth = document.body.clientWidth;
+        that.screenWidth = window.screenWidth;
+        that.backWidth = that.screenWidth / 2;
+        that.backHeight = (that.backWidth * 1.5) + 'px';
+      })()
+    }
   },
   methods: {
     onRefresh() {
@@ -97,29 +157,48 @@ export default {
         this.loading = false;
       }, 1000)
     },
-    clickColor(item) {
+    clickColor(item, index) {
       this.$router.push({
         name: 'Iframe',
         params: {
-          url: item.url,
+          url: item.initialUrl,
           title: item.title,
           desc: item.description,
           imgUrl: item.thumb
 
         }
       })
+      communication.$emit('dateViodeo', index, getM()[3]); //触发home 页面方法，目的是为了更新列表数据
     },
     createContent(item) {
-      console.log(item)
-      this.showShare = true;
-      this.ShareContent = {
-        title: item.title,
-        imgUrl: item.thumb,
-        desc: item.description,
-        url: item.url
+      console.log(item);
+      if (sessionStorage.getItem('Single')) { //单聊模式发送  正常模式赋值
+        wx.invoke('sendChatMessage', {
+          msgtype: "news", //消息类型，必填
+          news: {
+            link: item.initialUrl, //H5消息页面url 必填
+            title: item.title, //H5消息标题
+            desc: item.description, //H5消息摘要
+            imgUrl: item.thumb, //H5消息封面图片URL
+          },
+        }, function (res) {
+          console.log('服务指引返回结果', res);
+          if (res.err_msg == 'sendChatMessage:ok') {
+            //发送成功
+          }
+        })
+      } else {
+        this.showShare = true;
+        this.ShareContent = {
+          title: item.title,
+          imgUrl: item.thumb,
+          desc: item.description,
+          url: item.url
+        }
       }
     }
   },
+
   components: {
     share
   }
@@ -152,6 +231,7 @@ export default {
     margin: 0 auto;
     position: relative;
     width: 100%;
+    border-radius: 10px;
   }
   .mask {
     width: 45px;
@@ -169,8 +249,10 @@ export default {
   .line1 {
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
+    -webkit-line-clamp: 2;
     overflow: hidden;
+    color: #000;
+    font-size: 0.28rem;
   }
   .ed {
     display: flex;
@@ -182,6 +264,9 @@ export default {
   .wa {
     display: flex;
     align-items: center;
+    i {
+      margin-right: 3px;
+    }
   }
   .ca {
     display: flex;
@@ -194,6 +279,45 @@ export default {
   }
   /deep/ .van-list__finished-text {
     width: 100%;
+  }
+  .top {
+    position: absolute;
+    left: 10px;
+    top: 9px;
+    background: #f6c110;
+    width: 29px;
+    border-radius: 3px;
+    color: #000;
+    font-size: 10px;
+    text-align: center;
+    padding: 2px;
+    z-index: 998;
+  }
+  .mask1 {
+    height: 20px;
+    line-height: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    font-size: 0.24rem;
+    width: 100%;
+    display: flex;
+    padding: 0 8px;
+    box-sizing: border-box;
+    justify-content: space-between;
+    border-radius: 0 0 9px 9px;
+  }
+  .HbTit {
+    line-height: 25px;
+    padding: 5px 10px;
+    background: #fff;
+    position: relative;
+    min-height: 85px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
   }
 }
 </style>

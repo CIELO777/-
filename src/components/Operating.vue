@@ -1,22 +1,56 @@
 <template>
   <div class="operat">
-
-    <div v-for="(item,index) in optRecordMap" :key="index">
-      <div class="qs-title  bg-color-f0">
-        <span>{{index}}</span>
+    <van-list
+      finished-text="没有更多了"
+      :immediate-check="false"
+      v-model="loading"
+      :finished="finished"
+      finished-span="没有更多了"
+      @load="onLoad"
+      v-if="Object.keys(optRecordMap).length>0"
+    >
+      <div v-for="(item, index) in optRecordMap" :key="index">
+        <div class="qs-title bg-color-f0">
+          <span>{{ index }}</span>
+        </div>
+        <div
+          class="record-detail"
+          v-for="(items, indexs) in item"
+          :key="indexs"
+        >
+          <span>{{ items.accurateTime }}</span>
+          <span class="detail"
+            >{{ optRecordUserMap[items.creator].nickname }}
+          </span>
+          <span class="detail qs-blue">{{ items.typeName }}</span>
+          <span v-if="items.type != 6 && items.type != 7">
+            <span v-if="items.type == 2"> 给 </span>
+            <template v-if="items.type == 2">
+              <span
+                class="qs-green"
+                v-for="(it, index) in items.toArr"
+                :key="index"
+              >
+                {{ optRecordUserMap[it].nickname }}</span
+              >
+            </template>
+            <!-- v-if="items.type == 1 || items.type == 0" -->
+            <span> 该联系人</span>
+          </span>
+          <span v-else> 该联系人给 </span>
+          <template v-if="items.type == 6 || items.type == 7">
+            <span v-for="(i, indx) in items.toArr" :key="indx" class="qs-green"
+              >{{ optRecordUserMap[i].nickname }}
+            </span>
+          </template>
+        </div>
       </div>
-      <div class="record-detail" v-for="(items,indexs) in item" :key="indexs">
-        <span>{{items.accurateTime}}</span>
-        <span class="detail" :class="items.type == 7 ?'qs-green':''">{{optRecordUserMap[items.creator].nickname}}</span>
-        <span class="detail qs-blue">{{items.typeName}}</span>
-        <span v-if="items.type != 6 && items.type != 7 "> 该联系人</span>
-        <span v-else> 该联系人给 </span>
-        <span :class="items.type == 6 ?'qs-green':''" v-if="items.type == 6 || items.type == 7 ">
-          {{optRecordUserMap[items.from].nickname}} </span>
-      </div>
-    </div>
-    <van-empty v-show="empty" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
-
+    </van-list>
+    <van-empty
+      v-show="empty"
+      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+      description="暂无相关消息"
+    />
   </div>
 </template>
 
@@ -29,14 +63,16 @@ let nonce = generateNonce();
 
 export default {
   name: 'operating',
-  mixins: [ScorllMixin],
+  // mixins: [ScorllMixin],
   data() {
     return {
       optRecordMap: {},
       optRecordUserMap: {},
       total: 0,
+      current: 1,
       empty: false,
-
+      loading: false,
+      finished: false,
     }
   },
   methods: {
@@ -45,7 +81,7 @@ export default {
       let signature = generateSignature3(crmInfo, this.$C || local.C(), timeout, nonce);
       let that = this;
       let optRecordMap = this.optRecordMap;
-      let optRecordUserMap = {};
+      let optRecordUserMap = this.optRecordUserMap;
       this.$get('/api/request/itr/comp/customer/opt/query', {
         params: {
           ptId: crmInfo,
@@ -71,6 +107,18 @@ export default {
                 item.accurateTime = time[1].substring(0, 5) + "分";;
                 optRecordMap[mapKey].push(item);
               }
+              let toArr = []
+              let toStr = '';
+              if (item.to) {
+                item.to = item.to.split(",");
+                item.to.forEach(item => {
+                  let arr = item.split("|");
+                  toArr.push(arr[0])
+                  toStr += arr[0] + ",";
+                });
+                item.toArr = toArr;
+                item.toStr = toStr;
+              }
               if (item.type == 0) {
                 item.typeName = "新增";
               } else if (item.type == 1) {
@@ -94,20 +142,35 @@ export default {
               }
             })
             that.optRecordMap = { ...optRecordMap };
+            // console.log();
             if (Object.keys(that.optRecordMap).length == 0) that.empty = true; //如果数据等于0，就显示空信息
-            that.total = res.totalPageCount;
             that.optRecordUserMap = Object.assign(optRecordUserMap, res.user);
+            that.total = res.totalPageCount;
             that.$toast.clear()
 
           } else { }
         })
         .catch(function (error) {
         });
+    },
+    onLoad() {
+      console.log(this.current, this.total);
+      if (this.current >= this.total) {
+        this.finished = true;
+        return;
+      }
+      this.current = ++this.current;
+      this.getOperating()
+      setTimeout(() => {
+        this.loading = false;
+      }, 1500)
     }
   },
   async created() {
     await this.getOperating()
     this.current = 1;
+  },
+  activated() {
   },
   computed: {
     getIndex() {

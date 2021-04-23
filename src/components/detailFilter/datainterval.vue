@@ -12,14 +12,15 @@
     </div>
     <div v-show="!common" class="diyTime">
       <p>
-        <van-icon name="arrow-left" @click="goback" />日期区间<span color="#fff"><span @click="DiyTime"></span></span>
+        <van-icon name="arrow-left" @click="goback" />日期区间<span color="#fff"
+          ><span @click="DiyTime"></span
+        ></span>
       </p>
       <van-cell title="起始时间" @click="lately('start')" :value="start">
       </van-cell>
       <van-cell title="截止时间" @click="lately('end')" :value="endtime">
       </van-cell>
     </div>
-
   </div>
 </template>
 
@@ -64,6 +65,7 @@ export default {
       this.$emit('update:type', data); // 给父组件是开始还是结尾
     },
     DiyTime() {
+      console.log(this.module)
       this.start = this.module.timestart;
       this.endtime = this.module.endtime;
       if (this.module.endtime === "" || this.module.timestart === "") {
@@ -102,5 +104,6 @@ export default {
       margin: 10px;
     }
   }
+ 
 }
 </style>

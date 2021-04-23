@@ -1,7 +1,26 @@
 <template>
   <div class="video">
-    <van-search :clearable="false" v-model="value" show-action placeholder="请输入搜索关键词" @search="search" @cancel="onCancel" />
-    <Tab :states="state" :tabArrays="tabArray" @ColorId="ColorIds" :datas="atData" :userMaps="userMap" :configs="config" @mySonChagne="mySonChagne" @onSearch="onSearch" @refreshEmpty="refreshEmptys"></Tab>
+    <van-search
+      @clear="onCancel"
+      v-model="value"
+      show-action
+      placeholder="请输入搜索关键词"
+    >
+      <template #action>
+        <div @click="search">搜索</div>
+      </template>
+    </van-search>
+    <Tab
+      :states="state"
+      :tabArrays="tabArray"
+      @ColorId="ColorIds"
+      :datas="atData"
+      :userMaps="userMap"
+      :configs="config"
+      @mySonChagne="mySonChagne"
+      @onSearch="onSearch"
+      @refreshEmpty="refreshEmptys"
+    ></Tab>
   </div>
 </template>
 
@@ -16,6 +35,8 @@ import {
 let timeout = generateTimeout();
 let nonce = generateNonce();
 import local from '../uilts/localStorage';
+import communication from "../uilts/communication";
+import { Toolbar } from '../uilts/toolbarMixin';
 
 export default {
   name: "Video",
@@ -40,11 +61,13 @@ export default {
   },
   watch: {},
   computed: {},
+  mixins: [Toolbar],
+
   activated() {
     console.log('act')
   },
   methods: {
-    getCategoryList() {  // 获取自定义行
+    async getTabList() {  // 获取自定义行
       let signature = generateSignature4(
         this.$C || local.C(),
         this.$U || local.U(),
@@ -60,33 +83,31 @@ export default {
         size: 50,
         signature: signature
       }
-      this.$get("/aliyun/remote/vod/category/result", {
+      await this.$get("/aliyun/remote/vod/category/result", {
         params: data,
       })
         .then((res) => {
-          if (!res.error) {
-            this.tabArray = res.data.sort(function (a, b) {
-              return a.sort - b.sort;
-            });
-            this.tabArray.splice(0, 0, { title: "全部", id: 0 });
-            this.tabArray.forEach(item => {  // 创建多维对象数组；
-              this.treeData[item.id] = {
-                data: [],
-                userMap: {},
-                config: {
-                  scroll: 0,
-                  current: 1,
-                  total: -1,
-                },
-              }
-            })
-          }
+          this.tabArray = res.data.sort(function (a, b) {
+            return a.sort - b.sort;
+          });
+          this.tabArray.splice(0, 0, { title: "全部", id: 0 });
+          this.tabArray.forEach(item => {  // 创建多维对象数组；
+            this.treeData[item.id] = {
+              data: [],
+              userMap: {},
+              config: {
+                scroll: 0,
+                current: 1,
+                total: -1,
+              },
+            }
+          })
         })
         .catch(function (error) {
           console.log(error);
         });
     },
-    getList(cur) { // 获取视频列表
+    async getList(cur) { // 获取视频列表
       let signature = generateSignature4(
         this.$C || local.C(),
         this.$U || local.U(),
@@ -104,18 +125,26 @@ export default {
         size: 20,
         cateId: this.id
       }
-      this.$get("/aliyun/remote/vod/result", {
+      await this.$get("/aliyun/remote/vod/result", {
         params: data,
       })
         .then((res) => {
           if (!res.error) {
             let qq = this.treeData[this.id];
-            qq.data = (cur == 1 || cur == undefined) ? res.data : qq.data.concat(res.data);
-            qq.userMap = res.user;
+            let cc = res.data.map(item => {
+              return {
+                ...item,
+                time: item.updateTime.split(' ')[0],
+                visits1: item.visits > 10000 ? Math.round((item.visits / 10000) * 1000) / 1000 + '万' : item.visits
+              }
+            })
+            qq.data = (cur == 1 || cur == undefined) ? cc : qq.data.concat(cc);
+            qq.userMap = Object.assign(qq.userMap, res.user);
             qq.config.total = res.totalPageCount;
             this.atData = JSON.parse(JSON.stringify(this.treeData[this.id].data))  // 传入当前数组
             this.userMap = JSON.parse(JSON.stringify(this.treeData[this.id].userMap))  // 传入当前对象
             this.config = JSON.parse(JSON.stringify(this.treeData[this.id].config));  // 总页数
+            this.$toast.clear();
           } else {
             that.$toast.fail("请求失败，请稍后再试");
           }
@@ -169,12 +198,14 @@ export default {
         timeout: timeout,
         nonce: nonce,
         current: cur,
-        fuzzy: this.value,
         signature: signature,
         cateId: this.id,
         userId: this.$U || local.U(),
         compId: this.$C || local.C(),
       };
+      if (this.value !== '') {
+        data.fuzzy = this.value;
+      }
       this.$get("/aliyun/remote/vod/result", {
         params: data,
       })
@@ -182,8 +213,15 @@ export default {
           console.log(res)
           if (res.data.length > 0) {
             let qq = this.treeData[this.id];
-            qq.data = (cur == 1 || cur == undefined) ? res.data : qq.data.concat(res.data);
-            qq.userMap = res.user;
+            let cc = res.data.map(item => {
+              return {
+                ...item,
+                time: item.updateTime.split(' ')[0],
+                visits1: item.visits > 10000 ? Math.round((item.visits / 10000) * 1000) / 1000 + '万' : item.visits
+              }
+            })
+            qq.data = (cur == 1 || cur == undefined) ? cc : qq.data.concat(cc);
+            qq.userMap = Object.assign(qq.userMap, res.user);
             qq.config.total = res.totalPageCount;
             this.atData = JSON.parse(JSON.stringify(this.treeData[this.id].data))  // 传入当前数组
             this.userMap = JSON.parse(JSON.stringify(this.treeData[this.id].userMap))  // 传入当前对象
@@ -204,7 +242,7 @@ export default {
     onCancel() {
       // if (this.value === '') return;
       this.state = 'list';
-      this.treeData[this.id].config.current = 1; 
+      this.treeData[this.id].config.current = 1;
       document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
       this.getList()
     },
@@ -215,15 +253,32 @@ export default {
     refreshEmptys() {  // 当用户下拉刷新是触发，清空页数
       this.config.current = 0;  // 总页
     },
+    loading() {
+      this.$toast.loading({
+        message: '加载中...',
+        forbidClick: true,
+        overlay: true,
+        forbidClick: true,
+        duration: 0
+      });
+    }
   },
   created() {
-    this.getCategoryList();
-    this.getList()
+    // this.loading()
+    // this.getTabList();
+    // this.getList();
   },
   mounted() {
     window.addEventListener('scroll', this.scrollToTop)
-
-  }
+    communication.$on('dateViodeo', (index, data) => {
+      this.atData[index].time = data; // 更新时间数据
+    })
+  },
+  beforeRouteEnter: (to, from, next) => {
+    next(vm => {
+      vm.$store.commit("cache", to.name);
+    })
+  },
 };
 </script>
 
@@ -234,6 +289,7 @@ export default {
     left: 0;
     right: 0;
     z-index: 999;
+    background: #fff;
   }
 }
 </style>

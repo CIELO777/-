@@ -1,14 +1,13 @@
 <template>
   <div class="poster">
     <van-search
-      :clearable="false"
       v-model="value"
       show-action
       placeholder="请输入搜索关键词"
-      @search="search"
+      @clear="onCancel"
     >
       <template #action>
-        <div @click="onCancel">取消</div>
+        <div @click="search">搜索</div>
       </template>
     </van-search>
     <Tab
@@ -23,17 +22,18 @@
       @refreshEmpty="refreshEmptys"
     ></Tab>
 
-    <van-tabbar v-model="active" active-color="#ee0a24" @change="onChange">
+    <!-- <van-tabbar v-model="active" active-color="#ee0a24" @change="onChange">
       <van-tabbar-item icon="home-o">海报</van-tabbar-item>
       <van-tabbar-item icon="search" to="/document" :replace="true"
         >文档</van-tabbar-item
       >
-    </van-tabbar>
+    </van-tabbar> -->
   </div>
 </template>
 
 <script>
 import Tab from '../components/colorPage/Tab';
+import PostImg from '../components/poster/PosterImg'; // 定制图片预览
 
 import local from '../uilts/localStorage';
 import {
@@ -45,7 +45,7 @@ let timeout = generateTimeout();
 let nonce = generateNonce();
 export default {
   name: "Poster",
-  components: { Tab },
+  components: { Tab, },
   props: {},
   data() {
     return {
@@ -89,13 +89,13 @@ export default {
           let bb = qq.data.concat(res.data).map(item => {
             return {
               ...item,
-              time: item.createTime.split(' ')[0]
+              time: item.createTime.split(' ')[0].split('-')[1] + '-' + item.createTime.split(' ')[0].split('-')[2]
             }
           });
           let cc = res.data.map(item => {
             return {
               ...item,
-              time: item.createTime.split(' ')[0]
+              time: item.createTime.split(' ')[0].split('-')[1] + '-' + item.createTime.split(' ')[0].split('-')[2]
             }
           });
           qq.data = (cur == 1 || cur == undefined) ? cc : bb;
@@ -105,6 +105,7 @@ export default {
           this.atData = JSON.parse(JSON.stringify(this.treeData[this.id].data))  // 传入当前数组
           this.userMap = JSON.parse(JSON.stringify(this.treeData[this.id].userMap))  // 传入当前对象
           this.config = JSON.parse(JSON.stringify(this.treeData[this.id].config));  // 总页数
+          this.$toast.clear();
         })
         .catch((error) => {
           console.log(error);
@@ -128,21 +129,19 @@ export default {
         },
       })
         .then((res) => {
-          if (res.length > 0) {
-            this.tabArray = res;
-            this.tabArray.splice(0, 0, { title: "全部", id: 0 })
-            this.tabArray.forEach(item => {  // 创建多维对象数组；
-              this.treeData[item.id] = {
-                data: [],
-                userMap: {},
-                config: {
-                  scroll: 0,
-                  current: 1,
-                  total: -1,
-                },
-              }
-            })
-          }
+          this.tabArray = res;
+          this.tabArray.splice(0, 0, { title: "全部", id: 0 })
+          this.tabArray.forEach(item => {  // 创建多维对象数组；
+            this.treeData[item.id] = {
+              data: [],
+              userMap: {},
+              config: {
+                scroll: 0,
+                current: 1,
+                total: -1,
+              },
+            }
+          })
         })
         .catch((error) => {
           console.log(error);
@@ -170,7 +169,7 @@ export default {
     refreshEmptys() {
       this.config.current = 0;  // 总页
     },
-    mySonChagne() {
+    mySonChagne(data) {
       let cur = ++data
       this.treeData[this.id].config.current = cur;
       this.getList(cur)
@@ -208,13 +207,13 @@ export default {
           let bb = qq.data.concat(res.data).map(item => {
             return {
               ...item,
-              time: item.createTime.split(' ')[0]
+              time: item.createTime.split(' ')[0].split('-')[1] + '-' + item.createTime.split(' ')[0].split('-')[2]
             }
           });
           let cc = res.data.map(item => {
             return {
               ...item,
-              time: item.createTime.split(' ')[0]
+              time: item.createTime.split(' ')[0].split('-')[1] + '-' + item.createTime.split(' ')[0].split('-')[2]
             }
           });
           qq.data = (cur == 1 || cur == undefined) ? cc : bb;
@@ -246,11 +245,21 @@ export default {
         this.$router.replace({ name: 'Document' })
       }
     },
+    loading() {
+      this.$toast.loading({
+        message: '加载中...',
+        forbidClick: true,
+        overlay: true,
+        forbidClick: true,
+        duration: 0
+      });
+    }
   },
   activated() {
     this.active = 0;
   },
   async created() {
+    this.loading()
     await this.getTabList();
     this.getList();
     this.active = 0;

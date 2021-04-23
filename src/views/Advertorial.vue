@@ -1,12 +1,28 @@
 <template>
   <div class="advertorial">
-    <van-search :clearable="false" v-model="value" show-action placeholder="请输入搜索关键词" @search="search">
+    <van-search
+      @clear="onCancel"
+      v-model="value"
+      show-action
+      placeholder="请输入搜索关键词"
+    >
       <template #action>
-        <div @click="onCancel">取消</div>
+        <div @click="search">搜索</div>
       </template>
     </van-search>
-    {{atData}}
-    <!-- <Tab :states="state" :tabArrays="tabArray" @ColorId="ColorIds" :datas="atData" :trajectoryCounts="trajectoryCount" :userMaps="userMap" :configs="config" :formCounts="formCount" @mySonChagne="mySonChagne" @onSearch="onSearch" @refreshEmpty="refreshEmptys"></Tab> -->
+    <Tab
+      :states="state"
+      :tabArrays="tabArray"
+      @ColorId="ColorIds"
+      :datas="atData"
+      :trajectoryCounts="trajectoryCount"
+      :userMaps="userMap"
+      :configs="config"
+      :formCounts="formCount"
+      @mySonChagne="mySonChagne"
+      @onSearch="onSearch"
+      @refreshEmpty="refreshEmptys"
+    ></Tab>
   </div>
 </template>
 
@@ -21,10 +37,12 @@ import {
 } from "../uilts/tools";
 let timeout = generateTimeout();
 let nonce = generateNonce();
+import { Toolbar } from '../uilts/toolbarMixin';
 export default {
   name: "Advertorial",
   components: {},
   props: {},
+  mixins: [Toolbar],
   data() {
     return {
       value: "",
@@ -35,7 +53,6 @@ export default {
       trajectoryCount: {},
       config: {},
       formCount: {},
-      config: {},
       state: 'list',
       current: 1,
       total: 0,
@@ -64,23 +81,21 @@ export default {
         params: data,
       })
         .then((res) => {
-          if (res.length > 0) {
-            this.tabArray = res;
-            this.tabArray.splice(0, 0, { title: "全部", id: 1 }, { title: "管理员", id: 2 })
-            this.tabArray.forEach(item => {  // 创建多维对象数组；
-              this.treeData[item.id] = {
-                data: [],
-                trajectoryCount: {},
-                userMap: {},
-                config: {
-                  scroll: 0,
-                  current: 1,
-                  total: -1,
-                },
-                formCount: {},
-              }
-            })
-          }
+          this.tabArray = res;
+          this.tabArray.splice(0, 0, { title: "全部", id: 1 }, { title: "管理员", id: 2 }, { title: "我的", id: 3 })
+          this.tabArray.forEach(item => {  // 创建多维对象数组；
+            this.treeData[item.id] = {
+              data: [],
+              trajectoryCount: {},
+              userMap: {},
+              config: {
+                scroll: 0,
+                current: 1,
+                total: -1,
+              },
+              formCount: {},
+            }
+          })
         })
         .catch(function (error) {
           console.log(error);
@@ -101,13 +116,14 @@ export default {
         current: this.current,
         sort: "sort",
         current: cur || 1,
+        version: 1
       }
       this.$get("/api/request/itr/page/headlines/result", {
         params: data,
       })
         .then((res) => {
           let qq = this.treeData[this.id];
-          let bb = qq.data.concat(res.data).map(item => {
+          let bb = qq.data.concat(res.data).map((item, index) => {
             item.timeTemplate = this.getTimeByStr(item.timeTemplate);
             if ((item.timeTemplate + (60 * 60 * 3 * 1000)) > new Date().getTime()) {
               item.startTime = "刚刚";
@@ -116,7 +132,8 @@ export default {
               item.startTime = time[0].substring(5).replace("-", "月") + "日";
               item.startTime += " " + time[1].substring(0, 5);
             }
-            if (item.viewList.length > 3) { // 如果图片数量大于三，那么就 截取前三章
+            item.readNumber1 = item.readNumber > 10000 ? Math.round((item.readNumber / 10000) * 1000) / 1000 + '万' : item.readNumber
+            if (item.viewList.length >= 3) { // 如果图片数量大于三，那么就 截取前三章
               item.viewList1 = item.viewList.splice(0, 3)
             }
             return item;
@@ -130,19 +147,21 @@ export default {
               item.startTime = time[0].substring(5).replace("-", "月") + "日";
               item.startTime += " " + time[1].substring(0, 5);
             }
-            if (item.viewList.length > 3) { // 如果图片数量大于三，那么就 截取前三章
-              console.log(item.viewList.splice(0, 3))
+            if (item.viewList.length >= 3) { // 如果图片数量大于三，那么就 截取前三章
+              item.viewList1 = item.viewList.splice(0, 3)
             }
+            item.readNumber1 = item.readNumber > 10000 ? Math.round((item.readNumber / 10000) * 1000) / 1000 + '万' : item.readNumber
             return item;
           });
-          qq.data = (cur == 1 || cur == undefined) ? cc : bb;
-          qq.userMap = res.user;
           res.formCount.forEach(item => {
             qq.formCount[item.id] = item.counts;
           })
+          console.log(res.trajectoryCount)
           res.trajectoryCount.forEach(item => {
             qq.trajectoryCount[item.id] = item.counts;
           })
+          qq.data = (cur == 1 || cur == undefined) ? cc : bb;
+          qq.userMap = Object.assign(qq.userMap, res.user);
           qq.config.total = res.totalPageCount;
           this.loading = false;
           this.treeData = JSON.parse(JSON.stringify(this.treeData))
@@ -151,8 +170,9 @@ export default {
           this.userMap = JSON.parse(JSON.stringify(this.treeData[this.id].userMap))  // 传入当前对象
           this.config = JSON.parse(JSON.stringify(this.treeData[this.id].config));  // 总页数
           this.formCount = JSON.parse(JSON.stringify(this.treeData[this.id].formCount))  // 传入当前对象
+          this.$toast.clear();
         })
-        .catch(function (error) {
+        .catch((error) => {
           console.log(error);
         });
     },
@@ -208,9 +228,11 @@ export default {
         nonce: nonce,
         signature: signature,
         sort: "sort",
-        fuzzy: this.value,
         current: cur || 1,
         tag: this.id
+      }
+      if (this.value !== '') {
+        data.fuzzy = this.value;
       }
       this.$get("/api/request/itr/page/headlines/result", {
         params: data,
@@ -229,6 +251,8 @@ export default {
             if (item.viewList.length > 3) { // 如果图片数量大于三，那么就 截取前三章
               item.viewList1 = item.viewList.splice(0, 3)
             }
+            item.readNumber1 = item.readNumber > 10000 ? Math.round((item.readNumber / 10000) * 1000) / 1000 + '万' : item.readNumber
+
             return item;
           });
           let cc = res.data.map(item => {
@@ -243,6 +267,7 @@ export default {
             if (item.viewList.length > 3) { // 如果图片数量大于三，那么就 截取前三章
               console.log(item.viewList.splice(0, 3))
             }
+            item.readNumber1 = item.readNumber > 10000 ? Math.round((item.readNumber / 10000) * 1000) / 1000 + '万' : item.readNumber
             return item;
           });
           qq.data = (cur == 1 || cur == undefined) ? cc : bb;
@@ -283,19 +308,33 @@ export default {
       var scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
       this.treeData[this.id].config.scroll = scrollTop;
     },
+    loading() {
+      this.$toast.loading({
+        message: '加载中...',
+        forbidClick: true,
+        overlay: true,
+        forbidClick: true,
+        duration: 0
+      });
+    }
   },
   async created() {
-    await this.getTabList();
-    await this.getList();
+    // this.loading()
+    // await this.getTabList();
+    // await this.getList();
   },
-
   mounted() {
     window.addEventListener('scroll', this.scrollToTop)
   },
   components: {
     Tab,
     ColorView
-  }
+  },
+  beforeRouteEnter: (to, from, next) => {
+    next(vm => {
+      vm.$store.commit("cache", to.name);
+    })
+  },
 };
 </script>
 

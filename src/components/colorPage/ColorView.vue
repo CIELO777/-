@@ -2,50 +2,123 @@
  * @Author: YUN_KONG 
  * @Date: 2021-01-12 13:56:29 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-02-02 14:00:16
+ * @Last Modified time: 2021-04-08 20:36:17
  8 此模块用于彩页，软文列表
  */
 <template>
   <div class="colorView">
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-      <van-list v-if="datas.length > 0" class="vanList" finished-text="没有更多了" :immediate-check="false" v-model="loading" :finished="finished" finished-span="没有更多了" @load="onLoad">
+      <van-list
+        v-if="datas.length > 0"
+        class="vanList"
+        finished-text="没有更多了"
+        :immediate-check="false"
+        v-model="loading"
+        :finished="finished"
+        finished-span="没有更多了"
+        @load="onLoad"
+      >
         <!-- {{datas}} -->
-        <div class="card" v-for="(item,index) in datas" :key="index" @click="clickColor(item)">
+        <div
+          class="card"
+          v-for="(item, index) in datas"
+          :key="index"
+          @click="clickColor(item)"
+        >
           <div class="info">
             <div v-if="visitor == 0" class="header">
               <div class="jino">
-                <span :class="['tag',item.userId==uid?'bule-bg':'red-bg']">{{item.userId==uid?(item.draft==0?"已发布":"未发布"):"公司"}}</span>
+                <span
+                  :class="['tag', item.userId == uid ? 'bule-bg' : 'red-bg']"
+                  >{{
+                    item.userId == uid
+                      ? item.draft == 0
+                        ? "已发布"
+                        : "未发布"
+                      : "公司"
+                  }}</span
+                >
                 <img class="img" :src="item.thumb" />
-                <div class="ldldl">{{item.time}}</div>
+                <div class="ldldl">{{ item.time }}</div>
               </div>
               <div class="detail">
-                <span class="title line1">{{item.title}}</span>
-                <span v-if="visitor == 1" class="desc line2" style="line-height:20px;margin-right:10px;font-size:13px">{{item.description}}</span>
-                <div class="desc line1" v-if="visitor == 0" style="margin-right:0px">
-                  <div catchtap="handalClickFlow"> 流量 <span class="bule">{{trajectoryCounts[item.id]||0}}</span> </div>
-                  <div catchtap="handalClickForm"> 表单 <span class="bule">{{formCounts[item.id]||0}}</span></div>
-                  <div> 分享 <span>{{item.shareNumber}}</span></div>
+                <span class="title line1" style="font-size: 0.28rem">{{
+                  item.title
+                }}</span>
+                <span
+                  v-if="visitor == 1"
+                  class="desc line2"
+                  style="line-height: 20px; margin-right: 10px; font-size: 13px"
+                  >{{ item.description }}</span
+                >
+                <div
+                  class="desc line1"
+                  v-if="visitor == 0"
+                  style="margin-right: 0px"
+                >
+                  <div catchtap="handalClickFlow">
+                    <span style="margin-right: 3px">流量</span>
+                    <span class="bule">{{
+                      trajectoryCounts[item.id] || 0
+                    }}</span>
+                  </div>
+                  <div catchtap="handalClickForm">
+                    <span style="margin-right: 3px">表单</span>
+                    <span class="bule">{{ formCounts[item.id] || 0 }}</span>
+                  </div>
+                  <div>
+                    <span style="margin-right: 3px">分享数</span>
+                    <span>{{ item.shareNumber1 }}</span>
+                  </div>
                 </div>
-                <div class="line1 desc" style="font-size:14px">
-                  {{userMaps[item.userId] ? (userMaps[item.userId].nickname ||userMaps.nickname): ""}}
-                  <span v-if="userMaps[item.userId] ? (userMaps[item.userId].approve == 1 ||userMaps.approve): '' " class='approve'>V</span>
+                <div class="line1 desc name1">
+                  {{
+                    userMaps[item.userId]
+                      ? userMaps[item.userId].nickname || userMaps.nickname
+                      : ""
+                  }}
+                  <span
+                    v-if="
+                      userMaps[item.userId]
+                        ? userMaps[item.userId].approve == 1 || userMaps.approve
+                        : ''
+                    "
+                    class="approve"
+                    >V</span
+                  >
                 </div>
               </div>
             </div>
           </div>
-          <div class="other" v-if="visitor == 0" catchtap="handalClickManagement">
-            <div>
-            </div>
+          <div
+            class="other"
+            v-if="visitor == 0"
+            catchtap="handalClickManagement"
+          >
+            <div></div>
             <div class="shareA" @click.stop="createContent(item)">
-              <van-icon name="share" />分享
+              <img
+                style="width: 0.28rem; margin-right: 3px"
+                src="../../../public/img/icon/share.png"
+                alt=""
+              />
+              <span class="shareText">分享</span>
             </div>
           </div>
         </div>
       </van-list>
-      <van-empty v-else class="custom-image" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
+      <van-empty
+        v-else
+        class="custom-image"
+        image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+        description="暂无相关消息"
+      />
     </van-pull-refresh>
-    <share :ShareContents="ShareContent" v-show="showShare" :showShares.sync="showShare"></share>
-
+    <share
+      :ShareContents="ShareContent"
+      v-show="showShare"
+      :showShares.sync="showShare"
+    ></share>
   </div>
 </template>
 
@@ -87,7 +160,6 @@ export default {
     };
   },
   watch: {
-
   },
   computed: {},
   methods: {
@@ -97,7 +169,6 @@ export default {
         this.finished = true;
         return;
       }
-      console.log(this.states)
       if (this.states == 'list') {
         this.$emit('mySonChagne', this.configs.current) // 触发爷组件方法更新数据下一页
       } else {
@@ -126,22 +197,38 @@ export default {
       this.$router.push({
         name: 'Iframe',
         params: {
-          url: item.url,
+          url: item.initialUrl,
           title: item.title,
           desc: item.description,
           imgUrl: item.thumb
-
         }
       })
     },
     createContent(item) {
       // console.log(item)
-      this.showShare = true;
-      this.ShareContent = {
-        title: item.title,
-        imgUrl: item.thumb,
-        desc: item.description,
-        url: item.url
+      if (sessionStorage.getItem('Single')) { //单聊模式发送  正常模式赋值
+        wx.invoke('sendChatMessage', {
+          msgtype: "news", //消息类型，必填
+          news: {
+            link: item.initialUrl, //H5消息页面url 必填
+            title: item.title, //H5消息标题
+            desc: item.description, //H5消息摘要
+            imgUrl: item.thumb, //H5消息封面图片URL
+          },
+        }, function (res) {
+          console.log('服务指引返回结果', res);
+          if (res.err_msg == 'sendChatMessage:ok') {
+            //发送成功
+          }
+        })
+      } else {
+        this.showShare = true;
+        this.ShareContent = {
+          title: item.title,
+          imgUrl: item.thumb,
+          desc: item.description,
+          url: item.initialUrl
+        }
       }
     }
   },
@@ -149,6 +236,7 @@ export default {
     console.log('actived')
   },
   created() {
+    this.uid = JSON.parse(sessionStorage.getItem('userinfo')).id
   },
 };
 </script>
@@ -177,7 +265,7 @@ export default {
     right: 10px;
     height: 30px;
     width: 60px;
-    color: #aaa;
+    color: #848282;
     font-size: 24rpx;
     display: flex;
     flex-direction: row;
@@ -206,12 +294,14 @@ export default {
   .ldldl {
     background: rgba(0, 0, 0, 0.4);
     position: absolute;
-    bottom: 4px;
+    bottom: 3px;
     color: #fff;
     left: 0;
-    font-size: 14px;
-    width: 90px;
+    width: 100%;
     text-align: center;
+    height: 15px;
+    line-height: 16px;
+    font-size: 0.21rem;
   }
   .card .info .detail {
     padding-left: 10px;
@@ -221,27 +311,18 @@ export default {
     flex: 1;
     line-height: 30px;
   }
-  .line1 {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-    overflow: hidden;
-  }
-  .card .info .desc {
-    color: #aaa;
-    font-size: 16px;
-    margin-right: 80px;
-  }
-  .card .info .desc view {
+
+  .card .info .desc div {
     display: inline;
-    margin-left: 10px;
+    // margin-left: 10px;
+    font-size: 0.24rem;
   }
   .bule {
     color: #1593ff;
   }
   .card .info .desc {
-    color: #aaa;
-    font-size: 28rpx;
+    color: #848282;
+    font-size: 0.28rem;
     margin-right: 80px;
   }
 
@@ -250,6 +331,8 @@ export default {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
     overflow: hidden;
+    // padding-bottom: .1rem;
+    // line-height: .5rem;
   }
   .header {
     display: flex;
@@ -262,17 +345,39 @@ export default {
     display: inline;
     margin-right: 10px;
   }
+  .name1 {
+    font-size: 0.24rem !important;
+  }
   .vanList {
     padding-top: 20px;
   }
   .shareA {
-    font-size: 0.28rem;
+    font-size: 0.24rem;
     display: flex;
     color: #4d4b4b;
     align-items: center;
     i {
       margin-right: 0.06rem;
     }
+  }
+  .approve {
+    font-size: 14px;
+    font-style: italic;
+    font-weight: bold !important;
+    color: #f2711c !important;
+  }
+  /deep/ .van-pull-refresh__head {
+    top: 30px;
+  }
+  .title {
+    font-weight: 550;
+  }
+  .bule-bg {
+    background-color: #1593ff;
+  }
+  .shareText {
+    font-size: 0.24rem;
+    white-space: nowrap;
   }
 }
 </style>

@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-01-12 13:43:19 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-02-03 17:06:41
+ * @Last Modified time: 2021-04-05 19:04:10
  * 此模块用于彩页视频顶部tab
  */
 <template>
@@ -81,6 +81,43 @@
             :states="states"
           >
           </PosterView>
+
+          <OrderView
+            v-bind="$attrs"
+            v-on="$listeners"
+            v-if="videoID == item.id && $route.name == 'Order'"
+            :key="index"
+            :ref="`OrderView${index}`"
+            :datas="datas"
+            :configs="configs"
+            :states="states"
+          >
+          </OrderView>
+
+          <RadarViews
+            v-bind="$attrs"
+            v-on="$listeners"
+            v-if="videoID == item.id && $route.name == 'Radar'"
+            :key="index"
+            :datas="datas"
+            :configs="configs"
+            :states="states"
+            :ref="`RadarView${index}`"
+          >
+          </RadarViews>
+
+          <VerbalView
+            v-bind="$attrs"
+            v-on="$listeners"
+            v-if="videoID == item.id && $route.name == 'Verbal'"
+            :key="index"
+            :datas="datas"
+            :configs="configs"
+            :states="states"
+            :userMaps="userMaps"
+            :ref="`Verbal${index}`"
+          >
+          </VerbalView>
           <!-- </keep-alive> -->
         </van-tab>
       </template>
@@ -94,7 +131,9 @@ import VideoPage from '../../components/video/VideoPage';
 import AdvertorialView from '../../components/Advertorial/AdvertorialView';
 import documentView from '../../components/poster/documentView';
 import PosterView from '../../components/poster/PosterView';
-
+import OrderView from '../../components/Order/OrderView';
+import RadarViews from '../../components/RadarView/RadarViews';
+import VerbalView from '../verBal/VerbalView';
 import {
   generateTimeout,
   generateNonce,
@@ -122,6 +161,8 @@ export default {
       },
       videoID: 0,
       category: 0,
+      pageType: -1, // 销售雷达传入的参数
+      fromType: 0 // 销售雷达传入的参数
     };
   },
   watch: {},
@@ -190,8 +231,11 @@ export default {
     console.log(this.$route.name)
     // this.getList()
   },
-  mounted() { },
-  components: { ColorView, VideoPage, AdvertorialView, documentView, PosterView }
+  mounted() {
+    // console.log(this.datas)
+
+  },
+  components: { RadarViews, OrderView, ColorView, VideoPage, AdvertorialView, documentView, PosterView, VerbalView }
 };
 </script>
 

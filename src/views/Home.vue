@@ -1,33 +1,129 @@
-
 <template>
   <div class="home">
-    <navBar @ClearList="ClearLists" :SearchtotalPageCounts="SearchtotalPageCount" ref="navBar" :modes.sync="mode" @Typefilter="Typefilters(arguments)" @unbinds="unbindsss"></navBar>
-    <img src="https://dist.jiain.net/mall/images/registerBackground.jpg" alt="" style="width: 100%;" v-show="show" />
+    <navBar
+      @ClearList="ClearLists"
+      :SearchtotalPageCounts="SearchtotalPageCount"
+      ref="navBar"
+      :modes.sync="mode"
+      @Typefilter="Typefilters(arguments)"
+      @unbinds="unbindsss"
+      :short.sync="short"
+      :shortPop.sync="shortPop"
+      :shortTitle="shortTitle"
+      @scrollTop="scrollTops"
+      :mergeData="{
+        orderStatus,
+        status,
+        starLeve,
+      }"
+    ></navBar>
+    <img
+      src="https://dist.jiain.net/mall/images/registerBackground.jpg"
+      alt=""
+      style="width: 100%"
+      v-show="show"
+    />
     <!-- <van-pull-refresh class="pull" :success-text="successtext" style="min-height: 100vh;" head-height="40" v-model="isLoading" @refresh="onRefresh"> -->
-    <linkman @userIDLength="userIDLengths" @userIdSave="userIdSaves(arguments)" ref="mychild" v-if="data.length > 0" :list="data" :totals="total" :users="user" :userMaps="userMap" @chengParentCur="chengParentCurs">
+    <linkman
+      @userIDLength="userIDLengths"
+      @userIdSave="userIdSaves(arguments)"
+      ref="mychild"
+      v-if="data.length > 0"
+      :list="data"
+      :totals="total"
+      :users="user"
+      :userMaps="userMap"
+      @chengParentCur="chengParentCurs"
+      padding="89px"
+      :sb="caonim"
+    >
     </linkman>
-    <van-empty v-show="empty" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="暂无相关消息" />
+    <van-empty
+      v-else
+      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+      description="暂无相关消息"
+    />
     <!-- 企业微信验证码 -->
-    <van-popup v-model="show" :close-on-click-overlay="false" position="bottom" :style="{ height: '45%' }" overlay-class="popup">
+    <van-popup
+      v-model="show"
+      :close-on-click-overlay="false"
+      position="bottom"
+      :style="{ height: '45%' }"
+      overlay-class="popup"
+    >
       <div class="hint">
         <van-icon name="warning" size="25px" />
-        <p class="qy-hint">
-          企业微信绑定
-        </p>
+        <p class="qy-hint">企业微信绑定</p>
       </div>
       <p class="qy-hint1">当前账号没有绑定乐语，请输入手机号进行绑定</p>
-      <van-field v-model="sms" type="tel" center clearable label="手机号" class="inp" placeholder="请输入手机号">
+      <van-field
+        v-model="sms"
+        type="tel"
+        center
+        clearable
+        label="手机号"
+        class="inp"
+        placeholder="请输入手机号"
+      >
         <template #button>
-          <van-button size="small" type="primary" @click="clicksendCode" :disabled="times < 60">{{ sendings }}</van-button>
+          <van-button
+            size="small"
+            type="primary"
+            @click="clicksendCode"
+            :disabled="times < 60"
+            >{{ sendings }}</van-button
+          >
         </template>
       </van-field>
-      <van-field v-model="codes" type="digit" center clearable label="验证码" class="inp" placeholder="请输入验证码">
+      <van-field
+        v-model="codes"
+        type="digit"
+        center
+        clearable
+        label="验证码"
+        class="inp"
+        placeholder="请输入验证码"
+      >
         <template #button>
-          <van-button size="small" type="danger" @click="bindlooyuCode" class="bind">绑定</van-button>
+          <van-button
+            size="small"
+            type="danger"
+            @click="bindlooyuCode"
+            class="bind"
+            >绑定</van-button
+          >
         </template>
       </van-field>
     </van-popup>
-    <!-- </van-pull-refresh> -->
+    <!-- 快捷搜索弹框 -->
+    <van-popup v-model="shortPop" :style="{ width: '60%' }" class="shortPop">
+      <!-- 选择成交状态 -->
+      <div v-show="short == 1">
+        <h2>选择成交状态</h2>
+        <p class="shortRow" @click="clickShort('0')">未成交</p>
+        <p class="shortRow" @click="clickShort('1')">已成交</p>
+        <p class="shortRow" @click="clickShort('99')">全部</p>
+      </div>
+      <!-- 有效性 -->
+      <div v-show="short == 2">
+        <h2>选择有效性</h2>
+        <p class="shortRow" @click="clickShort('0')">无效</p>
+        <p class="shortRow" @click="clickShort('1')">未知</p>
+        <p class="shortRow" @click="clickShort('2')">有效</p>
+        <p class="shortRow" @click="clickShort('99')">全部</p>
+      </div>
+      <!-- 修改星级 -->
+      <div v-show="short == 3">
+        <h2>选择等级</h2>
+        <p class="shortRow" @click="clickShort('0')">未知</p>
+        <p class="shortRow" @click="clickShort('1')">一星</p>
+        <p class="shortRow" @click="clickShort('2')">二星</p>
+        <p class="shortRow" @click="clickShort('3')">三星</p>
+        <p class="shortRow" @click="clickShort('4')">四星</p>
+        <p class="shortRow" @click="clickShort('5')">五星</p>
+        <p class="shortRow" @click="clickShort('99')">全部</p>
+      </div>
+    </van-popup>
   </div>
 </template>
 <script>
@@ -87,6 +183,14 @@ export default {
       SearchtotalPageCount: 0,
       current: 0,
       currentSearch: 0,
+      short: '',
+      shortPop: false,
+      shortTitle: ['成交状态', '有效性', '联系人等级'],
+      caonim: '',
+      orderStatus: undefined,
+      status: undefined,
+      starLeve: undefined,
+
     };
   },
   components: {
@@ -94,10 +198,10 @@ export default {
     navBar,
   },
   methods: {
-    // onRefresh() {
-    //   this.getList(1)
-    // },
-    async getList(datas, id) {
+    scrollTops() {
+      document.documentElement.scrollTop = document.body.scrollTop = 0;
+    },
+    async getList(datas, params) {
       // 下拉联系人列表
       let that = this;
       let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
@@ -118,29 +222,45 @@ export default {
         timeout,
         signature,
       };
-
+      (this.orderStatus) === undefined || (this.orderStatus) === '99' ? "" : data.orderStatus = this.orderStatus;
+      (this.status) === undefined || (this.status) === '99' ? "" : data.status = this.status;
+      (this.starLeve) === undefined || (this.starLeve) === '99' ? "" : data.starLevel = this.starLeve;
+      if (params && Object.keys(params).length > 0) {
+        for (const key in params) {
+          data[key] = params[key];
+        }
+      }
       this.$get("/api/request/itr/comp/customer/query", {
         params: data,
-      })
-        .then(function (res) {
-          console.log(res)
-          if (!res.error) {
-            that.data = datas == 1 ? res.data : that.data.concat(res.data);
-            that.userMap = Object.assign(that.userMap, res.user);
-            that.user = res.user;
-            that.total = res.totalPageCount;
-            sessionStorage.setItem("active", "Home");
-            that.$refs?.mychild?.$toast.clear();
-            if (that.data.length == 0) that.empty = true; //如果数据大于0，就显示空信息
-            sessionStorage.setItem("TabIndex", 6); // 因为触底分页需要，一进项目设置为数字6
-            that.successtext = '刷新成功';
-          } else if (res.error) {
-            that.successtext = '刷新失败';
-            that.$toast.fail("乐语营销架构过期");
-          }
+      }).then(function (res) {
+        if (!res.error) {
+          res.data.forEach(item => { // 云外呼处理
+            if (item.phone && item.workNumber) {
+              item.YunCall = [item.phone];
+            } else if (item.phone) {
+              item.YunCall = [item.phone]
+            } else if (item.workNumber) {
+              item.YunCall = [item.workNumber]
+            }
+          })
+          that.data = datas == 1 ? res.data : that.data.concat(res.data);
+          that.userMap = Object.assign(that.userMap, res.user);
+          that.user = res.user;
+          that.total = res.totalPageCount;
+          sessionStorage.setItem("active", "Home");
+          that.$refs?.mychild?.$toast.clear();
+          if (that.data.length == 0) that.empty = true; //如果数据大于0，就显示空信息
+          sessionStorage.setItem("TabIndex", 6); // 因为触底分页需要，一进项目设置为数字6
+          that.successtext = '刷新成功';
+        } else if (res.error) {
+          that.successtext = '刷新失败';
+          that.$toast.fail("乐语营销架构过期");
+        }
+        setTimeout(() => {
           that.ClearToast();
-          that.isLoading = false;  // 如果是刷新的情况那么就 关闭刷新状态
-        })
+        }, 500)
+        that.isLoading = false;  // 如果是刷新的情况那么就 关闭刷新状态
+      })
         .catch(function (error) {
           console.log(error);
           that.isLoading = false;  // 如果是刷新的情况那么就 关闭刷新状态
@@ -321,11 +441,13 @@ export default {
           console.log(error);
         });
     },
-    totalLodding() {
+    loading() {
       this.$toast.loading({
-        message: "加载中...",
+        message: '加载中...',
         forbidClick: true,
-        duration: 800, // 持续展示 toast
+        overlay: true,
+        forbidClick: true,
+        duration: 0
       });
     },
     async getWxJsJdk() {
@@ -367,14 +489,18 @@ export default {
             jsApiList: ["agentConfig", "selectExternalContact", 'openEnterpriseChat'], // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
           });
           wx.ready(function () {
-            wx.hideAllNonBaseMenuItem();
+            // wx.hideAllNonBaseMenuItem();
+            // wx.hideOptionMenu();
+            // wx.hideMenuItems({
+            //   menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari','menuItem:refresh'] // 要隐藏的菜单项
+            // });
             wx.agentConfig({
               corpid: that.appid2, // 必填，企业微信的corpid，必须与当前登录的企业一致
               agentid: res.agentId, // 必填，企业微信的应用id （e.g. 1000247）
               timestamp: that.timestamp2, // 必填，生成签名的时间戳
               nonceStr: that.noncestr2, // 必填，生成签名的随机串
               signature: that.signature2, // 必填，签名，见附录-JS-SDK使用权限签名算法
-              jsApiList: ["selectExternalContact"], //必填
+              jsApiList: ["selectExternalContact", 'getContext', 'sendChatMessage'], //必填
               success: function (res) {
                 // 回调
                 // alert('成功')
@@ -390,8 +516,6 @@ export default {
             //通过error接口处理失败验证
             // config信息验证失败会执行error
           });
-          // } else {
-          // }
         })
         .catch((err) => {
           console.log(err);
@@ -524,6 +648,7 @@ export default {
     },
     // 触发滚页方法
     chengParentCurs(data) {
+      console.log(data, '------------------', this.mode);
       if (sessionStorage.getItem("route") == 'LinkDetailed' || sessionStorage.getItem("route") == 'Addcustomer') return;// 如果是 LinkDetailed 就return掉
       if (this.mode === "list") {
         // mode 是判断是否是搜索分页还是列表分页
@@ -575,6 +700,7 @@ export default {
         this.$toast.loading("加载中...");
         this.$refs.navBar.menuChange(8, data);
       }
+
     },
     Typefilters(data) {
       // 通过类型过滤后的数据
@@ -590,7 +716,7 @@ export default {
       this.data = data?.[1] ? this.data.concat(data[0].data) : data[0].data;
       this.SearchtotalPageCount = data[0].totalPageCount;
       // setTimeout(() => {
-      this.initscroll();
+      // this.initscroll();
       // }, 800)
     },
     ClearLists() {
@@ -607,27 +733,108 @@ export default {
       this.unbind();
     },
     ClearToast() {
-      setTimeout(() => {
-        this.$toast.clear(); //清除弹框
-      }, 800)
-
+      this.$toast.clear(); //清除弹框
     },
     // 更新数据
     ManualUpdate(index, wxid) {
+      console.log(index, wxid)
       this.data[index].wxCrmId = wxid;
+    },
+    clickShort(data) {
+      if (this.short == 1) {
+        switch (Number(data)) {
+          case 0:
+            this.shortTitle[0] = '未成交';
+            this.$set(this.shortTitle, 0, '未成交')
+            break;
+          case 1:
+            this.shortTitle[0] = '已成交';
+            this.$set(this.shortTitle, 0, '已成交')
+            break;
+          case 99:
+            this.shortTitle[0] = '全部';
+            this.$set(this.shortTitle, 0, '全部')
+            break;
+        }
+        this.orderStatus = data;
+      } else if (this.short == 2) {
+        switch (Number(data)) {
+          case 0:
+            this.shortTitle[1] = '无效';
+            this.$set(this.shortTitle, 1, '无效')
+            break;
+          case 1:
+            this.shortTitle[1] = '未知';
+            this.$set(this.shortTitle, 1, '未知')
+            break;
+          case 2:
+            this.shortTitle[1] = '有效';
+            this.$set(this.shortTitle, 1, '有效')
+            break;
+          case 99:
+            this.shortTitle[1] = '全部';
+            this.$set(this.shortTitle, 1, '全部')
+            break;
+        }
+        this.status = data;
+      } else {
+        switch (Number(data)) {
+          case 0:
+            this.shortTitle[2] = '未知';
+            this.$set(this.shortTitle, 2, '未知')
+            break;
+          case 1:
+            this.shortTitle[2] = '一星客户';
+            this.$set(this.shortTitle, 2, '一星客户')
+            break;
+          case 2:
+            this.shortTitle[2] = '二星客户';
+            this.$set(this.shortTitle, 2, '二星客户')
+            break;
+          case 3:
+            this.shortTitle[2] = '三星客户';
+            this.$set(this.shortTitle, 2, '三星客户')
+            break;
+          case 4:
+            this.shortTitle[2] = '四星客户';
+            this.$set(this.shortTitle, 2, '四星客户')
+            break;
+          case 5:
+            this.shortTitle[2] = '五星客户';
+            this.$set(this.shortTitle, 2, '五星客户')
+            break;
+          case 99:
+            this.shortTitle[2] = '全部';
+            this.$set(this.shortTitle, 2, '全部')
+            break;
+        }
+        this.starLeve = data;
+      }
+      console.log(this.$refs.navBar.Params)
+      this.getList(1, this.$refs.navBar.Params);
+      this.shortPop = false;
     },
   },
   async activated() {
     document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.home; // 设置每个页面的scrollTop
-    // this.getList(1);
+    console.log(this.$store.state.scroll.home)
     // 如果ManualData：true 证明姓名，电话，跟进记录修改过，这样的话就重新赋值把。
     let index = sessionStorage.getItem('ManualIdx');
-    let { nickName, company, sheet, gender } = this.$store.state.ManualData;
+    let { nickName, company, sheet, gender, userId, name } = this.$store.state.ManualData;
     try {  // 不为空的情况下回显手动更改数据
       if (nickName !== '') { this.data[index].nickname = nickName; }
       if (company !== '') { this.data[index].company = company; }
       if (sheet !== '') { this.data[index].lastContactRecord = sheet; }
       if (gender !== '') { this.data[index].gender = gender; }
+      if (userId !== '') {
+        console.log('11222', userId)
+        if (this.data[index]) {
+          this.data[index].ownerId = userId;
+          this.caonim = name;
+          this.$set(this.data[index], 'ownerId', userId);
+        }
+      }
+
     } catch (err) {
       console.log(err);
     }
@@ -635,36 +842,22 @@ export default {
     await this.getWxJsJdk();
   },
   async created() {
-    let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
-    // if (userinfo?.bind_comp_id) {
-    this.totalLodding();
-    this.getList(); // 就去请求列表
-    // }
-    // this.code = this.$route.query.code;
-    // if (this.code) {
-    //   //有code
-    //   if (userinfo?.bind_comp_id) {
-    //     // 有公司ID
-    //     this.getList(); // 就去请求列表
-    //   } else {
-    //     //没有公司ID
-    //     await this.getUserinfo(); //拿code 获取用户信息
-    //   }
-    // } else {
-    //   // 无code
-    //   if (userinfo?.bind_comp_id) {
-    //     // 如果有就不跳转微信页
-    //     this.totalLodding();
-    //     this.getList(); // 有公司ID 就去请求列表
-    //   } else {
-    //     // 没有code 请求code
-    //     this.getURl(); // 没有code 请求code
-    //   }
-    // }
-    setTimeout(async () => {
-      await this.getAgentConfig(); // 同步执行 否则会报错
-      await this.getWxJsJdk();
-    }, 1500);
+    if (sessionStorage.getItem('userinfo')) {
+      this.loading();
+      this.getList(); // 就去请求列表
+      setTimeout(async () => {
+        await this.getAgentConfig(); // 同步执行 否则会报错
+        await this.getWxJsJdk();
+      }, 1500);
+    } else {
+      this.$toast.fail({
+        message: '此模块不支持聊天工具栏。',
+        forbidClick: true,
+        duration: 0,
+        overlay: true,
+      });
+    }
+
   },
   watch: {
     "$store.state.SearchValue": {
@@ -695,6 +888,40 @@ export default {
       if (msg.route !== 'Home') return;
       this.ManualUpdate(msg.index, msg.wxId)
     })
+    communication.$on('callTel', (id) => {  // 首页电话按钮触发跟进记录
+      // this.HometelClicks(id)
+    })
+    communication.$on('release', (msg, data) => {// 动态给公海追加数据;
+      let ChangeData = this.data[msg];
+      this.data.splice(msg, 1) // 本地删除原数组
+      let name = JSON.parse(sessionStorage.getItem('userinfo')).nickname
+      ChangeData.ownerType = data;
+      ChangeData.ownerId = "0"
+      let str = '';
+      if (data == 0) {
+        str = '释放联系人到公司公海'
+      } else if (data == 1) {
+        str = '释放联系人到分公司公海'
+      } else if (data == 2) {
+        str = '释放联系人到部门公海'
+      } else if (data == 4) {
+        str = '释放联系人到个人公海'
+      }
+      ChangeData.lastContactRecord = name + str;
+      communication.$emit("AddDatabase", ChangeData, data);
+    })
+    communication.$on('linkman', (msg) => {
+      this.data.unshift(msg);
+    })
+    communication.$on('collectLinkman', (str, data, id) => { // 公海拾取的追加到联系人上
+      console.log(str, data, id)
+      let result = data;
+      result.ownerId = id;
+      result.lastContactRecord = str;
+      this.data.unshift(result);
+
+    })
+
   },
   destroyed() {
     this.$store.commit("destroyedSearch", "1");
@@ -705,7 +932,7 @@ export default {
         vm.getList(1);
         document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
       }
-      vm.$store.commit("cache", "Home,Common,HighSeas,LinkDetailed");
+      vm.$store.commit("cache", "Home,Common,HighSeas");
     })
   },
 };
@@ -753,5 +980,28 @@ export default {
 .pull /deep/ .van-pull-refresh__head {
   // 改变下拉框的提醒位置
   top: 45px;
+}
+.shortcut {
+  height: 40px;
+  width: 100%;
+  background: red;
+}
+.shortPop {
+  font-size: 0.28rem;
+  text-align: center;
+  padding: 0 !important;
+  background: #fff !important;
+  border-radius: 10px;
+  h2 {
+    height: 40px;
+    line-height: 40px;
+    font-weight: 600;
+    border-bottom: 0.5px solid #eee;
+  }
+  .shortRow {
+    height: 40px;
+    line-height: 40px;
+    border-bottom: 0.5px solid #eee;
+  }
 }
 </style>

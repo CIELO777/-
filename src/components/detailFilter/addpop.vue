@@ -4,7 +4,7 @@
     <!-- {{ this.client.starLeve}} -->
     <van-action-sheet v-model="datas.popshow" :actions="datas.list" @select="onSelect" />
     <!-- 2.type为输入框 -->
-    <van-popup v-model="datas.popshow" :style="{ height: '250px' }" v-if="datas.types == 2" @click-overlay="close" position="bottom">
+    <van-popup :overlay="false" v-model="datas.popshow" :style="{ height: '250px' }" v-if="datas.types == 2" @click-overlay="close" position="bottom">
       <div class="module ">
         <p>{{datas.title}}</p>
         <van-field v-model="message" rows="4" autosize label="" :placeholder="datas.placeholder" :type="datas.inpType" :maxlength="datas.maxLength" show-word-limit />
@@ -12,7 +12,7 @@
       </div>
     </van-popup>
     <!-- 3.type为日期 -->
-    <van-popup v-if="datas.types == 3" close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="datas.popshow" position="bottom" :style="{ height: '40%' }">
+    <van-popup :overlay="false" v-if="datas.types == 3" close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="datas.popshow" position="bottom" :style="{ height: '40%' }">
       <van-datetime-picker v-model="datas.birther" type="date" title="出生日期" @confirm="birthdayOk" @cancel="cancel" :formatter="formatter" />
     </van-popup>
     <!-- 4. 区间选择-->
@@ -190,6 +190,9 @@ export default {
     }
 
   },
+  created(){
+    console.log(this.datas)
+  }
 
 }
 </script>

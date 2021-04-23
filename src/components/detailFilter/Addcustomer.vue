@@ -4,43 +4,172 @@
       <!-- 使用 title 插槽来自定义标题 -->
       <template #title>
         <span class="custom-title">姓名</span>
-        <span style="color:red;font-size:18px">*</span>
+        <span style="color: red; font-size: 18px">*</span>
       </template>
     </van-cell>
     <van-cell :value="formData.phone" is-link @click="clickCell(13)">
       <!-- 使用 title 插槽来自定义标题 -->
       <template #title>
         <span class="custom-title">手机</span>
-        <span style="color:red;font-size:18px">*</span>
+        <span style="color: red; font-size: 18px">*</span>
       </template>
     </van-cell>
-    <van-cell :value="sheetData.gender ? sheetData.gender.value : ''" is-link @click="clickCell(2)" title="性别"></van-cell>
-    <van-cell :value="company" is-link @click="clickCell(3)" title="公司信息"></van-cell>
-    <van-cell :value="sheetData.companyOcc ? sheetData.companyOcc.value : ''" is-link @click="clickCell(4)" title="公司职务"></van-cell>
-    <van-cell :value="formData.note" is-link @click="clickCell(5)" title="备注"></van-cell>
-    <van-cell :value="sheetData.title ? sheetData.title.value : ''" is-link @click="clickCell(6)" title="来源类型"></van-cell>
-    <van-cell :value="sheetData.status ? sheetData.status.value : ''" is-link @click="clickCell(7)" title="有效性"></van-cell>
-    <van-cell :value="formData.wechat" is-link @click="clickCell(8)" title="微信"></van-cell>
-    <van-cell :value="formData.qq" is-link @click="clickCell(9)" title="QQ"></van-cell>
-    <van-cell :value="formData.email" is-link @click="clickCell(10)" title="邮箱"></van-cell>
-    <van-cell :value="sheetData.starLevel ? sheetData.starLevel.value : ''" is-link @click="clickCell(11)" title="星级"></van-cell>
-    <van-cell :value="birthday ? birthday : ''" is-link @click="clickCell(12)" title="出生日期"></van-cell>
+    <van-cell
+      :value="sheetData.gender ? sheetData.gender.value : ''"
+      is-link
+      @click="clickCell(2)"
+      title="性别"
+    ></van-cell>
+    <van-cell
+      :value="company"
+      is-link
+      @click="clickCell(3)"
+      title="所属公司"
+    ></van-cell>
+    <van-cell
+      :value="sheetData.companyOcc ? sheetData.companyOcc.value : ''"
+      is-link
+      @click="clickCell(4)"
+      title="公司职务"
+    ></van-cell>
+    <van-cell
+      :value="formData.note"
+      is-link
+      @click="clickCell(5)"
+      title="备注"
+    ></van-cell>
+    <van-cell
+      :value="sheetData.title ? sheetData.title.value : ''"
+      is-link
+      @click="clickCell(6)"
+      title="来源类型"
+    ></van-cell>
+    <van-cell
+      :value="sheetData.status ? sheetData.status.value : ''"
+      is-link
+      @click="clickCell(7)"
+      title="有效性"
+    ></van-cell>
+    <van-cell
+      :value="formData.wechat"
+      is-link
+      @click="clickCell(8)"
+      title="微信"
+    ></van-cell>
+    <van-cell
+      :value="formData.qq"
+      is-link
+      @click="clickCell(9)"
+      title="QQ"
+    ></van-cell>
+    <van-cell
+      :value="formData.email"
+      is-link
+      @click="clickCell(10)"
+      title="邮箱"
+    ></van-cell>
+    <van-cell
+      :value="sheetData.starLevel ? sheetData.starLevel.value : ''"
+      is-link
+      @click="clickCell(11)"
+      title="星级"
+    ></van-cell>
+    <van-cell
+      :value="birthday ? birthday : ''"
+      is-link
+      @click="clickCell(12)"
+      title="出生日期"
+    ></van-cell>
     <!--自定义列表 -->
     <template v-for="(item, index) in diyColumn">
-      <van-cell is-link :key="index" v-if="item.display== 1" @click="showPopup(item,index)" :title="item.label" :value="item.value"></van-cell>
+      <van-cell
+        is-link
+        :key="index"
+        v-if="item.display == 1"
+        @click="showPopup(item, index)"
+        :title="item.label"
+        :value="item.value"
+        >{{ item.value }}</van-cell
+      >
     </template>
-    <addpop ref="addpop" :data="data" @birthday="birthdays" @savasheet="savasheets" @savaForm="savaForms" :formDatas="formData" @childClose="close"></addpop> <!-- 输入框和选择框 -->
-    <compInfo height="calc(100% - 94px)" @search="searchs(arguments)" route="addcustomer" :companys.sync="company" ref="compInfo" :totalPageCounts="totalPageCount" :compshow.sync="compListShow" :user="users" :list="compLists"></compInfo> <!-- 公司信息列表 -->
+    <addpop
+      ref="addpop"
+      :data="data"
+      @birthday="birthdays"
+      @savasheet="savasheets"
+      @savaForm="savaForms"
+      :formDatas="formData"
+      @childClose="close"
+    ></addpop>
+    <!-- 输入框和选择框 -->
+    <compInfo
+      height="calc(100% - 94px)"
+      @search="searchs(arguments)"
+      route="addcustomer"
+      :companys.sync="company"
+      ref="compInfo"
+      :totalPageCounts="totalPageCount"
+      :compshow.sync="compListShow"
+      :user="users"
+      :list="compLists"
+    ></compInfo>
+    <!-- 公司信息列表 -->
     <!-- 自定义表单 -->
-    <van-popup :safe-area-inset-bottom="true" v-model="diy.show" position="bottom" :style="{ height: '30%' }">
-      <p class="pop-tit">修改{{diy.name}}</p>
+    <van-popup
+      @close="closePop"
+      :safe-area-inset-bottom="true"
+      v-model="diy.show"
+      position="bottom"
+      :style="{ height: '30%' }"
+    >
+      <p class="pop-tit">修改{{ diy.name }}</p>
       <div v-if="diy.type === 'text' || diy.type === 'textarea'">
-        <van-field :type="diy.type" label="" v-model="diy.price" :placeholder="diy.placeholder" />
+        <van-field
+          :type="diy.type"
+          label=""
+          v-model="diy.price"
+          :placeholder="diy.placeholder"
+        />
       </div>
-      <van-button size="mini"  color="#60C6C6" @click="DiySave" type="primary" class="btnTb">保存</van-button>
+      <van-button
+        size="mini"
+        color="#60C6C6"
+        @click="DiySave"
+        type="primary"
+        class="btnTb"
+        >保存</van-button
+      >
     </van-popup>
-    <van-action-sheet v-model="diy.showaction" :actions="diy.item" @select="onSelect" />
-    <van-button color="rgb(81, 187, 186)" @click="Save" class="hehi" type="primary" block>保存</van-button>
+    <van-action-sheet
+      v-model="diy.showaction"
+      :actions="diy.item"
+      @select="onSelect"
+    />
+    <van-action-sheet v-model="diy.checkoutPop" @close="actionSheet">
+      <template v-for="(item, index) in diy.item">
+        <van-checkbox
+          @click="checkBoxChange(item, index)"
+          :key="index"
+          v-model="item.check"
+          :data-check="item.check"
+          style="
+            font-size: 14px;
+            height: 40px;
+            border-bottom: 1px solid #eee;
+            padding: 0 20px;
+          "
+          >{{ item.label }}</van-checkbox
+        >
+      </template>
+    </van-action-sheet>
+    <van-button
+      color="rgb(81, 187, 186)"
+      @click="Save"
+      class="hehi"
+      type="primary"
+      block
+      >保存</van-button
+    >
   </div>
 </template>
 
@@ -81,13 +210,13 @@ export default {
         placeholder: "",
         item: [],
         price: "",
+        checkoutPop: false,
       }
 
     }
   },
   methods: {
     clickCell(data) {
-      console.log(data)
       if (data == 1) { //姓名
         this.data = {
           types: 2,
@@ -221,6 +350,7 @@ export default {
           list: this.sourceData,
           form: 'type',
         }
+
       } else if (data == 7) { // 有效性
         this.data = {
           types: 1,
@@ -233,7 +363,7 @@ export default {
         this.data = {
           types: 1,
           popshow: true,
-          title: "修改星级",
+          title: "选择等级",
           list: [
             {
               name: "一星",
@@ -300,7 +430,7 @@ export default {
             that.sourceData = res.data.map((item) => {
               return {
                 ...item,
-                name: '',
+                name: item.title,
               };
             });
           }
@@ -381,12 +511,20 @@ export default {
         crm.compId = this.$C || local.C();
         crm.phone = this.formData.phone;
         crm.nickname = this.formData.name;
+        crm.wx = this.formData.wechat;
+        crm.qq = this.formData.qq;
+        crm.remark = this.formData.note;
+        crm.email = this.formData.email;
         crm.gender = this.sheetData.gender?.key;
-        crm.company = this.sheetData.company?.key;
+        console.log(this.company)
+        crm.company = this.company;
+        console.log(this.sheetData.companyOcc)
         crm.companyOcc = this.sheetData.companyOcc?.key;
         crm.customSourceType = this.sheetData.title?.key;
-        crm.validity = this.sheetData.status?.key;
+        // crm.validity = this.sheetData.status?.key;
+        crm.status = this.sheetData.status?.key;
         crm.starLevel = this.sheetData.starLevel?.key;
+        // crm.validity = this.sheetData.status;
         crm.crmCompId = 0;
         crm.birthday = this.birthday;
         let signature = generateSignature3(0, crm.itrId, crm.compId, timeout, nonce);
@@ -397,9 +535,15 @@ export default {
           crm.companyOcc = -1;
         }
         // columus 自定义字段添加
-        let arr = this.diyColumn.length && this.diyColumn.filter(item => item.value).forEach(item => {
-          crm[item.name] = item.value;
-        })
+        if (this.diyColumn.length > 0) {
+          this.diyColumn.forEach(item => {
+            if (item.value) {
+              console.log(item)
+              crm[item.name] = item.value;
+            }
+          })
+        }
+        // return;
         this.$get("/api/request/itr/comp/customer/save", {
           params: crm,
         })
@@ -484,24 +628,46 @@ export default {
         });
     },
     showPopup(item, index) {  // 打开自定义表单
-      console.log(item)
       if (item.type == 'text' || item.type == 'textarea') {
         this.diy.show = true;
+        this.diy.item = JSON.parse(item.items).map(item => {
+          return {
+            ...item,
+            name: item.label
+          }
+        });
+      } else if (item.type == 'checkbox') {
+        // 分为两种情况第一种情况是y用用户曾经选中过。
+        // 这样的话就不能check=false; 反之check= false；
+        let backItem = JSON.parse(item.items);
+        let a = backItem.find(item => item.check);
+        console.log(a, 'aaaaaa')
+        if (!a) {
+          this.diy.item = backItem.map(item => {
+            return {
+              ...item,
+              check: false
+            }
+          });
+        } else {
+          this.diy.item = backItem;
+        }
+        console.log(this.diy.item)
+        this.diy.checkoutPop = true;
       } else {
         this.diy.showaction = true;
+        this.diy.item = JSON.parse(item.items).map(item => {
+          return {
+            ...item,
+            name: item.label
+          }
+        });
       }
-      // this.diy.headline = e;
       this.diy.name = item.label;
       this.diy.type = item.type;
       this.diy.placeholder = item.placeholder
       this.index = index;
-      this.diy.item = JSON.parse(item.items).map(item => {
-        return {
-          ...item,
-          name: item.value
-        }
-      });
-      // this.diy.price = d;
+      this.diy.price = item.value;
     },
     DiySave() {  // 自定义确定
       this.diy.show = false;
@@ -510,6 +676,31 @@ export default {
     onSelect(value) { // select选择确认
       this.diyColumn[this.index].value = value.value;
       this.diy.showaction = false;
+    },
+    actionSheet() { // 当多选类型框关闭的时候，进行过滤
+      let value = '';
+      let label = '';
+      this.diy.item.forEach(item => {
+        if (item.check) {
+          value += item.id + ',';
+          label += item.label + ',';
+        }
+      });
+      console.log(this.diyColumn[this.index], 'diyColumndiyColumn', this.index)
+      this.diyColumn[this.index].value = label;
+      this.$set(this.diyColumn, this.index, this.diyColumn[this.index])
+      // this.diy.checkoutPop = false;
+    },
+    checkBoxChange(item, index) {  // 
+      this.diy.item[index].check = item.check;
+      let origin = JSON.parse(this.diyColumn[this.index].items);
+      let check = { check: item.check };
+      let result = { ...JSON.parse(this.diyColumn[this.index].items)[index], ...check }
+      origin[index] = JSON.parse(JSON.stringify(result));
+      this.diyColumn[this.index].items = JSON.stringify(origin);
+    },
+    closePop() {
+      this.diy.show = false;
     }
   },
   components: { addpop, compInfo },

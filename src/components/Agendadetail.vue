@@ -4,19 +4,49 @@
       <van-icon name="arrow-left" size="17px" color="#fff" />
     </div> -->
     <div class="agenTitle">日程内容</div>
-    <van-field v-model="message" rows="3" autosize label="留言" type="textarea" placeholder="请输入留言" />
+    <van-field
+      v-model="message"
+      rows="3"
+      autosize
+      label="留言"
+      type="textarea"
+      placeholder="请输入留言"
+    />
     <div class="agenTitle">提醒时间</div>
-    <van-cell is-link title="选择提醒时间" :value="time" @click="agenTime = timeShow = true" />
+    <van-cell
+      is-link
+      title="选择提醒时间"
+      :value="time"
+      @click="agenTime = timeShow = true"
+    />
     <van-popup v-model="timeShow" position="bottom">
-      <van-datetime-picker type="datetime" title="选择完整时间" @confirm="timeOk" v-model="currentDate" />
+      <van-datetime-picker
+        type="datetime"
+        :columns-order="['year', 'month', 'day', 'hour', 'minute']"
+        :formatter="formatter"
+        title="选择完整时间"
+        @confirm="timeOk"
+        v-model="currentDate"
+      />
     </van-popup>
     <div class="agenTitle">开启日程</div>
     <van-cell center title="开启日程">
       <template #right-icon>
-        <van-switch v-model="checked" active-value="1" inactive-value="0" size="24" />
+        <van-switch
+          v-model="checked"
+          active-value="1"
+          inactive-value="0"
+          size="24"
+        />
       </template>
     </van-cell>
-    <van-button type="primary" size="large" style="margin-top:50px;background:#51BBBA" @click="AgendSave">保存</van-button>
+    <van-button
+      type="primary"
+      size="large"
+      style="margin-top: 50px; background: #51bbba"
+      @click="AgendSave"
+      >保存</van-button
+    >
   </div>
 </template>
 
@@ -38,17 +68,27 @@ export default {
       time: '',
       EditId: '',
 
+
     }
   },
   methods: {
     AgendSave(id) {  // 新增
+      console.log(id);
       let that = this;
       let { checked, message, time } = this;
-      let nonce = randomWord(true, 32, 32)
+      if (time === '') {
+        this.$toast({
+          message: '请选择提醒时间',
+          position: 'bottom',
+        });
+        return;
+      }
+      let nonce = randomWord(true, 32, 32);
+      console.log(this.$C || local.C());
       let crmInfo = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
       let signature = generateSignature3(this.EditId, crmInfo, local.U(), local.C(), timeout, nonce);
       let param = {
-        compId: this.$C,
+        compId: this.$C || local.C(),
         id: this.EditId,
         nonce,
         ptId: crmInfo,
@@ -56,22 +96,30 @@ export default {
         time: time,
         timeout: timeout,
         title: message,
-        userId: this.$U,
+        userId: this.$U || local.U(),
         signature: signature,
       };
       this.$get('/api/request/itr/comp/customer/remind/save', {
         params: param,
       })
         .then(function (res) {
-          let title = that.EditId == 0 ? "新增成功" : "编辑成功"
-          that.$toast({
-            message: title,
-            position: 'bottom',
-          });
-          setTimeout(() => {
-            that.$router.push('/linkDetailed')
-            sessionStorage.setItem('tabNum', 3)
-          }, 800)
+          if (res.error == 'success') {
+            let title = that.EditId == 0 ? "新增成功" : "编辑成功"
+            that.$toast({
+              message: title,
+              position: 'bottom',
+            });
+            setTimeout(() => {
+              that.$router.go(-1)
+              sessionStorage.setItem('tabNum', 3)
+            }, 800)
+          } else {
+            that.$toast({
+              message: '新增失败请重试！',
+              position: 'bottom',
+            });
+          }
+
         })
         .catch(function (error) {
           console.log(error);
@@ -88,6 +136,24 @@ export default {
 
       };
 
+    },
+    formatter(type, val) {
+      if (type === 'year') {
+        return val + '年';
+      }
+      if (type === 'month') {
+        return val + '月';
+      }
+      if (type === 'day') {
+        return val + '日';
+      }
+      if (type === 'hour') {
+        return val + '时';
+      }
+      if (type === 'minute') {
+        return val + '分';
+      }
+      return val;
     }
   },
   created() {
