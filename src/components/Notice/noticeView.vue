@@ -23,7 +23,7 @@
         <div class="img-list">
           <div
             v-for="(item, index) in imageList"
-            :class="imageList.length > 3 ? 'three' : 'two'"
+            :class="imageList.length > 3 ? 'three' : 'three'"
             :key="index"
           >
             <img
@@ -148,7 +148,7 @@ export default {
 
     },
     readStatus() {
-      let signature = generateSignature3(this.$U || local.U(),this.$route.params.id,timeout, nonce);
+      let signature = generateSignature3(this.$U || local.U(), this.$route.params.id, timeout, nonce);
       let data = {
         userId: this.$U || local.U(),
         notifyId: this.$route.params.id,
@@ -166,7 +166,12 @@ export default {
         });
     },
     prediv(src) {
-      ImagePreview([src]);
+      ImagePreview({
+        images: [
+          src
+        ],
+        closeable: true,
+      });
     },
     handalClickReadList() {
 

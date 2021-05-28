@@ -60,7 +60,6 @@ export default {
       console.log('failed', errorInfo);
     },
     onSubmit() {
-      let that = this;
       let { phone, name, compName, weChat, qq } = this;
       let signature = generateSignature3(this.$C || local.C(), timeout, nonce);
       let param = new URLSearchParams();

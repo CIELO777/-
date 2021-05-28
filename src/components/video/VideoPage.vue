@@ -46,23 +46,26 @@
                   <span style="margin-right: 5px">
                     {{ item.visits1 }}
                   </span>
-                  <img
-                    style="width: 15px; margin-right: 3px"
-                    src="../../../public/img/icon/share.png"
-                    alt=""
-                  />
-                  {{ item.shares }}
+                  <template v-if="$route.name !== 'ChatBarShare'">
+                    <img
+                      style="width: 15px; margin-right: 3px"
+                      src="../../../public/img/icon/share.png"
+                      alt=""
+                    />
+                    {{ item.shares }}
+                  </template>
                 </div>
                 <div class="ca" @click.stop="createContent(item)">
                   <img
                     style="width: 15px; margin-right: 3px"
                     :src="
                       Single
-                        ? require('../../../public/img/icon/share.png')
+                        ? require('../../../public/img/icon/send.png')
                         : require('../../../public/img/icon/menu.png')
                     "
                     alt=""
                   />
+                  <span v-if="Single" style="word-break: keep-all">发送</span>
                 </div>
               </div>
             </div>
@@ -88,7 +91,7 @@
 import share from '../../components/share'
 import communication from "../../uilts/communication";
 import { getM } from '../../uilts/date';
-
+import wxxx from '../../uilts/wxconfig'
 export default {
   name: "VideoPage",
   components: {},
@@ -118,7 +121,11 @@ export default {
       this.Single = sessionStorage.getItem('Single') || false;
 
     })
-    console.log(this.Single);
+    if (this.$route.name !== 'ChatBarShare') { // 这个授权只是在工作台时候授权
+      setTimeout(() => {
+        wxxx()
+      }, 1000);
+    }
   },
   mounted() {
     const that = this;
@@ -161,22 +168,21 @@ export default {
       this.$router.push({
         name: 'Iframe',
         params: {
-          url: item.initialUrl,
+          url: item.initialUrl + '?shareType=15',
           title: item.title,
           desc: item.description,
-          imgUrl: item.thumb
-
+          imgUrl: item.thumb,
+          view: 'video'
         }
       })
       communication.$emit('dateViodeo', index, getM()[3]); //触发home 页面方法，目的是为了更新列表数据
     },
     createContent(item) {
-      console.log(item);
       if (sessionStorage.getItem('Single')) { //单聊模式发送  正常模式赋值
         wx.invoke('sendChatMessage', {
           msgtype: "news", //消息类型，必填
           news: {
-            link: item.initialUrl, //H5消息页面url 必填
+            link: item.initialUrl + '?shareType=15', //H5消息页面url 必填
             title: item.title, //H5消息标题
             desc: item.description, //H5消息摘要
             imgUrl: item.thumb, //H5消息封面图片URL
@@ -193,7 +199,7 @@ export default {
           title: item.title,
           imgUrl: item.thumb,
           desc: item.description,
-          url: item.url
+          url: item.initialUrl + '?shareType=15'
         }
       }
     }
@@ -211,6 +217,7 @@ export default {
   background: #eee;
   font-size: 0.32rem;
   padding-top: 70px;
+  height: calc(100vh - 70px);
   .cont {
     width: 50%;
     width: calc(100% / 2 - 5px);

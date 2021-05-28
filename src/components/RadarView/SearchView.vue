@@ -1,5 +1,8 @@
 <template>
   <div class="searchView">
+    <!-- <div class="back" @click="back">
+      <van-icon name="arrow-left" size="20px" />
+    </div> -->
     <RadarViews
       v-bind="$attrs"
       v-on="$listeners"
@@ -142,6 +145,9 @@ export default {
     refreshEmptys() {
       this.configs.current = 0;  // 总页
     },
+    back(){
+      this.$router.go(-1)
+    }
   },
   created() {
     let data = JSON.parse(sessionStorage.getItem('searchView'))
@@ -167,5 +173,20 @@ export default {
 <style lang="less" scoped>
 .searchView {
   background: #eee;
+  height: 100vh;
+  .back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    left: 10px;
+    top: 0.4rem;
+    width: 38px;
+    height: 38px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    z-index: 99;
+    border-radius: 50%;
+  }
 }
 </style>

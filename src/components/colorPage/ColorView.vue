@@ -2,11 +2,16 @@
  * @Author: YUN_KONG 
  * @Date: 2021-01-12 13:56:29 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-04-08 20:36:17
+ * @Last Modified time: 2021-05-25 15:47:43
  8 此模块用于彩页，软文列表
  */
 <template>
-  <div class="colorView">
+  <div
+    class="colorView"
+    :style="{
+      height: datas.length > 8 ? 'calc(100% - 70px)' : 'calc(100vh - 70px)',
+    }"
+  >
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
       <van-list
         v-if="datas.length > 0"
@@ -29,15 +34,23 @@
             <div v-if="visitor == 0" class="header">
               <div class="jino">
                 <span
+                  v-if="item.topStatus && item.topStatus == 1"
                   :class="['tag', item.userId == uid ? 'bule-bg' : 'red-bg']"
-                  >{{
+                >
+                  置顶
+                </span>
+                <!-- <span
+                  :class="['tag', item.userId == uid ? 'bule-bg' : 'red-bg']"
+                  >
+                  {{
                     item.userId == uid
                       ? item.draft == 0
                         ? "已发布"
                         : "未发布"
                       : "公司"
-                  }}</span
-                >
+                  }}
+                  </span
+                > -->
                 <img class="img" :src="item.thumb" />
                 <div class="ldldl">{{ item.time }}</div>
               </div>
@@ -97,12 +110,22 @@
           >
             <div></div>
             <div class="shareA" @click.stop="createContent(item)">
-              <img
-                style="width: 0.28rem; margin-right: 3px"
-                src="../../../public/img/icon/share.png"
-                alt=""
-              />
-              <span class="shareText">分享</span>
+              <template v-if="$route.name == 'ChatBarShare'">
+                <img
+                  style="width: 0.28rem; margin-right: 5px"
+                  src="../../../public/img/icon/send.png"
+                  alt=""
+                />
+                <span class="shareText">发送</span>
+              </template>
+              <template v-else>
+                <img
+                  style="width: 0.28rem; margin-right: 3px"
+                  src="../../../public/img/icon/share.png"
+                  alt=""
+                />
+                <span class="shareText">分享</span>
+              </template>
             </div>
           </div>
         </div>
@@ -121,17 +144,10 @@
     ></share>
   </div>
 </template>
-
 <script>
-import share from '../../components/share'
+import share from '../../components/share';
+import wxxx from '../../uilts/wxconfig'
 
-import {
-  generateTimeout,
-  generateNonce,
-  generateSignature3,
-} from "../../uilts/tools";
-let timeout = generateTimeout();
-let nonce = generateNonce();
 export default {
   name: "colorView",
   components: { share },
@@ -156,12 +172,8 @@ export default {
       visitor: 0,
       ShareContent: {},
       showShare: false,
-
     };
   },
-  watch: {
-  },
-  computed: {},
   methods: {
     onLoad() {  // 触底事件、
       console.log(this.configs.current, this.configs.total)
@@ -174,13 +186,11 @@ export default {
       } else {
         let cur = ++this.configs.current;
         this.$emit('onSearch', cur) // 触发爷组件方法更新数据下一页
-
       }
       // this.$emit('mySonChagne', this.configs.current) // 触发爷组件方法更新数据下一页
       setTimeout(() => {
         this.loading = false;
       }, 1000)
-
       // this.getList();
       // 加载状态结束
     },
@@ -190,14 +200,14 @@ export default {
       this.loading = true;
       setTimeout(() => {
         this.refreshing = false;
-      }, 1000);
+      }, 1500);
       this.onLoad();
     },
     clickColor(item) {
       this.$router.push({
         name: 'Iframe',
         params: {
-          url: item.initialUrl,
+          url: item.initialUrl + '&shareType=15',
           title: item.title,
           desc: item.description,
           imgUrl: item.thumb
@@ -205,12 +215,11 @@ export default {
       })
     },
     createContent(item) {
-      // console.log(item)
       if (sessionStorage.getItem('Single')) { //单聊模式发送  正常模式赋值
         wx.invoke('sendChatMessage', {
           msgtype: "news", //消息类型，必填
           news: {
-            link: item.initialUrl, //H5消息页面url 必填
+            link: item.initialUrl + '&shareType=15', //H5消息页面url 必填
             title: item.title, //H5消息标题
             desc: item.description, //H5消息摘要
             imgUrl: item.thumb, //H5消息封面图片URL
@@ -227,16 +236,16 @@ export default {
           title: item.title,
           imgUrl: item.thumb,
           desc: item.description,
-          url: item.initialUrl
+          url: item.initialUrl + '&shareType=15',
         }
       }
     }
   },
   activated() {
-    console.log('actived')
   },
   created() {
-    this.uid = JSON.parse(sessionStorage.getItem('userinfo')).id
+    this.uid = JSON.parse(sessionStorage.getItem('userinfo')).id;
+    // wxxx(); // 为了授权分享接口使用，所以一定要在这调用
   },
 };
 </script>
@@ -246,6 +255,8 @@ export default {
   background: #eee;
   font-size: 0.32rem;
   padding-top: 70px;
+  height: calc(100vh - 70px);
+
   .card {
     margin: 15px 0;
     background-color: #fff;

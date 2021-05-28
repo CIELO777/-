@@ -1,0 +1,102 @@
+ <header>
+      <img
+        src="http://ego-file.soperson.com/itver/13394171296/1611219518377.jpg"
+        alt=""
+      />
+      <div class="infoBox">
+        <p>姓名（后台获取）</p>
+        <div class="details">
+          <span>性别 | 来源 （后台获取）</span
+          ><span @click="details = detailsPop = true">详情 ></span>
+        </div>
+      </div>
+    </header>
+    <article class="info">
+      <p class="origin"><span>来源：</span><span>-</span></p>
+      <ul>
+        <li><span>添加时间：</span><span>-</span></li>
+        <li><span>电话：</span><span>-</span></li>
+        <li><span>年龄：</span><span>-</span></li>
+        <li><span>邮箱：</span><span>-</span></li>
+      </ul>
+      <div class="star" @click="starSelect">
+        <p style="margin-right: 15px">星级 ></p>
+        <p>{{ star.data }}</p>
+      </div>
+    </article>
+    <article class="tab">
+      <div class="company">
+        <p>
+          <span class="title">企业标签</span
+          ><van-button type="info" size="small">添加</van-button>
+        </p>
+        <p class="grade">客户等级:</p>
+        <van-button type="default" size="small">一般</van-button>
+      </div>
+      <div class="personage">
+        <p>
+          <span class="title">个人标签</span
+          ><van-button type="info" size="small">添加</van-button>
+        </p>
+      </div>
+    </article>
+    <article class="dynamic">
+      <div class="title">动态</div>
+      <div class="list">
+        <van-steps direction="vertical" :active="0">
+          <van-step>
+            <h3>【城市】物流状态1</h3>
+            <p>2016-07-12 12:40</p>
+          </van-step>
+          <van-step>
+            <h3>【城市】物流状态2</h3>
+            <p>2016-07-11 10:00</p>
+          </van-step>
+          <van-step>
+            <h3>快件已发货</h3>
+            <p>2016-07-10 09:30</p>
+          </van-step>
+          <van-step>
+            <h3>【城市】物流状态1</h3>
+            <p>2016-07-12 12:40</p>
+          </van-step>
+          <van-step>
+            <h3>【城市】物流状态2</h3>
+            <p>2016-07-11 10:00</p>
+          </van-step>
+          <van-step>
+            <h3>快件已发货</h3>
+            <p>2016-07-10 09:30</p>
+          </van-step>
+          <van-step>
+            <h3>【城市】物流状态1</h3>
+            <p>2016-07-12 12:40</p>
+          </van-step>
+          <van-step>
+            <h3>【城市】物流状态2</h3>
+            <p>2016-07-11 10:00</p>
+          </van-step>
+          <van-step>
+            <h3>快件已发货</h3>
+            <p>2016-07-10 09:30</p>
+          </van-step>
+        </van-steps>
+      </div>
+    </article>
+    <van-tabbar v-model="TabActive">
+      <van-tabbar-item icon="search">添加跟进</van-tabbar-item>
+      <van-tabbar-item icon="friends-o">转接客户</van-tabbar-item>
+    </van-tabbar>
+    <!-- 详情弹框 -->
+    <van-popup
+      v-model="detailsPop"
+      position="bottom"
+      :style="{ height: '100%' }"
+      closeable
+    />
+    <!-- 星级选择 -->
+    <van-action-sheet
+      v-model="star.pop"
+      :actions="star.actions"
+      @select="starEnter"
+    />

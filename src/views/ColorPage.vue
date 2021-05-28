@@ -1,5 +1,5 @@
 <template>
-  <div class="colorPage">
+  <div class="colorPage" v-show="show">
     <van-search
       @clear="onCancel"
       v-model="value"
@@ -36,7 +36,6 @@ import {
 } from "../uilts/tools";
 let timeout = generateTimeout();
 let nonce = generateNonce();
-
 import { Toolbar } from '../uilts/toolbarMixin';
 export default {
   name: "ColorPage",
@@ -69,6 +68,7 @@ export default {
       UserId: '',
       open_userid: '',
       CorpId: '',
+      show: true
     };
   },
   watch: {},
@@ -79,6 +79,9 @@ export default {
     }
   },
   methods: {
+    pushpush() {
+      this.$router.replace('/chatBarShare')
+    },
     async getTabList() {
       let signature = generateSignature3(
         this.$C || local.C(),
@@ -313,6 +316,7 @@ export default {
     },
     refreshEmptys() {  // 当用户下拉刷新是触发，清空页数
       this.config.current = 0;  // 总页
+      console.log('refreshEmpty')
       // this.treeData[this.id].config.current = 1;
       // console.log(this.treeData)
     },
@@ -332,15 +336,22 @@ export default {
         duration: 0
       });
     },
-
   },
   activated() {
   },
   async created() {
+    this.$toast.loading({
+      message: '加载中...',
+      forbidClick: true,
+      overlay: true,
+      duration: 0,
+      className: 'overFFF'
+    });
+    this.show = sessionStorage.getItem('userinfo') ? true : false;
     // mixin
   },
   mounted() {
-    window.addEventListener('scroll', this.scrollToTop)
+    window.addEventListener('scroll', this.scrollToTop);
   },
   activated() {
   },
@@ -348,10 +359,21 @@ export default {
     Tab,
   },
   beforeRouteEnter: (to, from, next) => {
+    console.log(to, from, 'colorPage')
+    console.log(window.location.href, 'window.location.href')
     next(vm => {
       vm.$store.commit("cache", to.name);
     })
   },
+  beforeRouteLeave: (to, from, next) => {
+    if (to.name === 'ColorPage') {
+      //  如果要返回colorPage return 如果不return 的话数据会出现问题
+      console.log('yao11111 clororPage')
+      return;
+    } else {
+      next();
+    }
+  }
 };
 </script>
 
@@ -364,5 +386,6 @@ export default {
     right: 0;
     z-index: 999;
   }
+ 
 }
 </style>

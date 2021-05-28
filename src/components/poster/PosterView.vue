@@ -123,6 +123,7 @@ export default {
   background: #eee;
   font-size: 0.32rem;
   padding-top: 105px;
+  height:calc(100vh - 105px);
   .ww {
     display: flex;
     flex-wrap: wrap;

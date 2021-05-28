@@ -64,13 +64,14 @@ export default {
       let data = {
         userId: this.$U || local.U(),
         nonce: nonce,
-        sort: "id",
-        direct: "desc",
+        // sort: "id",
+        // direct: "desc",
         timeout: timeout,
         signature: signature,
         current: cur || 1,
         size: 20,
-        type: this.type
+        type: this.type,
+        categroyId:1
       };
       this.$get("/api/request/itr/page/material/result", {
         params: data,

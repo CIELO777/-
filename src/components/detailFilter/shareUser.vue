@@ -156,7 +156,7 @@ export default {
     getShareList(filter, ids, cur) {
       //   console.log(filter, ids, queryStatus);
       // 请求自定义列表
-      let compID = JSON.parse(sessionStorage.getItem("userinfo"))?.bind_comp_id;
+      let compID =  this.$C || local.C();
       let signature = generateSignature3(
         compID,
         this.$U || local.U(),
@@ -205,7 +205,7 @@ export default {
     },
     searchs(value) { // 为共享资源的搜索接口
       // console.log(value[0])
-      let compID = JSON.parse(sessionStorage.getItem("userinfo"))?.bind_comp_id;
+      let compID =  this.$C || local.C();
       let signature = generateSignature3(
         compID,
         timeout,

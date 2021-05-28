@@ -74,7 +74,7 @@
                 <span>{{ item.createTime }}</span>
               </div>
             </div>
-            <div class="export" @click.stop="handelClickExport(item)">分享</div>
+            <!-- <div class="export" @click.stop="handelClickExport(item)">分享</div> -->
           </div>
           <div class="cont">
             <span>{{ item.title }} </span>
@@ -165,6 +165,7 @@ export default {
     },
     handelClickExport(item) {
       // console.log(item)
+      // console.log(item)
       // this.showShare = true;
       // this.ShareContent = {
       //   title: item.title,
@@ -178,7 +179,7 @@ export default {
       // let blob = new Blob([url], {
       //   type: "image/jpeg/jpg"
       // });
-      this.downLoad(url, "image.jpg")
+      // this.downLoad(url, "image.jpg")
       // FileSaver.saveAs(url, "image.jpg");
       // FileSaver.saveAs(blob, 'filename.jpg');
     },

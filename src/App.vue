@@ -98,10 +98,8 @@ export default {
         param.append("nonce", nonce);
         param.append("timeout", timeout);
         param.append("signature", signature);
-        console.log(param, 'param')
         this.$post1('/wx-crm-server/wx/un/bind/itr', param)
           .then(function (res) {
-            console.log(res)
             if (res.code === 200) {
               that.$toast.success('该账号解绑成功');
               that.show = false; // 解绑成功关闭弹框
@@ -131,7 +129,7 @@ export default {
   },
   computed: {
     cacheState() {
-      console.log(this.$store.state.cacheState, '缓存的页面');
+      console.log(this.$store.state.cacheState, '缓存的页面', window.location.href);
       return this.$store.state.cacheState;
     }
   },
@@ -155,6 +153,10 @@ html,
 body {
   height: 100%;
 }
+/deep/ .van-loading {
+  color: red;
+}
+/deep/ 
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -293,8 +295,4 @@ body {
     width: 80%;
   }
 }
-.van-empty {
-  background: #f1f1f1;
-}
-
 </style>

@@ -75,7 +75,7 @@ export default {
           console.log(res, '分享接口')
           if (res.err_msg == "shareWechatMessage:ok") {
             this.shareCount()
-            this.$toast('分享成功')
+            // this.$toast('分享成功')
           } else {
             this.$toast('分享失败,您的企业微信没有权限分享，请检查企业微信配置')
           }
@@ -254,8 +254,8 @@ export default {
     }
   },
   async created() {
-    await this.getAgentConfig(); // 同步执行 否则会报错
-    await this.getWxJsJdk();
+    // await this.getAgentConfig(); // 同步执行 否则会报错
+    // await this.getWxJsJdk();
     let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
     // console.log(this.ShareContents)
     // this.url = this.ShareContents.url;

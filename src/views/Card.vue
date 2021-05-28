@@ -19,6 +19,7 @@ let timeout = generateTimeout()
 let nonce = generateNonce();
 import sha1 from "../uilts/sha1";
 import local from '../uilts/localStorage';
+import wxxx from '../uilts/wxconfig';
 
 export default {
   name: "Card",
@@ -53,7 +54,8 @@ export default {
       })
         .then((res) => {
           if (res.url !== null) {
-            this.url = res.initialUrl;
+            this.url = res.initialUrl + '?shareType=15';
+            console.log(this.url)
             this.$toast.clear();
           }
           if (res.remark) {
@@ -76,8 +78,11 @@ export default {
   },
   async created() {
     if (sessionStorage.getItem('userinfo')) {
-      this.loading()
-      this.initMineInfo()
+      this.loading();
+      this.initMineInfo();
+      setTimeout(() => {
+        wxxx();
+      }, 1500);
     } else {
       this.$toast.fail({
         message: '此模块不支持聊天工具栏。',

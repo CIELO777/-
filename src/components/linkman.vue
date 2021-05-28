@@ -4,13 +4,28 @@
     <!-- 联系人or公海 -->
     <div
       class="nav"
-      :style="{ paddingTop: padding }"
       v-if="
         $route.name == 'Home' ||
         $route.name == 'HighSeas' ||
         $route.name == 'detailFilter'
       "
+      @touchstart="touchStart"
+      @touchmove="touchMove"
+      @touchend="touchEnd"
+      :style="[style, { paddingTop: padding }]"
+      style=""
     >
+      <div
+        style="
+          line-height: 50px;
+          height: 50px;
+          font-size: 14px;
+          color: rgba(69, 90, 100, 0.6);
+          text-align: center;
+        "
+      >
+        <i class="weui-loading" /> 加载中...
+      </div>
       <template v-for="(item, i) in list">
         <div :key="i" class="nav-item">
           <div class="nav-L" @click="handItemClick(item, i)">
@@ -55,13 +70,7 @@
             </div>
 
             <p class="nav-comp">
-              {{
-                item.company === undefined ||
-                item.company === null ||
-                item.company === ""
-                  ? "未填写公司名称"
-                  : item.company
-              }}
+              {{ !item.company ? "未填写公司名称" : item.company }}
             </p>
             <p class="nav-comp">{{ item.lastContactRecord }}</p>
           </div>
@@ -103,9 +112,24 @@
     </div>
     <!-- 批注 -->
     <div
-      :style="{ paddingTop: padding, paddingBottom: '50px' }"
+      :style="[{ paddingTop: padding, paddingBottom: '50px' }, style]"
       v-if="$route.name == 'Common'"
+      @touchstart="touchStart"
+      @touchmove="touchMove"
+      @touchend="touchEnd"
+      class="nav"
     >
+      <div
+        style="
+          line-height: 50px;
+          height: 50px;
+          font-size: 14px;
+          color: rgba(69, 90, 100, 0.6);
+          text-align: center;
+        "
+      >
+        <i class="weui-loading" /> 加载中...
+      </div>
       <template v-for="(item, i) in list">
         <div :key="i" class="product" @click="postil(item, i)">
           <div class="contents line1">
@@ -213,7 +237,8 @@ export default {
       chatuserID: "",
       YunShow: false,
       YunValue: [],
-      index: 0
+      index: 0,
+      isLoading: false,
     }
   },
   methods: {
@@ -239,20 +264,17 @@ export default {
         }
         // 如果没有提示弹框
         if (res.err_msg == "selectExternalContact:ok") {
-          console.log(res, '成功');
         } else {
-          console.log(res, '失败');
           //错误处理
           if (res.err_msg.indexOf('permission') !== -1) {
             this.$toast.fail('请联系管理员开通客户联系权限')
           } else {
-            this.$toast.fail(`绑定联系人失败,${res.err_msg}`)
+            // this.$toast.fail(`绑定联系人失败,${res.err_msg}`)
           }
         }
       });
     },
     openChat(wxCrmId) {
-      console.log(wxCrmId, '对话')
       wx.openEnterpriseChat({ // 调用对话
         // 注意：userIds和externalUserIds至少选填一个。内部群最多2000人；外部群最多500人；如果有微信联系人，最多40人
         userIds: '',    //参与会话的企业成员列表，格式为userid1;userid2;...，用分号隔开。
@@ -260,12 +282,10 @@ export default {
         groupName: '',  // 会话名称。单聊时该参数传入空字符串""即可。
         chatId: "", // 若要打开已有会话，需指定此参数。如果是新建会话，chatId必须为空串
         success: function (res) {
-          console.log(res, 'success')
           var chatId = res.chatId; //返回当前群聊ID，仅当使用agentConfig注入该接口权限时才返回chatId
           // 回调
         },
         fail: function (res) {
-          console.log(res, 'fail')
           if (res.errMsg.indexOf('function not exist') > -1) {
             alert('版本过低请升级')
           }
@@ -279,7 +299,6 @@ export default {
       })
     },
     callTel(id, type, i) {
-      console.log(id, type, i);
       this.index = i; //获取点击了列表的第几个index
       if (type == 'Yun') {
         this.YunShow = true;
@@ -325,7 +344,6 @@ export default {
         });
     },
     postil(item, index) {
-      console.log(item, index)
       let ids = item.id;
       let backItem = JSON.parse(JSON.stringify(item))
       backItem.id = backItem.pid;
@@ -350,8 +368,7 @@ export default {
       this.$get('/api/request/itr/comp/customer/record/audit/read', {
         params: data,
       })
-    }
-
+    },
   },
   created() {
     this.route = this.$route.name;
@@ -372,7 +389,6 @@ export default {
   watch: {
     getIndex(val) {
       this.current = val;
-      console.log(this.totals, this.current);
       if (this.totals < this.current) return;
       if (this.current !== 1) {
         this.$emit('chengParentCur', this.current);
@@ -380,22 +396,22 @@ export default {
     },
   },
   mounted() {
-    // console.log('zhxingl1');
     // window.document.documentElement.scrollTop = sessionStorage.getItem('histroyScrollTop') || 0;
   }
 }
 
 </script>
 <style lang="less" scoped>
-@bgColor: #f1f1f1;
+@bgColor: #eee;
 @FColor: #726f6f;
 .content {
+
   font-size: 14px;
-  height: calc(~"100vh - 90px");
+  // height: calc(~"100vh - 90px");
   background: @bgColor;
   .van-search {
     position: fixed;
-    top: 0px;
+    // top: 0px;
     left: 0;
     width: 100vw;
   }
@@ -404,12 +420,14 @@ export default {
   margin: 0 auto;
   box-sizing: border-box;
   padding-bottom: 50px;
-  background: #f1f1f1;
+  background: #eee;
+  height: calc(100vh - 50px);
+  margin-top: -50px;
   .nav-item {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    margin-top: 1px;
+    border-top: 1px solid #eee;
     // height: 88px;
     background: #fff;
     padding: 0.17rem 12px;
@@ -504,11 +522,13 @@ export default {
   }
 }
 .product {
-  padding: 7px 10px;
+  padding: 7px 0px;
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
-  margin-top: 1px;
+  // margin-top: 1px;
+  border-top: 1px solid #eee;
+
   background-color: #fff;
   justify-content: center;
   align-items: center;

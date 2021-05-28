@@ -23,26 +23,36 @@
       style="width: 100%"
       v-show="show"
     />
-    <!-- <van-pull-refresh class="pull" :success-text="successtext" style="min-height: 100vh;" head-height="40" v-model="isLoading" @refresh="onRefresh"> -->
-    <linkman
-      @userIDLength="userIDLengths"
-      @userIdSave="userIdSaves(arguments)"
-      ref="mychild"
-      v-if="data.length > 0"
-      :list="data"
-      :totals="total"
-      :users="user"
-      :userMaps="userMap"
-      @chengParentCur="chengParentCurs"
-      padding="89px"
-      :sb="caonim"
-    >
-    </linkman>
-    <van-empty
-      v-else
-      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
-      description="暂无相关消息"
-    />
+    <!-- <van-pull-refresh
+      class="pull"
+      :success-text="successtext"
+      style="min-height: 100vh"
+      head-height="40"
+      v-model="isLoading"
+      @refresh="onRefresh"
+    > -->
+      <linkman
+        @userIDLength="userIDLengths"
+        @userIdSave="userIdSaves(arguments)"
+        @pullRefresf="onRefresh(1)"
+        @click="onRefresh"
+        ref="mychild"
+        v-if="data.length > 0"
+        :list="data"
+        :totals="total"
+        :users="user"
+        :userMaps="userMap"
+        @chengParentCur="chengParentCurs"
+        padding="89px"
+        :sb="caonim"
+      >
+      </linkman>
+      <van-empty
+        v-else
+        image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+        description="暂无相关消息"
+      />
+    <!-- </van-pull-refresh> -->
     <!-- 企业微信验证码 -->
     <van-popup
       v-model="show"
@@ -145,7 +155,6 @@ import Utils from "../uilts/utils";
 import Update from "../uilts/update";
 import navBar from "../components/NavBar";
 import { pullMixin } from '@/uilts/pull';
-
 import communication from "../uilts/communication";
 // import { initWxConfig, wxAgentConfig } from '../uilts/wx-js-sdk/wxConfig'
 // import wx from 'weixin-js-sdk';
@@ -156,7 +165,6 @@ export default {
   data() {
     return {
       count: 0,
-      isLoading: false,
       data: [],
       user: {},
       userMap: {},
@@ -190,7 +198,8 @@ export default {
       orderStatus: undefined,
       status: undefined,
       starLeve: undefined,
-
+      isLoading: false,
+      successtext: '',
     };
   },
   components: {
@@ -208,14 +217,14 @@ export default {
       let timeout = generateTimeout();
       let nonce = generateNonce();
       let signature = generateSignature3(
-        userinfo?.id,
-        userinfo?.bind_comp_id,
+        this.$U || local.U(),
+        this.$C || local.C(),
         timeout,
         nonce
       );
       let data = {
-        userId: userinfo?.id,
-        compId: userinfo?.bind_comp_id,
+        userId: this.$U || local.U(),
+        compId: this.$C || local.C(),
         current: datas || 1,
         size: 20,
         nonce,
@@ -243,7 +252,7 @@ export default {
               item.YunCall = [item.workNumber]
             }
           })
-          that.data = datas == 1 ? res.data : that.data.concat(res.data);
+          that.data = datas == 1 || !data ? res.data : that.data.concat(res.data);
           that.userMap = Object.assign(that.userMap, res.user);
           that.user = res.user;
           that.total = res.totalPageCount;
@@ -486,7 +495,7 @@ export default {
             timestamp: this.timestamp, // 必填，生成签名的时间戳
             nonceStr: this.noncestr, // 必填，生成签名的随机串
             signature: signature, // 必填，签名，见附录1
-            jsApiList: ["agentConfig", "selectExternalContact", 'openEnterpriseChat'], // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+            jsApiList: ["agentConfig", "selectExternalContact", 'openEnterpriseChat', 'getCurExternalContact'], // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
           });
           wx.ready(function () {
             // wx.hideAllNonBaseMenuItem();
@@ -500,7 +509,7 @@ export default {
               timestamp: that.timestamp2, // 必填，生成签名的时间戳
               nonceStr: that.noncestr2, // 必填，生成签名的随机串
               signature: that.signature2, // 必填，签名，见附录-JS-SDK使用权限签名算法
-              jsApiList: ["selectExternalContact", 'getContext', 'sendChatMessage'], //必填
+              jsApiList: ["selectExternalContact", 'getContext', 'sendChatMessage', 'getCurExternalContact'], //必填
               success: function (res) {
                 // 回调
                 // alert('成功')
@@ -570,7 +579,6 @@ export default {
     },
     saveWxCrm(wxcrm, id, phone, idx) {
       // 保存联系人接口
-      let that = this;
       let crm = {};
       crm.id = id; // 获取子组件点击的id ，userIdSave
       crm.itrId = this.$U || local.U();
@@ -648,7 +656,6 @@ export default {
     },
     // 触发滚页方法
     chengParentCurs(data) {
-      console.log(data, '------------------', this.mode);
       if (sessionStorage.getItem("route") == 'LinkDetailed' || sessionStorage.getItem("route") == 'Addcustomer') return;// 如果是 LinkDetailed 就return掉
       if (this.mode === "list") {
         // mode 是判断是否是搜索分页还是列表分页
@@ -737,7 +744,6 @@ export default {
     },
     // 更新数据
     ManualUpdate(index, wxid) {
-      console.log(index, wxid)
       this.data[index].wxCrmId = wxid;
     },
     clickShort(data) {
@@ -810,14 +816,15 @@ export default {
         }
         this.starLeve = data;
       }
-      console.log(this.$refs.navBar.Params)
       this.getList(1, this.$refs.navBar.Params);
       this.shortPop = false;
+    },
+    onRefresh() {
+      this.getList(1)
     },
   },
   async activated() {
     document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.home; // 设置每个页面的scrollTop
-    console.log(this.$store.state.scroll.home)
     // 如果ManualData：true 证明姓名，电话，跟进记录修改过，这样的话就重新赋值把。
     let index = sessionStorage.getItem('ManualIdx');
     let { nickName, company, sheet, gender, userId, name } = this.$store.state.ManualData;
@@ -827,7 +834,6 @@ export default {
       if (sheet !== '') { this.data[index].lastContactRecord = sheet; }
       if (gender !== '') { this.data[index].gender = gender; }
       if (userId !== '') {
-        console.log('11222', userId)
         if (this.data[index]) {
           this.data[index].ownerId = userId;
           this.caonim = name;
@@ -913,15 +919,13 @@ export default {
     communication.$on('linkman', (msg) => {
       this.data.unshift(msg);
     })
-    communication.$on('collectLinkman', (str, data, id) => { // 公海拾取的追加到联系人上
-      console.log(str, data, id)
+    communication.$on('collectLinkman', (str, data, id, type) => { // 公海拾取的追加到联系人上
       let result = data;
       result.ownerId = id;
       result.lastContactRecord = str;
+      result.ownerType = type; // 将ownerTYpe类型赋值为3
       this.data.unshift(result);
-
-    })
-
+    });
   },
   destroyed() {
     this.$store.commit("destroyedSearch", "1");
@@ -938,6 +942,10 @@ export default {
 };
 </script>
 <style lang="less" scoped>
+.home {
+  height: 100vh;
+  background: #eee;
+}
 .hint {
   display: flex;
   margin-top: 0.3rem;
@@ -979,7 +987,7 @@ export default {
 }
 .pull /deep/ .van-pull-refresh__head {
   // 改变下拉框的提醒位置
-  top: 45px;
+  top: 85px;
 }
 .shortcut {
   height: 40px;

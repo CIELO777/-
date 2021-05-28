@@ -5,23 +5,24 @@
       v-model="search"
       show-action
       placeholder="搜索批注内容"
+      class="navbar"
     >
       <template #action>
         <div @click="onSearch">搜索</div>
       </template>
     </van-search>
-    <!-- <van-pull-refresh class="pull" :success-text="successtext" style="min-height: 100vh;" head-height="40" v-model="isLoading" @refresh="onRefresh"> -->
     <linkman
       ref="mychild"
       @userIDLength="userIDLengths"
       @userIdSave="userIdSaves(arguments)"
+      @pullRefresf="onRefresh(1)"
       v-if="data.length > 0"
       :list="data"
       :totals="total"
       :users="user"
       :userMaps="userMap"
       @chengParentCur="chengParentCurs"
-      padding="0"
+      padding="48px"
       label="Seas"
     ></linkman>
     <van-empty
@@ -30,7 +31,6 @@
       image="https://img.yzcdn.cn/vant/custom-empty-image.png"
       description="暂无相关消息"
     />
-    <!-- </van-pull-refresh> -->
   </div>
 </template>
 <script>
@@ -44,8 +44,7 @@ import local from '../uilts/localStorage';
 import Utils from '../uilts/utils';
 import navBar from '../components/NavBar';
 import communication from "../uilts/communication";
-import { pullMixin } from '@/uilts/pull'
-
+import { pullMixin } from '@/uilts/pull';
 export default {
   name: 'Common',
   inject: ['reload', 'unbind'],
@@ -70,6 +69,8 @@ export default {
       updateIndex: -1,
       search: '',
       fuzzy: '',
+      isLoading: false,
+      successtext: ''
     }
   },
   methods: {
@@ -78,10 +79,10 @@ export default {
       let timeout = generateTimeout();
       let nonce = generateNonce();
       let userinfo = JSON.parse(sessionStorage.getItem('userinfo'))
-      let signature = generateSignature3(userinfo?.id, userinfo?.bind_comp_id, timeout, nonce)
+      let signature = generateSignature3(this.$U || local.U(), this.$C || local.C(), timeout, nonce)
       let data = {
-        userId: userinfo.id,
-        compId: userinfo.bind_comp_id,
+        userId: this.$U || local.U(),
+        compId: this.$C || local.C(),
         current: datas || 1,
         size: 20,
         nonce,
@@ -156,6 +157,8 @@ export default {
           this.userMap = Object.assign(this.userMap, res.user);
           this.data = qqd;
           this.total = res.totalPageCount;
+          this.successtext = '刷新成功';
+          this.isLoading = false;  // 如果是刷新的情况那么就 关闭刷新状态
           this.$toast.clear();
         })
         .catch((error) => {
@@ -437,8 +440,8 @@ export default {
       });
     },
     onSearch(val) {
-      console.log(val);
-      this.fuzzy = val;
+      console.log(this.search);
+      this.fuzzy = this.search;
       this.getList(1)
       this.firstLodding()
     },
@@ -450,7 +453,9 @@ export default {
       this.$store.commit('SearchfuzzyReset', 'off');
       this.getList(1)
     },
-
+    onRefresh() {
+      this.getList(1);
+    }
   },
   async created() {
     this.totalLodding();
@@ -530,9 +535,23 @@ export default {
   },
 }
 </script>
-<style>
-.van-empty {
-  padding-top: 3rem;
+<style  lang="less" scoped>
+.about {
+  background: #eee;
+  height: 100vh;
+  .navbar {
+    height: 48px;
+    z-index: 999;
+    font-size: 0.32rem;
+    position: fixed;
+    width: 100%;
+    left: 0;
+    top: 0;
+    background: #fff !important;
+  }
+  .van-empty {
+    padding-top: 3rem;
+  }
 }
 .pull /deep/ .van-pull-refresh__head {
   top: 45px;

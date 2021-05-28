@@ -128,6 +128,7 @@ export default {
 <style lang="less" scoped>
 .agenda {
   background: #f1f1f1;
+  height:100vh;
   .agendaTit {
     display: flex;
     background: #fff;
@@ -139,7 +140,7 @@ export default {
     width: 100%;
     left: 0;
     height: 0.8rem;
-    top: 33px;
+    top: 114px;
     border-bottom: 8px solid #f1f1f1;
     border-top: 8px solid #f1f1f1;
     padding-left: 0.3rem;
@@ -179,7 +180,7 @@ export default {
     // }
   }
   .agendaCont:nth-child(2) {
-    padding-top: 1.9rem;
+    padding-top: 3.7rem;
   }
   // .qs-green {
   //   color: #3d8329;
@@ -192,7 +193,8 @@ export default {
   //   color: #ff8000;
   // }
   .van-empty {
-    padding-top: 2.9rem;
+    // height: 100vh;
+    padding-top: 186px;
   }
   .qs-green {
     color: #3d8329;

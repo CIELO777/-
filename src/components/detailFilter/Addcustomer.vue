@@ -1,14 +1,12 @@
 <template>
   <div class="Addcustomer">
-    <van-cell :value="formData.name" is-link @click="clickCell(1)">
-      <!-- 使用 title 插槽来自定义标题 -->
+    <!-- <van-cell :value="formData.name" is-link @click="clickCell(1)">
       <template #title>
         <span class="custom-title">姓名</span>
         <span style="color: red; font-size: 18px">*</span>
       </template>
     </van-cell>
     <van-cell :value="formData.phone" is-link @click="clickCell(13)">
-      <!-- 使用 title 插槽来自定义标题 -->
       <template #title>
         <span class="custom-title">手机</span>
         <span style="color: red; font-size: 18px">*</span>
@@ -79,7 +77,10 @@
       is-link
       @click="clickCell(12)"
       title="出生日期"
-    ></van-cell>
+    ></van-cell> -->
+    <van-dialog v-model="show" title="标题" show-cancel-button>
+      <img src="https://img01.yzcdn.cn/vant/apple-3.jpg" />
+    </van-dialog>
     <!--自定义列表 -->
     <template v-for="(item, index) in diyColumn">
       <van-cell
@@ -89,6 +90,7 @@
         @click="showPopup(item, index)"
         :title="item.label"
         :value="item.value"
+        :required="item.required == 1 ? true : false"
         >{{ item.value }}</van-cell
       >
     </template>
@@ -129,6 +131,7 @@
           label=""
           v-model="diy.price"
           :placeholder="diy.placeholder"
+          :formatter="formatter"
         />
       </div>
       <van-button
@@ -164,7 +167,7 @@
     </van-action-sheet>
     <van-button
       color="rgb(81, 187, 186)"
-      @click="Save"
+      @click="$route.params.name ? checkIng() : Save()"
       class="hehi"
       type="primary"
       block
@@ -202,6 +205,7 @@ export default {
       sheetData: {},
       birthday: "",
       diyColumn: [],
+      show:false,
       diy: {
         name: "",
         show: false,
@@ -211,8 +215,9 @@ export default {
         item: [],
         price: "",
         checkoutPop: false,
-      }
-
+      },
+      whetherExist: false,
+      findPhone: '',
     }
   },
   methods: {
@@ -412,7 +417,7 @@ export default {
       let that = this;
       let timeout = generateTimeout();
       let nonce = generateNonce();
-      let compID = JSON.parse(sessionStorage.getItem("userinfo"))?.bind_comp_id;
+      let compID = this.$C || local.C();
       let signature = generateSignature3(compID, timeout, nonce);
       let data = {
         current: 1,
@@ -487,29 +492,20 @@ export default {
       this.birthday = data;
     },
     Save() { // 表单保存
-      if (JSON.stringify(this.formData) == '{}') {
-        this.$toast({
-          message: '请填写姓名和手机',
-          position: 'bottom',
-        });
-        return;
-      }
-      if (this.formData.name === '') {
-        this.$toast({
-          message: '姓名不能为空',
-          position: 'bottom',
-        });
-      } else if (this.formData.phone === '') {
-        this.$toast({
-          message: '手机不能为空',
-          position: 'bottom',
-        });
+      let lock = true;
+      this.diyColumn.forEach(item => { // 是否为空校验
+        if (item.required == 1 && !item.value) {
+          lock = false;
+        }
+      });
+      if (!lock) {
+        this.$toast('还有必填项没有填写,请填写!')
       } else {
         let crm = {};
         crm.id = 0;
         crm.itrId = this.$U || local.U();
         crm.compId = this.$C || local.C();
-        crm.phone = this.formData.phone;
+        // crm.phone = this.formData.phone;
         crm.nickname = this.formData.name;
         crm.wx = this.formData.wechat;
         crm.qq = this.formData.qq;
@@ -524,13 +520,15 @@ export default {
         // crm.validity = this.sheetData.status?.key;
         crm.status = this.sheetData.status?.key;
         crm.starLevel = this.sheetData.starLevel?.key;
-        // crm.validity = this.sheetData.status;
         crm.crmCompId = 0;
         crm.birthday = this.birthday;
         let signature = generateSignature3(0, crm.itrId, crm.compId, timeout, nonce);
         crm.timeout = timeout;
         crm.nonce = nonce;
         crm.signature = signature;
+        if (this.$route.params.name && this.$route.params.wxcrmId) { // 如果路由中有参数，聊天工具栏中跳转过来需要绑定wxID
+          crm.wxCrmId = this.$route.params.wxcrmId;
+        }
         if (crm.companyOcc == 7) {
           crm.companyOcc = -1;
         }
@@ -538,12 +536,10 @@ export default {
         if (this.diyColumn.length > 0) {
           this.diyColumn.forEach(item => {
             if (item.value) {
-              console.log(item)
               crm[item.name] = item.value;
             }
           })
         }
-        // return;
         this.$get("/api/request/itr/comp/customer/save", {
           params: crm,
         })
@@ -554,7 +550,18 @@ export default {
                 position: 'bottom',
               });
               setTimeout(() => {
-                this.$router.replace({ name: 'Home', params: { status: 'success' } })
+                if (this.$route.params.name && this.$route.params.wxcrmId) {
+                  // 跳转到
+                  this.$toast.loading({
+                    message: '加载中...',
+                    forbidClick: true,
+                    duration: 0,
+                    overlay: true,
+                  });
+                  this.getListUserInfo(res.id)
+                } else {
+                  this.$router.replace({ name: 'Home', params: { status: 'success' } })
+                }
               }, 400)
             } else {
               this.$toast.fail(res.errMsg);
@@ -619,9 +626,18 @@ export default {
       param.append("nonce", nonce);
       param.append("signature", signature);
       param.append("compId", this.$C || local.C());
+      param.append("version", 1);
       await this.$post1("/api/request/itr/comp/column/query", param)
         .then((res) => {
-          this.diyColumn = res;
+          let [List, Lists] = [[], []];
+          res.forEach((item) => {  // 合并数组
+            if (item.required === 1) {
+              List.push(item)
+            } else {
+              Lists.push(item)
+            }
+          });
+          this.diyColumn = List.concat(Lists)
         })
         .catch(function (error) {
           console.log(error);
@@ -671,6 +687,7 @@ export default {
     },
     DiySave() {  // 自定义确定
       this.diy.show = false;
+      console.log(this.diy.price)
       this.diyColumn[this.index].value = this.diy.price;
     },
     onSelect(value) { // select选择确认
@@ -701,20 +718,231 @@ export default {
     },
     closePop() {
       this.diy.show = false;
-    }
+    },
+    async checkIng() { // 查重数据每次保存时候查重时候有这个数据
+      let lock = false;
+      let rg = /^wm/;
+      this.diyColumn.forEach(item => { // 判断是手机号还是微信ID
+        if (item.name === 'phone') {
+          if (item.value.length > 30 && rg.test(item.value)) { // 长度限制。开都字母限制
+            lock = true;
+          }
+        }
+      });
+      if (lock) { // 两种情况第一种没有改变输入框，直接保存并且绑定
+        this.Save()
+      } else {      // 2.改变了手机输入框为手机号,查重并弹框
+        this.$toast.loading({
+          message: '查询中...',
+          forbidClick: false,
+          duration: 0,
+          overlay: true,
+        });
+        let signature = generateSignature3(this.$C || local.C(), timeout, nonce);
+        let param = new URLSearchParams();
+        let phone;
+        this.diyColumn.forEach(item => {
+          if (item.name === 'phone') {
+            phone = item.value;
+          }
+        });
+        this.findPhone = phone;
+        await this.whetherList();
+        param.append("compId", this.$C || local.C());
+        param.append("phone", phone);
+        param.append("nonce", nonce);
+        param.append("signature", signature);
+        param.append("timeout", timeout);
+        param.append("current", 1);
+        param.append("size", 20);
+        // 请求并且跳转页面
+        this.$post1("/api/request/itr/comp/customer/rechecking", param)
+          .then((res) => {
+            // alert(res.data.length)
+            // alert(this.whetherExist)
+            // alert(res.data[0].wxCrmId)
+            if (res.data.length === 0) { // 查重不存在直接保存 
+              this.Save()
+            } else if (res.data.length > 0) { // 查重存在 && 
+              if (this.whetherExist && res.data[0].wxCrmId) { // 联系人列表存在 && 绑定了联系人
+                this.$dialog.confirm({
+                  title: '温馨提示',
+                  message: '该手机号已经绑定其他用户，继续绑定会解绑已绑定用户，是否继续保存。',
+                })
+                  .then(() => {
+                    this.edit(res.data[0].id) // 绑定企业微信ID;
+                  })
+                  .catch(() => {
+                    wx.closeWindow(); // 关闭页面
+                  });
+              } else if (this.whetherExist && !res.data[0].wxCrmId) {
+                this.edit(res.data[0].id) // 绑定企业微信ID
+                this.$toast('绑定联系人成功')
+              } else {
+                this.$toast('该手机号已存在且不属于你，请联系管理员处理'); // 联系人列表不存在
+                setTimeout(() => {
+                  wx.closeWindow() // 退回到聊天框
+                }, 3000)
+              }
+            }
+            // if (res.data.length === 0 && !this.whetherExist) { // 证明没有数据。不能保存
+            //   wx.closeWindow() // 退回到聊天框
+            // } else if (res.data.length > 0 && res.data[0].wxCrmId) { // 有数据且绑定了联系人
+            //   console.log('有数据并且绑定了联系人')
+            //   this.$dialog.confirm({
+            //     title: '温馨提示',
+            //     message: '是否继续保存',
+            //   })
+            //     .then(() => {
+            //       // on confirm
+            //       this.edit(res.data[0].id) // 绑定企业微信ID;
+            //     })
+            //     .catch(() => {
+            //       wx.closeWindow(); // 关闭页面
+            //     });
+            // } else if (res.data.length > 0 && !res.data[0].wxCrmId) { // 有数据且没绑定联系人
+            //   this.edit(res.data[0].id) // 绑定企业微信ID
+            //   this.$toast('绑定联系人成功')
+            // }
+            // this.$toast.clear()
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
+      return;
+    },
+    async whetherList() {// 判断手机号在联系人列表里存在么？
+      let signature = generateSignature3(
+        this.$C || local.C(),
+        this.$U || local.U(),
+        timeout,
+        nonce
+      );
+      let param = new URLSearchParams();
+      let phone;
+      this.diyColumn.forEach(item => {
+        if (item.name === 'phone') {
+          phone = item.value;
+        }
+      });
+      param.append("type", 1);
+      param.append("userId", this.$U || local.U());
+      param.append("compId", this.$C || local.C());
+      param.append("timeout", timeout);
+      param.append("nonce", nonce);
+      param.append("fuzzy", this.findPhone);
+      param.append("current", 1); // 默认页数是1
+      param.append("signature", signature);
+      await this.$post1("/api/request/itr/comp/customer/query", param)
+        .then((res) => {
+          console.log(res)
+          if (res.data.length > 0) { // 证明联系人列表中存在
+            this.whetherExist = true;
+          }
+        })
+        .catch(function (error) { });
+    },
+    formatter(value) {  // 限制字符串类型 
+      if (this.diyColumn[this.index].name === 'phone') {  // 表单类型为手机时候就校验
+        var re = /[^0-9a-zA-Z\-\_]*$/g;  // 数字字母_-允许
+        return value.replace(re, '');
+      } else {
+        return value;
+      }
+    },
+    edit(wxId) { // 聊天工具栏绑定wxcrmID用。
+      let crm = {};
+      crm.id = wxId; // 获取子组件点击的id ，userIdSave
+      crm.itrId = this.$U || local.U();
+      crm.compId = this.$C || local.C();
+      crm.wxCrmId = this.$route.params.wxcrmId;
+      // crm.phone = phone;
+      let signature = generateSignature3(
+        crm.id,
+        crm.itrId,
+        crm.compId,
+        timeout,
+        nonce
+      );
+      crm.timeout = timeout;
+      crm.nonce = nonce;
+      crm.signature = signature;
+      this.$get("/api/request/itr/comp/customer/save", {
+        params: crm,
+      })
+        .then(async (res) => {
+          this.$toast.loading({
+            message: '保存中...',
+            forbidClick: true,
+            duration: 0,
+            overlay: true,
+          });
+          this.getListUserInfo(res.id)
+        })
+        .catch(function (error) {
+          console.log(error);
+          this.$toast.clear()
+        });
+    },
+    getListUserInfo(id) { // 此接口通过列表项的id 获取当前联系人数据，主要跳转用；
+      let signature = generateSignature3(
+        this.$C || local.C(),
+        this.$U || local.U(),
+        timeout,
+        nonce
+      );
+      let param = new URLSearchParams();
+      param.append("userId", this.$U || local.U());
+      param.append("compId", this.$C || local.C());
+      param.append("timeout", timeout);
+      param.append("nonce", nonce);
+      param.append("fuzzy", id);
+      param.append("current", 1); // 默认页数是1
+      param.append("signature", signature);
+      this.$post1("/api/request/itr/comp/customer/query", param)
+        .then((res) => {
+          sessionStorage.setItem('tabNum', 0); // 保存数据并且跳转
+          sessionStorage.setItem('_crm_info', JSON.stringify(res.data[0]))
+          this.$toast.clear()
+          this.$router.replace({ name: 'LinkDetailed' });
+        })
+        .catch(function (error) {
+          this.$toast.clear()
+        });
+    },
   },
   components: { addpop, compInfo },
   async created() {
-    await this.getColumnConfig()
+    console.log(this.$route.params.name)
+    await this.getColumnConfig();
     this.getCid();
+    console.log(this.$route, 'this.$routethis.$reoute')
+    if (this.$route.params.name && this.$route.params.wxcrmId) { // 如果存在这两个参数，证明是从客户画像中跳转过来的
 
+      this.diyColumn.forEach(item => { //  回显数据...
+        if (item.name === 'nickname') {
+          item.value = this.$route.params.name;
+        } else if (item.name === 'phone') {
+          item.value = this.$route.params.wxcrmId;
+        }
+      })
+      this.$forceUpdate()
+    }
+  },
+  beforeRouteLeave: (to, from, next) => {
+    if (to.name === 'ChatCustomer') {
+      next(false);
+    } else {
+      next();
+    }
   }
 }
 </script>
 
 <style lang="less" scoped>
 .Addcustomer {
-  margin-bottom: 44px;
+  padding-bottom: 44px;
   .hehi {
     margin-top: 10px;
     display: block;
@@ -735,6 +963,14 @@ export default {
   .pop-tit {
     font-size: 16px;
     padding: 10px;
+  }
+  /deep/ .van-cell__value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    width: 3rem;
+    color: #7c7878;
   }
 }
 </style>

@@ -27,7 +27,9 @@ local.U = function () {
 local.C = function () {
 	var obj = window.sessionStorage.getItem('userinfo');
 	if (obj && obj != 'undefined' && obj != 'null') {
-		return JSON.parse(obj).bind_comp_id;
+		// return JSON.parse(obj).bind_comp_id; //生产
+		let CompId = process.env.VUE_APP_ENV === 'production' ? JSON.parse(obj).bind_comp_id : 40021450;
+		return CompId; //测试
 	}
 	return '';
 };

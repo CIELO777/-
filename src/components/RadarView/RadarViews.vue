@@ -1,7 +1,12 @@
 <template>
   <div
     class="radarViews"
-    :style="{ 'padding-top': $route.name == 'SearchView' ? '0' : '93px' }"
+    :style="[
+      { 'padding-top': $route.name == 'SearchView' ? '0' : '93px' },
+      {
+        height: datas.length > 8 ? 'calc(100% - 93px)' : 'calc(100vh - 93px)',
+      },
+    ]"
   >
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
       <van-list
@@ -20,10 +25,12 @@
           class="product"
         >
           <img
+            v-if="item.sourceType != 15"
             :src="
               item.portrait + '?x-oss-process=image/resize,m_fill,h_200,w_200'
             "
           />
+          <img v-else :src="item.visitorPortrait" alt="">
           <div class="content">
             <span class="toh"
               ><span class="toTit">{{ item.nickname }}</span
@@ -35,7 +42,7 @@
               ><span class="member" v-if="item.member == 1">会员</span
               ><span class="des"
                 >{{ item.createTime }}来自{{
-                  sourceTypeMap[item.sourceType]
+                  sourceTypeMap[item.sourceType + ""]
                 }}</span
               ></span
             >
@@ -95,6 +102,8 @@ export default {
         "11": "钉钉",
         "12": "百度小程序",
         "13": "海报",
+        "14": "字节小程序",
+        "15": "企业微信"
       },
       total: 0,
       start: "【",
@@ -133,9 +142,11 @@ export default {
     },
   },
   created() {
-    console.log(this.$route.name)
   },
-  mounted() { },
+  mounted() { 
+    console.log(this.datas)
+
+  },
 
 };
 </script>
@@ -143,6 +154,7 @@ export default {
 <style lang="less" scoped>
 .radarViews {
   padding-top: 93px;
+  background: #eee;
   .product {
     padding: 10px 15px;
     box-sizing: border-box;
@@ -169,7 +181,7 @@ export default {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-        line-height: .5rem;
+        line-height: 0.5rem;
         display: flex;
         align-items: center;
         .toTit {
@@ -199,6 +211,9 @@ export default {
         }
       }
     }
+  }
+  .van-empty {
+    background: #eee;
   }
 }
 </style>

@@ -1,5 +1,10 @@
 <template>
-  <div class="AdvertorialView">
+  <div
+    class="AdvertorialView"
+    :style="{
+      height: datas.length > 8 ? 'calc(100% - 100px)' : 'calc(100vh - 100px)',
+    }"
+  >
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
       <van-list
         v-if="datas.length > 0"
@@ -28,12 +33,14 @@
             <div class="footer pt12">
               <div @click="handalClickFlow">
                 流量<span class="num bule">
-                  {{ trajectoryCounts[item.id] || 0 }}</span
+                  {{
+                    (trajectoryCounts && trajectoryCounts[item.id]) || 0
+                  }}</span
                 >
               </div>
               <div @click="handalClickForm">
                 表单<span class="num bule">
-                  {{ formCounts[item.id] || 0 }}</span
+                  {{ (formCounts && formCounts[item.id]) || 0 }}</span
                 >
               </div>
               <div>
@@ -52,14 +59,22 @@
               </div>
             </div>
             <div class="other" @click.stop="createContent(item)">
-              <div style="margin-right: 3px">
+              <template v-if="$route.name == 'ChatBarShare'">
                 <img
-                  style="width: 0.3rem; margin-right: 3px"
+                  style="width: 0.28rem; margin-right: 5px"
+                  src="../../../public/img/icon/send.png"
+                  alt=""
+                />
+                <span class="shareText">发送</span>
+              </template>
+              <template v-else>
+                <img
+                  style="width: 0.28rem; margin-right: 3px"
                   src="../../../public/img/icon/share.png"
                   alt=""
                 />
-              </div>
-              <div class="shareText">分享</div>
+                <span class="shareText">分享</span>
+              </template>
             </div>
           </div>
 
@@ -71,12 +86,12 @@
             <div class="footer">
               <div @click="handalClickFlow">
                 流量<span class="num bule">
-                  {{ trajectoryCounts[item.id] || 0 }}
+                  {{ (trajectoryCounts && trajectoryCounts[item.id]) || 0 }}
                 </span>
               </div>
               <div @click="handalClickForm">
                 表单<span class="num bule">
-                  {{ formCounts[item.id] || 0 }}
+                  {{ (formCounts && formCounts[item.id]) || 0 }}
                 </span>
               </div>
               <div>
@@ -95,14 +110,22 @@
               </div>
             </div>
             <div class="other" @click.stop="createContent(item)">
-              <div style="margin-right: 3px">
+              <template v-if="$route.name == 'ChatBarShare'">
                 <img
-                  style="width: 15px; margin-right: 3px"
+                  style="width: 0.28rem; margin-right: 5px"
+                  src="../../../public/img/icon/send.png"
+                  alt=""
+                />
+                <span class="shareText">发送</span>
+              </template>
+              <template v-else>
+                <img
+                  style="width: 0.28rem; margin-right: 3px"
                   src="../../../public/img/icon/share.png"
                   alt=""
                 />
-              </div>
-              <div>分享</div>
+                <span class="shareText">分享</span>
+              </template>
             </div>
           </div>
 
@@ -125,12 +148,14 @@
             <div class="footer">
               <div @click="handalClickFlow">
                 流量<span class="num bule">
-                  {{ trajectoryCounts[item.id] || 0 }}</span
+                  {{
+                    (trajectoryCounts && trajectoryCounts[item.id]) || 0
+                  }}</span
                 >
               </div>
               <div @click="handalClickForm">
                 表单<span class="num bule">
-                  {{ formCounts[item.id] || 0 }}</span
+                  {{ (formCounts && formCounts[item.id]) || 0 }}</span
                 >
               </div>
               <div>
@@ -149,14 +174,22 @@
               </div>
             </div>
             <div class="other" @click.stop="createContent(item)">
-              <div style="margin-right: 3px">
+              <template v-if="$route.name == 'ChatBarShare'">
                 <img
-                  style="width: 15px; margin-right: 3px"
+                  style="width: 0.28rem; margin-right: 5px"
+                  src="../../../public/img/icon/send.png"
+                  alt=""
+                />
+                <span class="shareText">发送</span>
+              </template>
+              <template v-else>
+                <img
+                  style="width: 0.28rem; margin-right: 3px"
                   src="../../../public/img/icon/share.png"
                   alt=""
                 />
-              </div>
-              <div>分享</div>
+                <span class="shareText">分享</span>
+              </template>
             </div>
           </div>
 
@@ -175,12 +208,14 @@
             <div class="footer">
               <div @click="handalClickFlow">
                 流量<span class="num bule">
-                  {{ trajectoryCounts[item.id] || 0 }}</span
+                  {{
+                    (trajectoryCounts && trajectoryCounts[item.id]) || 0
+                  }}</span
                 >
               </div>
               <div @click="handalClickForm">
                 表单<span class="num bule">
-                  {{ formCounts[item.id] || 0 }}</span
+                  {{ (formCounts && formCounts[item.id]) || 0 }}</span
                 >
               </div>
               <div>
@@ -199,14 +234,22 @@
               </div>
             </div>
             <div class="other" @click.stop="createContent(item)">
-              <div style="margin-right: 3px">
+              <template v-if="$route.name == 'ChatBarShare'">
                 <img
-                  style="width: 15px; margin-right: 3px"
+                  style="width: 0.28rem; margin-right: 5px"
+                  src="../../../public/img/icon/send.png"
+                  alt=""
+                />
+                <span class="shareText">发送</span>
+              </template>
+              <template v-else>
+                <img
+                  style="width: 0.28rem; margin-right: 3px"
                   src="../../../public/img/icon/share.png"
                   alt=""
                 />
-              </div>
-              <div>分享</div>
+                <span class="shareText">分享</span>
+              </template>
             </div>
           </div>
         </div>
@@ -228,7 +271,7 @@
 
 <script>
 import share from '../../components/share'
-
+import wxxx from '../../uilts/wxconfig'
 export default {
   name: "AdvertorialView",
   components: {},
@@ -241,14 +284,12 @@ export default {
       refreshing: false,
       showShare: false,
       ShareContent: {}
-
     };
   },
   watch: {},
   computed: {},
   methods: {
     onLoad() {  // 触底事件、
-      console.log(this.configs.current, this.configs.total, '执行了')
       if (this.configs.current >= this.configs.total) {
         this.finished = true;
         return;
@@ -280,7 +321,7 @@ export default {
       this.$router.push({
         name: 'Iframe',
         params: {
-          url: item.initialUrl,
+          url: item.initialUrl + '&shareType=15',
           title: item.title,
           desc: item.description,
           imgUrl: item.thumb
@@ -292,7 +333,7 @@ export default {
         wx.invoke('sendChatMessage', {
           msgtype: "news", //消息类型，必填
           news: {
-            link: item.initialUrl, //H5消息页面url 必填
+            link: item.initialUrl + '&shareType=15', //H5消息页面url 必填
             title: item.title, //H5消息标题
             desc: item.description, //H5消息摘要
             imgUrl: item.thumb, //H5消息封面图片URL
@@ -309,7 +350,7 @@ export default {
           title: item.title,
           imgUrl: item.thumb,
           desc: item.description,
-          url: item.initialUrl
+          url: item.initialUrl + '&shareType=15'
         }
       }
     },
@@ -321,7 +362,9 @@ export default {
     },
   },
   created() {
-    console.log(this.trajectoryCounts)
+    if (this.$route.name !== 'ChatBarShare') { // 这个授权只是在工作台时候授权
+      wxxx()
+    }
   },
   mounted() { },
   components: { share },

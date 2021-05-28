@@ -189,6 +189,7 @@ export default {
 .order {
   background: #f1f1f1;
   font-size: 15px;
+  height: 100vh;
   .orderTit {
     z-index: 998;
     display: flex;
@@ -201,7 +202,7 @@ export default {
     width: 100%;
     left: 0;
     height: 0.8rem;
-    top: 33px;
+    top: 114px;
     border-bottom: 8px solid #f1f1f1;
     border-top: 8px solid #f1f1f1;
     padding-left: 0.3rem;
@@ -212,7 +213,7 @@ export default {
   .orderCont {
     // padding: 8px 8px;
     background-color: #fff;
-    padding-top: 95px;
+    padding-top: 3.5rem;
     .main-order {
       padding: 0px 0.2rem;
       // background-color: #fff;
@@ -263,11 +264,10 @@ export default {
       padding-left: 0.2rem;
     }
   }
-  .null {
-    padding-top: 2.9rem;
-  }
+
   .van-empty {
     background: #f1f1f1;
+    padding-top: 186px;
   }
 }
 </style>

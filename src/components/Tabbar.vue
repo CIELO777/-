@@ -52,7 +52,6 @@ export default {
   },
   methods: {
     tabbarChange(event) {
-      console.log(event)
       sessionStorage.setItem('active', event);
       // if (event == 'Home') {
       //   sessionStorage.setItem('TabIndex', 6);

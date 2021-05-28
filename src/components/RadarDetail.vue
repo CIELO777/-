@@ -1,5 +1,8 @@
 <template>
   <div class="RadarDetail">
+    <!-- <div class="back" @click="back">
+      <van-icon name="arrow-left" size="20px" />
+    </div> -->
     <div class="main">
       <div class="visitor-info">
         <span class="promote line2"
@@ -10,37 +13,37 @@
           访客电话 : {{ visitorInfo.id.length == 11 ? visitorInfo.id : "无" }}
         </div>
       </div>
-      <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-        <van-list
-          class="vanList"
-          :immediate-check="false"
-          v-model="loading"
-          :finished="finished"
-          finished-span="没有更多了"
-          @load="onLoad"
-        >
-          <div class="visitor_radar">
-            <div class="i-sticky-demo">
-              <div v-for="(item, index) in dateMap" :key="index">
-                <div class="date-title">{{ index }}</div>
-                <div
-                  v-for="(items, idxs) in item"
-                  :key="idxs"
-                  class="i-sticky-demo-item"
-                >
-                  <span>{{ items.date }} </span
-                  ><span>{{ items.description }}</span>
-                </div>
+      <!-- <van-pull-refresh v-model="refreshing" @refresh="onRefresh"> -->
+      <van-list
+        class="vanList"
+        :immediate-check="false"
+        v-model="loading"
+        :finished="finished"
+        finished-span="没有更多了"
+        @load="onLoad"
+      >
+        <div class="visitor_radar">
+          <div class="i-sticky-demo">
+            <div v-for="(item, index) in dateMap" :key="index">
+              <div class="date-title">{{ index }}</div>
+              <div
+                v-for="(items, idxs) in item"
+                :key="idxs"
+                class="i-sticky-demo-item"
+              >
+                <span>{{ items.date }} </span
+                ><span>{{ items.description }}</span>
               </div>
             </div>
           </div>
-        </van-list>
-        <!-- <van-empty
+        </div>
+      </van-list>
+      <!-- <van-empty
           v-else
           image="https://img.yzcdn.cn/vant/custom-empty-image.png"
           description="暂无相关消息"
         /> -->
-      </van-pull-refresh>
+      <!-- </van-pull-refresh> -->
     </div>
   </div>
 </template>
@@ -89,6 +92,7 @@ export default {
         "12": "百度小程序",
         "13": "海报",
         "14": "字节小程序",
+        "15": "企业微信"
       },
       start: "【",
       end: "】",
@@ -104,13 +108,12 @@ export default {
   methods: {
     onRefresh() {
       // this.$emit('refreshEmpty')
-      console.log('1111')
-      this.finished = false;
-      this.loading = true;
-      setTimeout(() => {
-        this.refreshing = false;
-      }, 1000);
-      this.loadingRadarDetail();
+      // this.finished = false;
+      // this.loading = true;
+      // setTimeout(() => {
+      //   this.refreshing = false;
+      // }, 1000);
+      // this.loadingRadarDetail();
     },
     onLoad() {
       if (this.current >= this.total) {
@@ -158,8 +161,10 @@ export default {
               if (item.description) {
                 item.description = item.description.replace(/undefined/g, '');
               }
-              dateMap[key].push(item);
+              that.current === 1 || !that.current ? dateMap[key].push(item) : dateMap[key].push(item);
             })
+            console.log(that.current)
+            console.log(dateMap)
             that.dateMap = JSON.parse(JSON.stringify(dateMap));
             that.total = res.totalPageCount;
           }
@@ -194,6 +199,9 @@ export default {
       }
       return time;
     },
+    back(){
+      this.$router.go(-1)
+    }
   },
   activated() {
     console.log('actied')
@@ -255,6 +263,20 @@ export default {
         line-height: 20px;
       }
     }
+  }
+  .back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    left: 10px;
+    top: 0.4rem;
+    width: 38px;
+    height: 38px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    z-index: 99;
+    border-radius: 50%;
   }
 }
 </style>

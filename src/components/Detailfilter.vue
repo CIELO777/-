@@ -802,7 +802,7 @@ export default {
           res.forEach(item => {
             if (item.type == 'select') {
               let a = JSON.parse(item.items)
-              a.push({label:'全部'})
+              a.push({ label: '全部' })
             }
           })
           this.diyColumn = res;
@@ -875,6 +875,7 @@ export default {
           if (!res.error) {
             if (res.data.length != 0) {
               this.listShow = true;
+              console.log('this.')
               this.searchList = datas == 1 ? res.data : this.searchList.concat(res.data);
               console.log(this.searchList)
               this.searchUser = res.user;
@@ -1114,6 +1115,8 @@ export default {
       // this.diy.headline = e;
       this.diy.name = item.label;
       this.diy.type = item.type;
+      this.diy.price = this.diyColumn[index].value
+      console.log(index,'showPopupshowPopup')
       this.diy.placeholder = item.placeholder
       this.index = index;
       this.diy.item = JSON.parse(item.items).map(item => {
@@ -1195,7 +1198,7 @@ export default {
     position: fixed;
     bottom: 0;
     left: 0;
-    background: rgb(81, 187, 186);
+    // background: rgb(81, 187, 186);
     height: 44px;
     border: none;
     color: #fff;

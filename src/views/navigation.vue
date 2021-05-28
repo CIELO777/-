@@ -362,8 +362,8 @@ export default {
       })
         .then(
           await function (res) {
+            console.log(res)
             if (res.code === 200 && JSON.stringify(res.data) != "{}") {
-              console.log(res)
               if (res.data.CorpId ?? res.data.open_userid) {
                 // openid 和wxid 都存在在发送请求，请求用户信息
                 that.getopenId(res.data.CorpId, res.data.open_userid);
@@ -373,6 +373,7 @@ export default {
                 that.CorpId = res.data.CorpId;
                 sessionStorage.setItem("openId", that.open_userid); // 保存openID 解绑用
                 sessionStorage.setItem("CorpId", res.data.CorpId); // 保存openID 解绑用
+                sessionStorage.setItem("UserId", res.data.UserId); // 保存openID 解绑用
               }
             } else {   //没有信息，
               // console.log(that.entry, 'that.entry1112213')
@@ -411,8 +412,8 @@ export default {
             if (res.data.bind_comp_id) {
               // 如果有公司ID 那么就存数据，
               // that.$toast.clear()
-              let a = { ...res.data, bind_comp_id: that.compId, bind_comp_id1: res.data.bind_comp_id }
-              sessionStorage.setItem("userinfo", JSON.stringify(res.data)); // 公司id 存入本地；
+              let a = { ...res.data, bind_comp_id: that.compId, bind_comp_id1: res.data.bind_comp_id };
+              sessionStorage.setItem("userinfo", JSON.stringify(a)); // 公司id 存入本地；
               that.outData(res.data.id);  // 获取是否过期；
               that.getConsole();
               // that.getNotice();
@@ -441,7 +442,7 @@ export default {
       // console.log(this.CorpId, ' that.CorpId that.CorpId that.CorpId')
       // if (this.entry == 'single_chat_tools') { // 如果是通过单聊中进入的，那么就截取code
       if (url.includes('code')) {
-        url = window.location.href.split('?code=')[0]
+        url = window.location.href.split('?code=')[0];
       }
       // }
       location.href = "https://wxa.jiain.net/wx-crm-server/wx/oauth2/login?url=" + url;
@@ -580,8 +581,6 @@ export default {
     },
     bindlooyuCode() {
       // 验证码验证是否正确 验证码正确调用确认绑定
-      // this.bindLooyu();
-      // return;
       let that = this;
       let signature = generateSignature8(this.sms, 1, 3, timeout, nonce);
       let param = new URLSearchParams();
@@ -791,7 +790,7 @@ export default {
     },
     Search() {
       this.comp.list.length = 0;
-      document.documentElement.scrollTop = document.body.scrollTop = 0 // 设置每个页面的scrollTop
+      document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
       this.onSearch();
     },
     onSearch() {
@@ -857,14 +856,15 @@ export default {
           params: data,
         },
       ).then((res) => {
+        console.log(res)
         if (res.error == 'success') {
           // this.$toast('已成功加入该公司');
           this.comp.applyShow = false;
           this.comp.show = false;
           this.laqu();
         } else {
-          this.comp.applyShow = false;
-          this.compApply = true;
+          // this.comp.applyShow = false;
+          // this.compApply = true;
         }
       })
         .catch(function (error) {
@@ -1035,7 +1035,8 @@ export default {
     }
   },
   async created() {
-    this.outData();
+    console.log(2132131)
+    
     let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
     this.code = this.$route.query.code;
     let first = sessionStorage.getItem('first');
@@ -1067,6 +1068,7 @@ export default {
     setTimeout(async () => {
       await this.getAgentConfig(); // 同步执行 否则会报错
       await this.getWxJsJdk();
+      this.outData();
     }, 1500);
 
   },
@@ -1077,6 +1079,7 @@ export default {
       // this.getUserinfo();
       this.created()
     });
+    
   },
   beforeRouteEnter: (to, from, next) => {
     next(vm => {

@@ -417,7 +417,7 @@ export default {
           }
           // 处理图片，如果多张的话就隔离开
           console.log(res.photos)
-          if (res.photos.indexOf(',') !== -1) {
+          if (res.photos && res.photos.indexOf(',') !== -1) {
             res.photos = res.photos.split(',')
           }
           res.commissionTitle = title;

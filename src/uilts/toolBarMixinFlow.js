@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:13:08 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-05-25 16:59:51
+ * @Last Modified time: 2021-05-26 15:13:50
  * 聊天工具栏素材分享功能组件，
  */
 export const Toolbar = {
@@ -13,7 +13,7 @@ export const Toolbar = {
 			CorpId: '',
 			Single: false,
 			compId: '',
-			show: false,
+			Bindshow: false,
 			accomplish: false,
 		}
 	},
@@ -21,11 +21,10 @@ export const Toolbar = {
 		// this.$router.replace('/ChatBarShare');
 		// return;
 		if (sessionStorage.getItem('userinfo')) { // 通过userinfo字段判断是从哪个接口进入的
-			if (this.$route.name !== 'ChatCustomer') { // 客户画像模块不需要 执行如下方法
-				this.loading()
-				await this.getTabList();  // 存在就是从第三方应用进入的，没有存在就是从通讯录进入的
-				await this.getList();
-			}
+			this.loading()
+			await this.initMineInfo()
+			await this.getShopDetail()
+			this.getList();
 			// wxxx()	
 		} else {
 			this.code = this.$route.query.code;
@@ -104,20 +103,20 @@ export const Toolbar = {
 					wxCompId,
 					openId,
 				},
-			}).then(function (res) {
+			}).then(async function (res) {
 				console.log(res, 'resresres');
 				if (res.code === 500 || !res.data || res.msg == "not_bind") {
 					console.log("🚀 ~ file: toolbarMixin.js ~ line 109 ~ getopenId ~ res", res)
 					// 没有绑定
-					that.show = true;
+					that.Bindshow = true;
 					sessionStorage.setItem("not_bind", true)
 					that.Single = true; // 为true证明是单聊；
 					sessionStorage.setItem('Single', true);
-					if (that.$route.name === 'ColorPage') { // 如果是彩页，那么就跳转 分享页面
-						that.$router.replace('/chatBarShare')
-					} else if (that.$route.name === 'ChatCustomer') { // 如果不是那么就分享到 客户画像
-						that.accomplish = true; // 目的是为了让企业微信客户端
-					}
+					// if (that.$route.name === 'ColorPage') { // 如果是彩页，那么就跳转 分享页面
+					// 	that.$router.replace('/chatBarShare')
+					// } else if (that.$route.name === 'ChatCustomer') { // 如果不是那么就分享到 客户画像
+					// 	that.accomplish = true; // 目的是为了让企业微信客户端
+					// }
 				} else if (
 					res.code === 200 &&
 					res.msg === "success" &&
@@ -131,12 +130,13 @@ export const Toolbar = {
 						sessionStorage.setItem("userinfo", JSON.stringify(a)); // 公司id 存入本地；
 						that.Single = true; // 为true证明是单聊；
 						sessionStorage.setItem('Single', true);
-						if (that.$route.name === 'ChatBarShare' || that.$route.name === 'ColorPage') {
-							that.$router.push('/chatBarShare')
-						} else if (that.$route.name === 'ChatCustomer') {
-							// that.$router.push('/chatCustomer')
-							that.init() // 请求数据
-						}
+						await that.init()
+						// if (that.$route.name === 'ChatBarShare' || that.$route.name === 'ColorPage') {
+						// 	that.$router.push('/chatBarShare')
+						// } else if (that.$route.name === 'ChatCustomer') {
+						// 	// that.$router.push('/chatCustomer')
+						// 	that.init() // 请求数据
+						// }
 						that.accomplish = true; // 目的是为了让企业微信客户端
 						console.log("🚀 ~ file: toolbarMixin.js ~ line 134 ~ getopenId ~ that.accomplish", that.accomplish)
 					} else {

@@ -6,8 +6,8 @@ function resolve(dir) {
 }
 module.exports = {
     // publicPath: '/wx-crm/',
-    publicPath: '/wx-crmTest/',
-
+    publicPath: process.env.VUE_APP_ROUTE,
+    outputDir: process.env.outputDir,
     // assetsSubDirectory: 'static',
     // assetsPublicPath: '/',
     devServer: {
@@ -30,7 +30,7 @@ module.exports = {
                 }
             },
             '/aliyun': {
-                target: 'https://wxa.jiain.net/',
+                target: 'https://api.jiain.net/',
                 // target: 'http://122.51.207.208:8088/',
                 changeOrigin: true,
                 // 路径重写： 下面的意思是重写访问路径中的  '/api' 为 '' ，如果没有重写, /api 代表 http://127.0.0.1:8090/api

@@ -1,32 +1,41 @@
 <template>
   <div class="rader">
-    <div
-      class="product"
-      v-for="(item, index) in recordList"
-      :key="index"
-      @click="productClick(item)"
-    >
-      <img
-        :src="item.portrait + '?x-oss-process=image/resize,m_fill,h_200,w_200'"
-      />
-      <div class="content">
-        <span class="toh"
-          ><span class="toTit">{{ item.nickname }}</span
-          ><span v-if="item.approve == 1" style="margin: 0 5px" class="approve"
-            >V</span
-          ><span class="member" v-if="item.member == 1">会员</span
-          ><span class="des"
-            >{{ item.createTime }}来自{{ sourceTypeMap[item.sourceType] }}</span
-          ></span
-        >
-        <span class="toh desc">{{ item.description }}</span>
+    <div class="backView">
+      <div
+        class="product"
+        v-for="(item, index) in recordList"
+        :key="index"
+        @click="productClick(item)"
+      >
+        <img
+          :src="
+            item.portrait + '?x-oss-process=image/resize,m_fill,h_200,w_200'
+          "
+        />
+        <div class="content">
+          <span class="toh"
+            ><span class="toTit">{{ item.nickname }}</span
+            ><span
+              v-if="item.approve == 1"
+              style="margin: 0 5px"
+              class="approve"
+              >V</span
+            ><span class="member" v-if="item.member == 1">会员</span
+            ><span class="des"
+              >{{ item.createTime }}来自{{
+                sourceTypeMap[item.sourceType]
+              }}</span
+            ></span
+          >
+          <span class="toh desc">{{ item.description }}</span>
+        </div>
       </div>
+      <van-empty
+        v-show="empty"
+        image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+        description="暂无相关消息"
+      />
     </div>
-    <van-empty
-      v-show="empty"
-      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
-      description="暂无相关消息"
-    />
   </div>
 </template>
 
@@ -73,6 +82,8 @@ export default {
         "11": "钉钉",
         "12": "百度小程序",
         "13": "海报",
+        "14": "字节小程序",
+        "15": "企业微信"
       },
       total: 0,
       start: "【",
@@ -166,61 +177,68 @@ export default {
 
 <style lang="less" scoped>
 .rader {
-  padding-top: 0.8rem;
-  .product {
-    padding: 10px 15px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    margin-top: 1px;
-    background-color: #fff;
-    img {
-      height: 1rem;
-      width: 1rem;
-      border-radius: 5px;
-    }
-    .content {
-      flex: 1;
-      padding-left: 0.2rem;
+  height: 100vh;
+  background: #eee;
+  .backView {
+    padding-top: 134px;
+    .product {
+      padding: 10px 15px;
       box-sizing: border-box;
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      width: calc(~"100% - 50px");
-      max-width: calc(100% - 50px);
-      .toh {
-        font-size: 0.26rem;
-        display: block;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        line-height: 25px;
-        .toTit {
-          font-size: 15px;
-          font-weight: 600;
-        }
-        .approve {
-          font-size: 0.28rem;
+      flex-direction: row;
+      margin-top: 1px;
+      background-color: #fff;
+      img {
+        height: 1rem;
+        width: 1rem;
+        border-radius: 5px;
+      }
+      .content {
+        flex: 1;
+        padding-left: 0.2rem;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: calc(~"100% - 50px");
+        max-width: calc(100% - 50px);
+        .toh {
+          font-size: 0.26rem;
+          display: block;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          line-height: 25px;
+          .toTit {
+            font-size: 15px;
+            font-weight: 600;
+          }
+          .approve {
+            font-size: 0.28rem;
 
-          font-style: italic;
-          font-weight: bold !important;
-          color: #f2711c !important;
-        }
-        .member {
-          background-color: #f7831c;
-          color: #fff;
-          display: inline-block;
-          padding: 0px 3px;
-          line-height: 15px;
-          border-radius: 2px;
-          text-align: center;
-          margin-left: 5px;
-        }
-        .des {
-          padding-left: 5px;
+            font-style: italic;
+            font-weight: bold !important;
+            color: #f2711c !important;
+          }
+          .member {
+            background-color: #f7831c;
+            color: #fff;
+            display: inline-block;
+            padding: 0px 3px;
+            line-height: 15px;
+            border-radius: 2px;
+            text-align: center;
+            margin-left: 5px;
+          }
+          .des {
+            padding-left: 5px;
+          }
         }
       }
     }
+  }
+  /deep/ .van-empty {
+    padding-top: 52px;
   }
 }
 </style>

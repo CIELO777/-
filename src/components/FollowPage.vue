@@ -19,12 +19,12 @@
         <div class="firm" @click="linkmanClick()" v-else>
           <img src="../assets/img/企业微信1.png" alt="" />
         </div>
-        <div class="firm" @click="Chatconfig()">
+        <!-- <div class="firm" @click="Chatconfig()">
           <img src="../assets/img/config.png" alt="" />
         </div>
         <div class="firm" @click="ChatRecord()">
           <img style="width: 75%" src="../assets/img/记录.png" alt="" />
-        </div>
+        </div> -->
       </div>
 
       <!-- 语音弹框 -->
@@ -727,7 +727,7 @@ export default {
 <style lang="less" scoped>
 .Follpage {
   background: #f1f1f1;
-  height: 100%;
+  height: 100vh;
   .contents {
     height: 3.32rem;
     padding: 0.4rem;
@@ -748,7 +748,7 @@ export default {
     display: flex;
     background: #fff;
     justify-content: space-between;
-    margin-top: 0.2rem;
+    // margin-top: 0.2rem;
     height: 0.8rem;
     align-items: center;
     color: #468af1;
@@ -756,7 +756,7 @@ export default {
     width: 100%;
     left: 0;
     height: 0.8rem;
-    top: 33px;
+    top: 123px;
     border-bottom: 8px solid #f1f1f1;
     border-top: 8px solid #f1f1f1;
     div {
@@ -768,7 +768,7 @@ export default {
     }
   }
   .follCont:nth-child(2) {
-    padding-top: 1.8rem;
+    padding-top: 3.4rem;
   }
   .follCont {
     background-color: #fff;
@@ -876,7 +876,7 @@ export default {
     float: right;
   }
   .van-empty {
-    padding-top: 2.9rem;
+    padding-top:186px;
   }
   .audio {
     height: 35px;

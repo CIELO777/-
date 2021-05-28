@@ -250,7 +250,7 @@ export default {
 .choose {
   font-size: 0.28rem;
   background: #f1f1f1;
-  height: calc(~"100% - 46px");
+  height: calc(~"100vh - 44px");
   overflow-y: scroll;
   .backGo {
     width: 1rem;

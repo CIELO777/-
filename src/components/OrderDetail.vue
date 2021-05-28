@@ -33,7 +33,7 @@
           <div>
             <span style="margin-right: 10px">当前商品总金额：</span>
             <span style="color: #f56464" v-if="item.models"
-              >{{ item.modelPrice * item.shuliang }} 元</span
+              >{{ (item.modelPrice * item.shuliang).toFixed(2) }} 元</span
             >
             <span v-else>{{ (item.price * item.shuliang).toFixed(2) }} 元</span>
           </div>
@@ -113,9 +113,22 @@
     />
     <!-- <van-cell is-link title="订单所属" :value="OrderquantityName" /> -->
     <!-- <van-action-sheet /> -->
-    <van-button type="primary" size="large" @click="OrderSave" class="saveBtn"
-      >保存</van-button
-    >
+    <div class="btn">
+      <van-button
+        type="default"
+        size="normal"
+        style="margin-top: 20px"
+        @click="backgo"
+        >返回</van-button
+      >
+      <van-button
+        style="margin-top: 20px; background: #51bbba"
+        type="primary"
+        size="normal"
+        @click="OrderSave"
+        >保存1</van-button
+      >
+    </div>
     <!-- 类型选择弹框 -->
     <van-action-sheet
       v-model="ModelShow"
@@ -161,7 +174,8 @@ export default {
         marginLeft: "-0.1rem",
         marginTop: "-0.1rem",
         borderRadius: '50%',
-      }
+      },
+      page: ''
     }
   },
   methods: {
@@ -237,7 +251,7 @@ export default {
     },
     backgo() {  // 点击返回的时候保存信息
       sessionStorage.setItem('tabNum', 2);
-      this.$router.push('/linkDetailed')
+      this.$router.go(-1);
       sessionStorage.removeItem('shelvesData');
       sessionStorage.removeItem('shelvesIds');
     },
@@ -412,10 +426,12 @@ export default {
         shuliang: 1,
       }
     })
-
+    this.page = sessionStorage.getItem("active")
+    console.log(sessionStorage.getItem("active"), ' this.page ')
   },
   activated() {
     console.log(JSON.parse(sessionStorage.getItem('shelvesData')), 'activated');
+    console.log('213123212321321321312')
     if (sessionStorage.getItem('orderSelectInfo')) {
       this.OrderquantityName = JSON.parse(sessionStorage.getItem('orderSelectInfo')).name;
       this.OrderquantityId = JSON.parse(sessionStorage.getItem('orderSelectInfo')).id;
@@ -582,6 +598,16 @@ export default {
   .actionSheet {
     /deep/ .van-action-sheet__description {
       color: black;
+    }
+  }
+  .btn {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    button {
+      flex: 1;
     }
   }
 }

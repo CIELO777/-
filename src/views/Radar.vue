@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-02-18 14:22:08 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-03-29 11:51:19
+ * @Last Modified time: 2021-05-26 11:18:05
  */
 <template>
   <div class="radar">
@@ -106,27 +106,31 @@
         title="选择年月日"
       />
     </van-popup>
+    <!-- 绑定操作 -->
+    <BindPop :shows="Bindshow" @BindComplete="BindCompletes"></BindPop>
   </div>
 </template>
 
 <script>
+import BindPop from '../components/ChatCustomer/BindPop';
 import local from '../uilts/localStorage';
 import { generateTimeout, generateNonce, generateSignature, generateSignature3 } from '../uilts/tools';
 let timeout = generateTimeout();
 let nonce = generateNonce();
 import { yesterday, lastSevent, month, getM, formatDate } from '../uilts/date';
-
+import { Toolbar } from '../uilts/toolBarMixinFlow';
 import Tab from '../components/colorPage/Tab';
 import datainterval from '../components/detailFilter/datainterval';
 export default {
   name: "Radar",
-  components: { datainterval, Tab },
+  components: { datainterval, Tab, BindPop },
   props: [],
   data() {
     return {
       state: 'list',
       atData: [],
       show: false,
+      Bindshow: false,
       config: {},
       treeData: {
         0: {
@@ -289,7 +293,14 @@ export default {
       compId: '',
     };
   },
-  watch: {},
+  mixins: [Toolbar],
+  watch: {
+    Bindshow(val, oldVal) {//普通的watch监听
+      if (val) {
+        this.$toast.clear()
+      }
+    },
+  },
   computed: {},
   methods: {
     async getList(cur) {
@@ -341,6 +352,7 @@ export default {
                   from.description = from.description.replace(/undefined/g, '');
                 }
                 allArr.push(from);
+                item.visitorPortrait ? from.visitorPortrait = item.visitorPortrait : from.visitorPortrait = item.toPortrait; // 兼容企业微信头像
               }
             })
             let qq = this.treeData[this.id];
@@ -372,6 +384,7 @@ export default {
       } else {
         this.fromType = 2;
       };
+      console.log(index)
       if (index == 0 || index == 4 || index == 5) {
         this.pageType = -1;
       } else if (index == 1) {
@@ -379,6 +392,8 @@ export default {
       } else if (index == 2) {
         this.pageType = 2;
       } else if (index == 4) {
+        this.pageType = 1
+      } else if (index == 3) {
         this.pageType = 1
       };
       if (this.treeData[this.id].config.total == -1) { // == -1 证明第一次点击该标签a
@@ -508,8 +523,8 @@ export default {
       this.$router.push({
         path: '/searchView',
       })
-      // this.show = false;
-      this.empty()
+      this.show = true;
+      // this.empty()
     },
     back() {
       this.show = false;
@@ -568,26 +583,36 @@ export default {
         forbidClick: true,
         duration: 0
       });
+    },
+    async init() {
+      await this.initMineInfo()
+      await this.getShopDetail()
+      this.getList();
+    },
+    async BindCompletes() { // 关闭弹框
+      this.Bindshow = false;
+      await this.getUserinfo();  // 重新拉去信息接口
     }
   },
   async created() {
-    if (sessionStorage.getItem('userinfo')) {
-      this.loading()
-      await this.initMineInfo()
-      await this.getShopDetail()
-      this.getList()
-    } else {
-      this.$toast.fail({
-        message: '此模块不支持聊天工具栏。',
-        forbidClick: true,
-        duration: 0,
-        overlay: true,
-      });
-    }
+    this.loading();
+    console.log('3445')
+    // if (sessionStorage.getItem('userinfo')) {
+    //   this.loading()
+    //   await this.initMineInfo()
+    //   await this.getShopDetail()
+    //   this.getList();
+    // } else {
+    //   this.$toast.fail({
+    //     message: '此模块不支持聊天工具栏。',
+    //     forbidClick: true,
+    //     duration: 0,
+    //     overlay: true,
+    //   });
+    // }
   },
   activated() {
     // this.show = false;
-
   },
   mounted() {
     window.addEventListener('scroll', this.scrollToTop)

@@ -1,5 +1,8 @@
 <template>
   <div class="verBalDetail">
+    <div class="back" @click="back">
+      <van-icon name="arrow-left" size="20px" />
+    </div>
     <div class="main">
       <div class="page-title">
         {{ item.title }}
@@ -29,15 +32,15 @@
           <div class="line1">{{ user.company }} {{ item.time }}</div>
         </div>
       </div>
-      <div></div>
-
-      <div class="cont" v-for="(item, index) in item.content" :key="index">
-        <!-- 文字 -->
+      <!-- <div class="cont" v-for="(item, index) in item.content" :key="index">
         <div v-if="item.type == 0 && item.data != '&nbsp;'">
           <div class="cont-span" :style="item.allStyle">
             <span>{{ item.data }}</span>
           </div>
         </div>
+      </div> -->
+      <div class="cont-span" :style="item.allStyle">
+        <span>{{ item.content.data }}</span>
       </div>
     </div>
   </div>
@@ -79,6 +82,7 @@ export default {
   watch: {},
   computed: {},
   methods: {
+    back() { this.$router.go(-1) },
     analysisJSONtoCss(data) {
       var styles = "";
       Object.keys(data).forEach(function (key) {
@@ -102,13 +106,13 @@ export default {
     },
     parseCont() {
       let item = this.item;
-      item.content = JSON.parse(item.content);
-      item.content.forEach(i => {
-        if (i.type == 0) {
-          //   let style = library.library.util.analysisJSONtoCss(i);
-          //   i.allStyle = style;
-        }
-      })
+      item.content = item.content;
+      // item.content.forEach(i => {
+      //   if (i.type == 0) {
+      //     //   let style = library.library.util.analysisJSONtoCss(i);
+      //     //   i.allStyle = style;
+      //   }
+      // })
       this.item = item;
     },
   },
@@ -116,7 +120,7 @@ export default {
     console.log(this.$route.params)
     this.user = this.$route.params.user;
     this.item = this.$route.params.item;
-    this.parseCont()
+    this.parseCont();
   },
   mounted() { }
 };
@@ -126,6 +130,7 @@ export default {
 .verBalDetail {
   background: #eee;
   font-size: 0.32rem;
+  height: 100vh;
   .main {
     padding: 10px;
   }
@@ -173,7 +178,7 @@ export default {
     text-align: left;
     margin: 10px 0;
     padding: 5px 10px;
-
+    white-space: pre-line;
     font-size: 0.3rem;
     line-height: 0.6rem;
   }
@@ -182,6 +187,20 @@ export default {
     font-style: italic;
     font-weight: bold !important;
     color: #f2711c !important;
+  }
+  .back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 10px;
+    top: 0.4rem;
+    width: 38px;
+    height: 38px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border-radius: 50%;
+    left: 10px;
   }
 }
 </style>

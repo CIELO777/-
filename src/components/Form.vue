@@ -1,33 +1,32 @@
 <template>
   <div class="deaContant">
     <div class="allocation">
-      <div class="waooo" @click="shareOpera" style="margin-right: 15px">
-        <img src="../assets/img/svg_customer_share.png" />
-        <span class="handleTxt">共享</span>
-      </div>
-      <div class="waooo" @click="allocation" style="margin-right: 15px">
-        <img src="../assets/img/svg_customer_distribution.png" />
-        <span class="handleTxt">分配</span>
-      </div>
-      <div class="waooo">
-        <div
-          v-if="block != 0 && block != 1 && block != 2 && block != 4"
-          @click="release"
-          class="waooo"
-        >
-          <img src="../assets/img/svg_customer_principal.png" />
-          <span class="handleTxt">释放</span>
+      <div class="handle">
+        <div class="waooo" @click="shareOpera" style="margin-right: 15px">
+          <img src="../assets/img/svg_customer_share.png" />
+          <span class="handleTxt">共享</span>
         </div>
-        <div v-else @click="pickup" class="waooo">
-          <img src="../assets/img/svg_customer_pickup.png" />
-          <span class="handleTxt">拾取</span>
+        <div class="waooo" @click="allocation" style="margin-right: 15px">
+          <img src="../assets/img/svg_customer_distribution.png" />
+          <span class="handleTxt">分配</span>
+        </div>
+        <div class="waooo">
+          <div
+            v-if="block != 0 && block != 1 && block != 2 && block != 4"
+            @click="release"
+            class="waooo"
+          >
+            <img src="../assets/img/svg_customer_principal.png" />
+            <span class="handleTxt">释放</span>
+          </div>
+          <div v-else @click="pickup" class="waooo">
+            <img src="../assets/img/svg_customer_pickup.png" />
+            <span class="handleTxt">拾取</span>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="dTitle" style="display: flex; justify-content: space-between">
-      <span>联系人信息</span>
-      <span @click="UnbindContact" style="margin-right: 10px"
-        >解绑外部联系人</span
+      <span @click="UnbindContact" style="margin-right: 10px; color: #597896">
+        解绑外部联系人</span
       >
     </div>
     <!-- 默认字段 -->
@@ -37,7 +36,7 @@
         v-if="item._checked"
         :key="index"
         :is-link="item.nolink == false"
-        @click="showPopup(item.key, crmInfo[item.key])"
+        @click="showPopup(item.key, crmInfo[item.key], item)"
         :title="item.title"
         :value="crmInfo[item.key] === null ? '' : crmInfo[item.key] + ''"
       ></van-cell>
@@ -54,6 +53,8 @@
       closeable
       position="bottom"
       :style="{ height: '180px' }"
+      @click-overlay="closePop"
+      :close-on-click-overlay="overlay"
     >
       <p class="pop-tit">姓名</p>
       <van-field
@@ -78,6 +79,8 @@
       closeable
       position="bottom"
       :style="{ height: '200px' }"
+      @click-overlay="closePop"
+      :close-on-click-overlay="overlay"
     >
       <p class="pop-tit">手机</p>
       <van-field
@@ -102,6 +105,8 @@
       closeable
       position="bottom"
       :style="{ height: '200px' }"
+      @click-overlay="closePop"
+      :close-on-click-overlay="overlay"
     >
       <p class="pop-tit">手机2</p>
       <van-field
@@ -119,24 +124,54 @@
         >保存</van-button
       >
     </van-popup>
+    <van-popup
+      close-icon-position="top-left"
+      :safe-area-inset-bottom="true"
+      v-model="popShow.address"
+      closeable
+      position="bottom"
+      :style="{ height: '200px' }"
+      @click-overlay="closePop"
+      :close-on-click-overlay="overlay"
+    >
+      <p class="pop-tit">修改详细地址</p>
+      <van-field
+        label=""
+        type="tel"
+        v-model="formData.address"
+        placeholder=""
+      />
+      <van-button
+        color="#60C6C6"
+        size="mini"
+        type="primary"
+        @click="FormSave(formData.address, 'address', 'address')"
+        class="btnTb"
+        >保存</van-button
+      >
+    </van-popup>
     <van-action-sheet
       :actions="validityactions"
       v-model="popShow.status"
       @select="onSelectStatus"
+      :close-on-click-overlay="overlay"
     />
     <van-action-sheet
       :actions="sourceData"
       v-model="popShow.customSourceType"
       @select="onSelectCID"
+      :close-on-click-overlay="overlay"
     />
     <van-action-sheet
       :actions="actionsStar"
       v-model="popShow.starLevel"
+      :close-on-click-overlay="overlay"
       @select="onSelectStart"
     />
     <van-action-sheet
       :actions="actionsSex"
       v-model="popShow.gender"
+      :close-on-click-overlay="overlay"
       @select="onSelectSex"
     />
     <!-- <van-popup close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="popShow.comp" closeable position="bottom" :style="{ height: '100%' }"> -->
@@ -176,6 +211,7 @@
       :actions="actionsCoo"
       v-model="popShow.companyOcc"
       @select="onSelectJob"
+      :close-on-click-overlay="overlay"
     />
     <van-popup
       close-icon-position="top-left"
@@ -184,6 +220,8 @@
       closeable
       position="bottom"
       :style="{ height: '250px' }"
+      @click-overlay="closePop"
+      :close-on-click-overlay="overlay"
     >
       <p class="pop-tit">备注</p>
       <van-field
@@ -208,6 +246,8 @@
       v-model="popShow.birthday"
       position="bottom"
       :style="{ height: '45%' }"
+      @click-overlay="closePop"
+      :close-on-click-overlay="overlay"
     >
       <van-datetime-picker
         v-model="formData.birthday"
@@ -218,7 +258,7 @@
         :min-date="minDate"
         :max-date="maxDate"
       />
-    </van-popup> 
+    </van-popup>
     <van-popup
       close-icon-position="top-left"
       :safe-area-inset-bottom="true"
@@ -226,6 +266,8 @@
       closeable
       position="bottom"
       :style="{ height: '180px' }"
+      @click-overlay="closePop"
+      :close-on-click-overlay="overlay"
     >
       <p class="pop-tit">微信</p>
       <van-field label="" v-model="formData.wx" placeholder="请输入微信号" />
@@ -246,6 +288,8 @@
       closeable
       position="bottom"
       :style="{ height: '180px' }"
+      @click-overlay="closePop"
+      :close-on-click-overlay="overlay"
     >
       <p class="pop-tit">QQ</p>
       <van-field label="" v-model="formData.qq" placeholder="请输入QQ号" />
@@ -265,6 +309,8 @@
       closeable
       position="bottom"
       :style="{ height: '180px' }"
+      @click-overlay="closePop"
+      :close-on-click-overlay="overlay"
     >
       <p class="pop-tit">邮箱</p>
       <van-field label="" v-model="formData.email" placeholder="请输入邮箱号" />
@@ -287,6 +333,8 @@
       closeable
       position="bottom"
       :style="{ height: '200px' }"
+      @click-overlay="closePop"
+      :close-on-click-overlay="overlay"
     >
       <p class="pop-tit">修改{{ diy.name }}</p>
       <div v-if="diy.type === 'text' || diy.type === 'textarea'">
@@ -311,6 +359,7 @@
     <van-action-sheet
       v-model="diy.showaction"
       :actions="diy.item"
+      :close-on-click-overlay="overlay"
       @select="onSelect"
     />
     <van-popup v-model="shortPop" :style="{ width: '60%' }" class="shortPop">
@@ -323,6 +372,21 @@
         <p class="shortRow" @click="releaseSelect('4')">个人公海</p>
       </div>
     </van-popup>
+    <van-overlay :show="popShow.region" z-index="999" @click.stop="regionShow">
+      <p class="operaTion">
+        <span @click="regionPop = popShow.region = false">取消</span
+        ><span>选择地区</span><span @click="regionSave">保存</span>
+      </p>
+      <v-distpicker
+        :province="province"
+        :city="city"
+        :area="area"
+        @province="Sprovince"
+        @city="Scity"
+        @area="Sarea"
+        type="mobile"
+      ></v-distpicker>
+    </van-overlay>
   </div>
 </template>
 
@@ -340,12 +404,16 @@ import compInfo from "./detailFilter/CompInfo";
 import communication from "../uilts/communication";
 import shareUser from './detailFilter/shareUser'
 // import { delete } from 'vue/types/umd';
+import VDistpicker from 'v-distpicker'
+
 export default {
   name: "forms",
-  props: ["crmInfo"],
+  props: ["crmInfo", 'sourceData'],
   data() {
     return {
-      sourceData: [],
+      overlay: true,
+      // sourceData: [],
+      item: {},
       minDate: new Date(1900, 0, 1),
       maxDate: new Date(2060, 10, 1),
       formatter(type, value) {
@@ -376,6 +444,8 @@ export default {
         follow: false,
         followDate: false,
         workNumber: false,
+        address: false,
+        region: false,
       },
       formData: {
         nickname: "",
@@ -396,7 +466,12 @@ export default {
         follow: "",
         followDate: "",
         workNumber: "",
+        address: '',
+        region: '',
       },
+      province: '北京市',
+      city: '北京市',
+      area: '海淀区',
       cooList: [
         "职员",
         "经理",
@@ -522,9 +597,10 @@ export default {
   },
   methods: {
     findSelect(name) { // 查询自定义行数当前·数据
-      return this.formDiy.find(item => name === item.name)
+      return this.form.find(item => name === item.key)
     },
-    showPopup(e, d) {
+    showPopup(e, d, items) {
+      this.item = items; // 备份ITEM; 必填校验用
       // 如果在公海并且点击了相关人， 那么就不让他进去
       let route = sessionStorage.getItem("active");
       if (route == 'HighSeas' && e == 'share') {
@@ -538,7 +614,6 @@ export default {
       //  如果包含字段进行数据合并，垃圾。自定义数据不再一个接口里，在这做处理，目的获取当前自定义表单的一些详细信息（type，lable）
       if (e.includes("column")) {
         let item = this.findSelect(e);
-        console.log(item, this.formDiy)
         if (item.type == 'text' || item.type == 'textarea') {
           this.diy.show = true;
         } else {
@@ -559,7 +634,6 @@ export default {
         if (
           e == "contactNumber" ||
           e == "lastContactRecord" ||
-
           e == "lastContactTime"
         ) {
           this.followUp();
@@ -577,20 +651,49 @@ export default {
           // console.log(this.share.ids)
           this.$refs.shareUser.clickshare(this.share.ids) // 触发子元素方法目的请求已经共享的数据
         };
+        if (e == 'region' && d) { // 地区回显
+          this.province = d.split('-')[0];
+          this.city = d.split('-')[1];
+          this.area = d.split('-')[2];
+        }
         this.popShow[e] = true; // 打开弹框
         if (e == 'share') {
           this.formData[e] = d; // 回显数据
         }
         this.formData[e] = d; // 回显数据
-
+        if (e == 'phone') { // 如果是手机号那么弹框显示全部手机号
+          this.formData[e] = this.crmInfo.phone_back; // 回显数据
+        }
+      }
+    },
+    Sprovince(data) {
+      this.province = data.value;
+    },
+    Scity(data) {
+      this.city = data.value;
+    },
+    Sarea(data) {
+      this.area = data.value;
+    },
+    regionSave() {
+      let { province, city, area } = this;
+      if (province !== '' && city !== '' && city !== '市' && area !== '区' && area !== '') {
+        // this.popShow.region = false;
+        this.formData.region = this.province + '-' + this.city + '-' + this.area;
+        this.saveSelect("region", this.formData.region, "region");
+      }
+    },
+    regionShow() { // 选中
+      // this.popShow.region = false;
+      let { province, city, area } = this;
+      if (province !== '' && city !== '' && area !== '') {
+        // this.popShow.region = false;
       }
     },
     onSelect(e) {
-      console.log(e);
       this.FormSave(e.value, this.diy.headline, 'showaction')
     },
     FormSave(data, type, ourType) {
-      console.log(data, type, ourType)
       // 保存表单数据
       let that = this;
       let crm = {};
@@ -598,7 +701,7 @@ export default {
       crm.id = JSON.parse(sessionStorage.getItem("_crm_info"))?.id;
       crm.itrId = this.$U || local.U();
       crm.compId = this.$C || local.C();
-      crm.phone = this.crmInfo.phone;
+      // crm.phone = this.crmInfo.phone;  // 传这个参数会导致有时联系人已经存在
       let signature = generateSignature3(
         crm.id,
         crm.itrId,
@@ -652,15 +755,23 @@ export default {
         case "workNumber":
           crm[type] = data;
           break;
+        case "address":
+          crm[type] = data;
+          break;
         case "company":
           crm.company = data;
           this.$store.commit("ManualUpdate", { target: "company", data });
           break;
       }
-
       if (type.includes('column')) { // 自定义字段
         lock = 1
         crm[type] = data;
+      }
+      // _checked ? '显示' ： '隐藏';
+      // required  && required=1 ? '必填' ： ‘不必填’
+      if (this.item?.required && this.item.required == 1 && data === '') { // 必填 && 数据为空;
+        this.$toast.fail("表单为必填项，请填写内容")
+        return;
       }
       this.$get("/api/request/itr/comp/customer/save", {
         params: crm,
@@ -687,7 +798,6 @@ export default {
         });
     },
     onSelectStatus(item, index) {
-      console.log(item, index)
       this.saveSelect("status", item.status, "status");
     },
     onSelectCID(item, index) {
@@ -705,6 +815,10 @@ export default {
     birthdayOk(value) {
       this.saveSelect("birthday", formatDate(value), "birthday");
     },
+    closePop() {
+      // this.forData.birthday
+      // this.popShow.birthday = true;
+    },
     saveSelect(key, data, ourName) {
       // 下拉表单提交
       let that = this;
@@ -712,7 +826,7 @@ export default {
       crm.id = JSON.parse(sessionStorage.getItem("_crm_info"))?.id;
       crm.itrId = this.$U || local.U();
       crm.compId = this.$C || local.C();
-      crm.phone = this.crmInfo.phone;
+      // crm.phone = this.crmInfo.phone; // 去掉
       let signature = generateSignature3(
         crm.id,
         crm.itrId,
@@ -724,7 +838,6 @@ export default {
       crm.nonce = nonce;
       crm.signature = signature;
       // 手动更新列表数据，防止返回刷新，scrolltop 丢失；
-      // console.log(key, data, ourName)
       crm[key] = data;
       if (key == 'gender') {
         that.$store.commit("ManualUpdate", { target: "gender", data }); // 更新列表数据
@@ -738,6 +851,10 @@ export default {
       // if(crm.starLevel == 0 || crm.starLevel === undefined){
       //   delete crm.starLevel 
       // }
+      if (this.item?.required && this.item.required == 1 && key === '') { // 必填 && 数据为空;
+        this.$toast.fail("表单为必填项，请填写内容")
+        return;
+      }
       this.$get("/api/request/itr/comp/customer/save", {
         params: crm,
       })
@@ -754,38 +871,6 @@ export default {
     followUp() {
       // 跟进记录点击跳转
       this.$emit("update:active", 1);
-    },
-    getCid() {
-      // 来源方式下拉框接口请求
-      let that = this;
-      let timeout = generateTimeout();
-      let nonce = generateNonce();
-      let compID = JSON.parse(sessionStorage.getItem("userinfo"))?.bind_comp_id;
-      let signature = generateSignature3(compID, timeout, nonce);
-      let data = {
-        current: 1,
-        size: 999,
-        compId: compID,
-        timeout: timeout,
-        nonce: nonce,
-        signature: signature,
-      };
-      this.$get("/api/request/itr/comp/customer/source/result", {
-        params: data,
-      })
-        .then(function (res) {
-          if (!res.error) {
-            that.sourceData = res.data.map((item) => {
-              return {
-                ...item,
-                name: item.title,
-              };
-            });
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
     },
     compList(cur) {
       // 来源方式下拉框接口请求
@@ -824,7 +909,6 @@ export default {
         });
     },
     searchcompList(cur, DATAS) {
-      console.log(cur, DATAS)
       // 来源方式下拉框接口请求
       let that = this;
       let timeout = generateTimeout();
@@ -840,7 +924,6 @@ export default {
         signature: signature,
       };
       if (DATAS !== '') {
-        console.log('JINLAILE1')
         data.fuzzy = cur
       } else {
         delete data.fuzzy
@@ -885,7 +968,6 @@ export default {
           let form = JSON.parse(res.data);
           if (form.length !== 0) {
             // 数组转对象。偷个懒去控制显隐。这个只支持默认表单隐藏
-            var obj = {};
             //  默认表单
             this.form = form
               .map((item) => {
@@ -910,7 +992,7 @@ export default {
                   item.title = '所属公司'
                 }
                 return item;
-              });
+              })
           }
         })
         .catch(function (error) {
@@ -991,6 +1073,7 @@ export default {
       param.append("timeout", timeout);
       param.append("nonce", nonce);
       param.append("signature", signature);
+      param.append("version", 1);
       param.append("compId", this.$C || local.C());
       this.$post1("/api/request/itr/comp/column/query", param)
         .then((res) => {
@@ -1019,7 +1102,7 @@ export default {
       let role = sessionStorage.getItem('role');
       let route = sessionStorage.getItem('active');
       let name = JSON.parse(sessionStorage.getItem('userinfo')).nickname;
-      if (route === 'Home') {  // 如果是home 页面如果是三种权限并且nickname == ‘负责人的name’
+      if (route === 'Home' || route === 'ChatCustomer') {  // 如果是home 页面如果是三种权限并且nickname == ‘负责人的name’
         if (role == 'true' || this.crmInfo.ownerNickname === name) {
           this.routeType = 'allocation';
           this.queryType = 3;
@@ -1042,7 +1125,7 @@ export default {
       let role = sessionStorage.getItem('role');
       let route = sessionStorage.getItem('active');
       let name = JSON.parse(sessionStorage.getItem('userinfo')).nickname;
-      if (route === 'Home') {  // 如果是home 页面如果是三种权限并且nickname == ‘负责人的name’
+      if (route === 'Home' || route === 'ChatCustomer') {  // 如果是home 页面如果是三种权限并且nickname == ‘负责人的name’
         if (role == 'true' || this.crmInfo.ownerNickname === name) {
           this.$dialog.confirm({
             title: '温馨提示',
@@ -1072,7 +1155,6 @@ export default {
         } else {
           this.$toast('该联系人没有释放权限')
         }
-
       }
 
     },
@@ -1137,18 +1219,23 @@ export default {
               let name = JSON.parse(sessionStorage.getItem('userinfo')).nickname;
               let ownerId = JSON.parse(sessionStorage.getItem('userinfo')).id;
               let str = '';
+              console.log(data.ownerType)
               if (data.ownerType == 0) {
-                str = `${name}从公司公海拾取了这个联系人`;
+                str = `【客户】${name}从公司公海拾取了这个联系人`;
                 // '释放联系人到公司公海';
               } else if (data.ownerType == 1) {
-                str = `${name}从分公司公海拾取了这个联系人`;
+                str = `【客户】${name}从分公司公海拾取了这个联系人`;
               } else if (data.ownerType == 2) {
-                str = `${name}从部门公海拾取了这个联系人`;
+                str = `【客户】${name}从部门公海拾取了这个联系人`;
               } else if (data.ownerType == 4) {
-                str = `${name}从个人公海拾取了这个联系人`;
+                str = `【客户】${name}从个人公海拾取了这个联系人`;
+              } else if (data.ownerType == 3) {
+                str = `【客户】${name}从公海拾取了这个联系人`;
               }
-              communication.$emit("collect", Idx, str, data, ownerId); // 清空followPage本地数据，
-
+              this.block = 3;
+              console.log(Idx)
+              console.log(str)
+              communication.$emit("collect", Idx, str, data, ownerId, 3); // 清空followPage本地数据，
             });
           } else {
             this.$dialog.alert({
@@ -1170,7 +1257,6 @@ export default {
       this.allocationList(data)
     },
     async allocationList(cur) {
-      console.log('来了');
       let staff_id = JSON.parse(sessionStorage.getItem('userinfo'))?.bind_staff_id;
       let signature = generateSignature3(this.$C || local.C(), this.$U || local.U(), timeout, nonce);
       await this.$get('/api/request/itr/comp/staff/result', {
@@ -1233,7 +1319,6 @@ export default {
               this.totalPageCount = res.totalPageCount;
               this.$toast.clear()
             } else {
-              console.log('wolieai')
               this.compLists.length = 0;
             }
           }
@@ -1269,37 +1354,34 @@ export default {
     },
 
   },
-  mounted() {
-    this.getCid();
-    // this.action = ;
-  },
   beforeCreate() {
     sessionStorage.setItem("TabIndex", 0); // 清空tabindex 防止表单触发触底事件
-
   },
   created() {
     this.getColumn(); //
     this.outData();
     this.getColumnConfig()
     this.action = sessionStorage.getItem("active");
+    console.log(JSON.parse(sessionStorage.getItem('_crm_info')).ownerType)
     this.block = JSON.parse(sessionStorage.getItem('_crm_info')).ownerType;
     // this.getShareList();
     // console.log(this.crmInfo)
   },
   activated() {
-    this.outData();
+
+    // this.outData();
     document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.form; // 设置每个页面的scrollTop
   },
   updated() {
     this.crmInfos = this.crmInfo;
   },
-  components: { compInfo, shareUser },
+  components: { compInfo, shareUser, VDistpicker },
 };
 </script>
 
 <style lang="less" scoped>
 .deaContant {
-  margin-top: 85px;
+  margin-top: 164px;
   .btnTb {
     position: fixed;
     right: 0;
@@ -1329,15 +1411,19 @@ export default {
   }
   .allocation {
     height: 40px;
-    background: #fff;
+    background: #eee;
     display: flex;
     align-items: center;
     padding: 0 10px;
     position: fixed;
     left: 0;
     right: 0;
-    top: 43px;
+    top: 123px;
     z-index: 999;
+    justify-content: space-between;
+    .handle {
+      display: flex;
+    }
   }
   .waooo {
     margin-right: 12px;
@@ -1370,6 +1456,45 @@ export default {
       line-height: 40px;
       border-bottom: 0.5px solid #eee;
     }
+  }
+  .distpicker-address-wrapper {
+    z-index: 99999;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    height: 45%;
+    overflow-y: auto;
+    background: #eee;
+  }
+  /deep/ .address-header {
+    background: #eee !important;
+    color: #000;
+  }
+  /deep/ .address-container {
+    background: #eee;
+    color: #000;
+  }
+  /deep/ .address-container {
+    > ul {
+      border-bottom: none;
+      li {
+        border-bottom: none;
+        border-top: none;
+      }
+    }
+  }
+  .operaTion {
+    position: fixed;
+    bottom: 45%;
+    left: 0;
+    background: #eee;
+    font-size: 16px;
+    padding: 8px;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #c5c4c4;
   }
 }
 </style>

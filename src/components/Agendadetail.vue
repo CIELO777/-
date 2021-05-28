@@ -40,13 +40,21 @@
         />
       </template>
     </van-cell>
-    <van-button
-      type="primary"
-      size="large"
-      style="margin-top: 50px; background: #51bbba"
-      @click="AgendSave"
-      >保存</van-button
-    >
+    <div class="btn">
+      <van-button
+        type="default"
+        size="normal"
+        @click="backgo"
+        >返回</van-button
+      >
+      <van-button
+        type="primary"
+        size="normal"
+        style="background: #51bbba"
+        @click="AgendSave"
+        >保存</van-button
+      >
+    </div>
   </div>
 </template>
 
@@ -67,8 +75,7 @@ export default {
       currentDate: new Date(),
       time: '',
       EditId: '',
-
-
+      page: '',
     }
   },
   methods: {
@@ -131,9 +138,8 @@ export default {
     },
     backgo() {
       if (this.$route.name == 'Agendadetail') {
-        this.$router.push('/linkDetailed')
+        this.$router.go(-1)
         sessionStorage.setItem('tabNum', 3);
-
       };
 
     },
@@ -158,6 +164,8 @@ export default {
   },
   created() {
     this.EditId = this.$route.params.id;
+    this.page = sessionStorage.getItem("active")
+    console.log(sessionStorage.getItem("active"), ' this.page ')
     if (this.$route.params.param) {
       this.time = this.$route.params.time;
       this.checked = this.$route.params.remindStatus + "";
@@ -169,7 +177,7 @@ export default {
 
 <style lang="less" scoped>
 .agentD {
-  height: calc(~"100vh - 50px");
+  height: calc(~"100vh - 44px");
   background: #f1f1f1;
   font-size: 14px;
   .agenTitle {
@@ -192,15 +200,15 @@ export default {
       padding-left: 16px;
     }
   }
-  button {
-    background: #51bbba;
-    margin-top: 10px;
-    display: block;
-    margin: 10px auto 0;
-    width: 100%;
+  .btn {
+    display: flex;
     position: fixed;
-    bottom: 0;
     left: 0;
+    right: 0;
+    bottom: 0;
+    button {
+      flex: 1;
+    }
   }
 }
 </style>

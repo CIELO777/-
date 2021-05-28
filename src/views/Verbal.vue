@@ -26,7 +26,6 @@
 <script>
 import Tab from '../components/colorPage/Tab';
 import local from '../uilts/localStorage';
-import wxxx from '../uilts/wxconfig';
 import { Toolbar } from '../uilts/toolbarMixin';
 
 import {
@@ -80,7 +79,13 @@ export default {
       })
         .then((res) => {
           let qq = this.treeData[this.id];
-          qq.data = (cur == 1 || cur == undefined) ? res.data : qq.data.concat(res.data);
+          let cc = res.data.map(item => {
+            return {
+              ...item,
+              content: JSON.parse(item.content)[0]
+            }
+          })
+          qq.data = (cur == 1 || cur == undefined) ? cc : qq.data.concat(cc);
           qq.userMap = Object.assign(qq.userMap, res.user);
           qq.config.total = res.totalPageCount;
           this.treeData = JSON.parse(JSON.stringify(this.treeData))
@@ -190,7 +195,13 @@ export default {
       })
         .then((res) => {
           let qq = this.treeData[this.id];
-          qq.data = (cur == 1 || cur == undefined) ? res.data : qq.data.concat(res.data);
+          let cc = res.data.map(item => {
+            return {
+              ...item,
+              content: JSON.parse(item.content)[0]
+            }
+          })
+          qq.data = (cur == 1 || cur == undefined) ? cc : qq.data.concat(cc);
           qq.config.total = res.totalPageCount;
           this.treeData = JSON.parse(JSON.stringify(this.treeData))
           this.atData = JSON.parse(JSON.stringify(this.treeData[this.id].data))  // 传入当前数组

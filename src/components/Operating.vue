@@ -7,7 +7,8 @@
       :finished="finished"
       finished-span="没有更多了"
       @load="onLoad"
-      v-if="Object.keys(optRecordMap).length>0"
+      v-if="Object.keys(optRecordMap).length > 0"
+      style="padding-top: 2.5rem"
     >
       <div v-for="(item, index) in optRecordMap" :key="index">
         <div class="qs-title bg-color-f0">
@@ -142,6 +143,7 @@ export default {
               }
             })
             that.optRecordMap = { ...optRecordMap };
+            console.log(that.optRecordMap)
             // console.log();
             if (Object.keys(that.optRecordMap).length == 0) that.empty = true; //如果数据等于0，就显示空信息
             that.optRecordUserMap = Object.assign(optRecordUserMap, res.user);
@@ -191,16 +193,16 @@ export default {
 
 <style lang="less" scoped>
 .operat {
-  padding-top: 0.8rem;
+  height: 100vh;
   .qs-title {
     background-color: #f0f0f5;
     padding: 10px;
-    font-size: 18px;
+    font-size: 0.36rem;
   }
   .record-detail {
     background-color: #fff;
     padding: 10px;
-    font-size: 15px;
+    font-size: 0.3rem;
     line-height: 36px;
     margin-bottom: 1px;
     letter-spacing: 1px;
@@ -213,6 +215,8 @@ export default {
   }
   .van-empty {
     background: #f1f1f1;
+    // height: 100vh;
+    padding-top: 186px;
   }
 }
 </style>

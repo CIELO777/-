@@ -1,25 +1,26 @@
-import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
-import store from './store'
-import './registerServiceWorker'
+import Vue from 'vue';
+import App from './App.vue';
+import router from './router';
+import store from './store';
+// import './registerServiceWorker'
 import Vant from 'vant';
 import 'vant/lib/index.css';
-import axios from 'axios'
+import axios from 'axios';
 Vue.prototype.$axios = axios;
 import { post, get, post1 } from './uilts/https';
 import local from './uilts/localStorage';
-import './uilts/reset.css'
-import setTitle from './uilts/SetTitle'
+import './uilts/reset.css';
+import setTitle from './uilts/SetTitle';
 import wx from "weixin-js-sdk";
 import Vconsole from 'vconsole';
-import UUID from 'vue-uuid'
-Vue.use(UUID)
+import UUID from 'vue-uuid';
+import '@vant/touch-emulator'; //
+Vue.use(UUID);
 // new Vconsole();
 Vue.prototype.$wx = wx; // 挂载wx-jdk 插件
 Vue.prototype.$post = post;
 Vue.prototype.$post1 = post1;
-Vue.prototype.$get = get;  // axios二次封装
+Vue.prototype.$get = get;  // axios二次封 装
 Vue.prototype.$U = local.U();  // Userid
 Vue.prototype.$C = local.C();  // Compid
 Vue.config.productionTip = false;
@@ -50,8 +51,9 @@ router.beforeEach((to, from, next) => {
 });
 
 Vue.use(Vant);
-new Vue({
+let vueThis = new Vue({
   router,
   store,
   render: h => h(App)
 }).$mount('#app')
+export default vueThis

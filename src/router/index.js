@@ -184,12 +184,26 @@ const routes = [
     name: 'ChatRecord',
     component: () => import(/* webpackChunkName: "about" */ '../components/ChatRecord.vue')
   },
+  {
+    path: '/chatBarShare',
+    name: 'ChatBarShare',
+    component: () => import(/* webpackChunkName: "about" */ '../components/ChatBarShare.vue')
+  },
+  {
+    path: '/chatCustomer',
+    name: 'ChatCustomer',
+    component: () => import(/* webpackChunkName: "about" */ '../components/ChatCustomer/ChatCustomer.vue')
+  },
+  {
+    path: '/CircleFriends',
+    name: 'CircleFriends',
+    component: () => import(/* webpackChunkName: "about" */ '../views/CircleFriends.vue')
+  },
 ]
-
 const router = new VueRouter({
   mode: 'history',
   // base: '/wx-crm/',
-  base: '/wx-crmTest/',
+  base: process.env.VUE_APP_ROUTE,
   routes
 })
 

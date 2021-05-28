@@ -8,7 +8,6 @@
       :ShareContents="ShareContent"
       :showShares.sync="showShare"
     ></share>
-
     <iframe id="iframe" :src="url" frameborder="0" scrolling="auto"></iframe>
   </div>
 </template>
@@ -19,6 +18,7 @@ import { generateTimeout, generateNonce, generateSignature3, generateSignature }
 let timeout = generateTimeout();
 let nonce = generateNonce();
 import local from '../uilts/localStorage';
+import wxxx from '../uilts/wxconfig';
 
 export default {
   name: "MicroStation",
@@ -40,6 +40,28 @@ export default {
     createContent() { // 触发分享模块
       this.showShare = true;
     },
+    getMicUrl() {
+      let signature = generateSignature3(this.$U || local.U(), this.$C || local.C(), nonce, timeout);
+      this.$get("/api/request/console/mall", {
+        params: {
+          userId: this.$U || local.U(),
+          compId: this.$C || local.C(),
+          timeout,
+          nonce,
+          signature
+        },
+      })
+        .then((res) => {
+          if (res && res.url !== '') {
+            this.url = res.url + '&shareType=15';
+            console.log(this.url)
+            this.$toast.clear();
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+        });
+    },
     initMineInfo() { // 获取当前店铺url地址，店铺ID 。
       this.$get("/itver/remote/user/profile", {
         params: {
@@ -49,7 +71,7 @@ export default {
       })
         .then((res) => {
           if (res?.mall?.url !== null) {
-            this.url = res.mall.url;
+            // this.url = res.mall.url;
             this.shopId = res.mall.title;
             this.getHome();
             this.$toast.clear();
@@ -96,9 +118,14 @@ export default {
     }
   },
   created() {
+    console.log(21312321)
     if (sessionStorage.getItem('userinfo')) {
       this.loading()
       this.initMineInfo()
+      this.getMicUrl();
+      setTimeout(() => {
+        wxxx();
+      }, 1500);
     } else {
       this.$toast.fail({
         message: '此模块不支持聊天工具栏。',

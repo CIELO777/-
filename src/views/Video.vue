@@ -129,12 +129,13 @@ export default {
         params: data,
       })
         .then((res) => {
+          console.log(12312312)
           if (!res.error) {
             let qq = this.treeData[this.id];
             let cc = res.data.map(item => {
               return {
                 ...item,
-                time: item.updateTime.split(' ')[0],
+                time: item.createTime.split(' ')[0],
                 visits1: item.visits > 10000 ? Math.round((item.visits / 10000) * 1000) / 1000 + '万' : item.visits
               }
             })
@@ -216,7 +217,7 @@ export default {
             let cc = res.data.map(item => {
               return {
                 ...item,
-                time: item.updateTime.split(' ')[0],
+                time: item.createTime.split(' ')[0],
                 visits1: item.visits > 10000 ? Math.round((item.visits / 10000) * 1000) / 1000 + '万' : item.visits
               }
             })

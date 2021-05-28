@@ -2,10 +2,15 @@
  * @Author: YUN_KONG 
  * @Date: 2021-02-07 16:29:18 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-03-22 15:11:20
+ * @Last Modified time: 2021-05-25 14:14:52
  */
 <template>
-  <div class="OrderView">
+  <div
+    class="OrderView"
+    :style="{
+      height: datas.length > 5 ? 'calc(100% - 100px)' : 'calc(100vh - 100px)',
+    }"
+  >
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
       <van-list
         v-if="datas.length > 0"
@@ -112,7 +117,6 @@
         </div>
       </van-list>
       <van-empty
-        v-else
         class="custom-image"
         image="https://img.yzcdn.cn/vant/custom-empty-image.png"
         description="暂无相关消息"
@@ -237,13 +241,12 @@ export default {
   }
   .van-empty {
     background: #f1f1f1;
+    padding-top: 160px;
   }
   /deep/ .van-pull-refresh__head {
     top: 100px;
   }
-  .van-empty {
-    padding-top: 3rem;
-  }
+
   .qs-org {
     color: #ff8000;
   }

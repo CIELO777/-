@@ -10,12 +10,12 @@
       @fastComp="fastComp"
       :contactStatus.sync="contactStatus"
     ></navBar>
-    <!-- <van-pull-refresh class="pull"  :success-text="successtext"  v-model="isLoading" @refresh="onRefresh"> -->
     <linkman
       ref="mychild"
       @userIDLength="userIDLengths"
       @userIdSave="userIdSaves(arguments)"
       @chengParentCur="chengParentCurs"
+      @pullRefresf="onRefresh(1)"
       :totals="total"
       label="Seas"
       v-if="data.length > 0"
@@ -30,7 +30,6 @@
       image="https://img.yzcdn.cn/vant/custom-empty-image.png"
       description="暂无相关消息"
     />
-    <!-- </van-pull-refresh> -->
   </div>
 </template>
 <script>
@@ -53,6 +52,7 @@ export default {
   mixins: [pullMixin],
   data() {
     return {
+      isLoading: false,
       data: [],
       user: {},
       userMap: {},
@@ -77,10 +77,10 @@ export default {
       let timeout = generateTimeout();
       let nonce = generateNonce();
       let userinfo = JSON.parse(sessionStorage.getItem('userinfo'));
-      let signature = generateSignature3(userinfo?.id, userinfo?.bind_comp_id, timeout, nonce);
+      let signature = generateSignature3(this.$C || local.C(), this.$U || local.U(), timeout, nonce);
       let data = {
-        userId: userinfo.id,
-        compId: userinfo.bind_comp_id,
+        userId: this.$U || local.U(),
+        compId: this.$C || local.C(),
         current: datas || 1,
         size: 20,
         nonce,
@@ -375,18 +375,18 @@ export default {
       document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
       this.getList(1, this.$refs.navBar.Params);
       console.log(this.$refs.navBar.Params)
+    },
+    onRefresh() { // 下拉刷新
+      this.getList(1)
     }
   },
   async created() {
-    console.log(this.$route)
     this.totalLodding();
     this.getList();
     await this.getAgentConfig();
     await this.getWxJsJdk();
   },
   async activated() {
-    console.log(this.$route)
-
     document.documentElement.scrollTop = document.body.scrollTop = this.$store.state.scroll.highseas;
     // 如果ManualData：true 证明姓名，电话，跟进记录修改过，这样的话就重新赋值把。
     let index = sessionStorage.getItem('ManualIdx');
@@ -454,9 +454,10 @@ export default {
       ChangeData.lastContactRecord = name + '给' + data.nickname + '分配了一个联系人';
       communication.$emit("linkman", ChangeData);
     })
-    communication.$on('collect', (msg, str, data, id) => { // 公海拾取操作。删除公海的数据并追加联系人的数据
+    communication.$on('collect', (msg, str, data, id, type) => { // 公海拾取操作。删除公海的数据并追加联系人的数据
       this.data.splice(msg, 1) // 本地删除原数组
-      communication.$emit("collectLinkman", str, data, id);
+      console.log(str, data, id, type)
+      communication.$emit("collectLinkman", str, data, id, type);
     })
   },
   beforeRouteEnter: (to, from, next) => {
@@ -484,13 +485,15 @@ export default {
 
 <style lang="less" scoped>
 .about {
+  height: 100vh;
+  background: #eee;
   // height: calc(~"100% - 98px");
   .van-empty {
     padding-top: 3rem;
   }
   .pull /deep/ .van-pull-refresh__head {
     // 改变下拉框的提醒位置
-    top: 45px;
+    top: 85px;
   }
 }
 </style>

@@ -1,7 +1,10 @@
 <template>
   <div class="iframesss">
     <div class="share" @click="createContent">
-      <van-icon name="share" size="20px" />
+      <van-icon name="share-o" size="20px" />
+    </div>
+    <div class="back" @click="back">
+      <van-icon name="arrow-left" size="20px" />
     </div>
     <share
       :ShareContents="ShareContent"
@@ -13,7 +16,8 @@
 </template>
 
 <script>
-import share from '../../components/share'
+import share from '../../components/share';
+import wxxx from '../../uilts/wxconfig'
 
 export default {
   name: "Iframe",
@@ -37,14 +41,25 @@ export default {
         desc: this.$route.params.desc,
         url: this.$route.params.url
       }
-
+    },
+    back() {
+      // console.log(this.$route, 'this.$route', this.$route.params);
+      // if (this.$route.params.view && this.$route.params.view == 'video') { // 如果是视频页面直接跳转两级
+      //   this.$router.go(-2);
+      // } else {
+      this.$router.go(-1);
+      // }
     }
   },
-  created() {
-    console.log(this.$route.params.url, 'paramsUrl')
-    this.url = this.$route.params.url;
+  activated() {
   },
-
+  created() {
+    this.url = this.$route.params.url;
+    console.log(this.url, 'video');
+    setTimeout(() => {
+      wxxx(); // 为了授权分享接口使用，所以一定要在这调用
+    }, 1500);
+  },
   mounted() { },
 };
 </script>
@@ -65,13 +80,18 @@ export default {
     top: 0.4rem;
     width: 38px;
     height: 38px;
-    background: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
     border-radius: 50%;
   }
   .sharesheet /deep/ .van-share-sheet__option {
     span {
       white-space: pre;
     }
+  }
+  .back {
+    .share;
+    left: 10px;
   }
 }
 </style>

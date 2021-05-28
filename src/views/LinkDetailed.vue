@@ -1,6 +1,13 @@
 <template>
   <div class="detail">
-    <!-- :lazy-render="false"  -->
+    <!-- 联系人详情头部信息 -->
+    <header>
+      <img :src="info.portrait" alt="" />
+      <div>
+        <p style="padding-top: 2px">{{ info.nickname }}</p>
+        <p>{{ !info.company ? "未填写公司名称" : info.company }}</p>
+      </div>
+    </header>
     <van-tabs
       swipeable
       v-model="active"
@@ -94,6 +101,11 @@ export default {
       sourceData: [],
       hackReset: true,
       componentKey: 0,
+      info: {
+        company: '',
+        nickname: '',
+        portrait: '',
+      }
     }
   },
   components: {
@@ -130,6 +142,11 @@ export default {
     // sessionStorage.setItem('TabIndex', this.active)
     this.getCrm();
     this.getCid();
+    ["portrait", "nickname", "company"].forEach((key) => { // 获info基本信息；
+      if (key in JSON.parse(sessionStorage.getItem('_crm_info'))) {
+        this.info[key] = JSON.parse(sessionStorage.getItem('_crm_info'))[key]
+      }
+    })
   },
   methods: {
     getCrm() { // 获取基本信息
@@ -184,10 +201,13 @@ export default {
               consumptionNumber: res.consumptionNumber + '元',
               customSourceType: res.customSourceTitle,
               share: shareStr,
-              share1: res.share
-
+              share1: res.share,
+              phone_back: res.phone,
+              phone: res.phone && res.phone.replace(res.phone.substring(3, 7), "****")
             }
             that.crmInfos = a;
+            that.info.nickname = res.nickname;
+            that.info.company = res.company;
           }
         })
         .catch(function (error) {
@@ -248,7 +268,6 @@ export default {
     findSourceType(item) {
       // console.log(item);
       this.sourceData.find(item => {
-        console.log(item);
       })
     },
     tabsChange(e) {
@@ -278,7 +297,6 @@ export default {
     Radar
   },
   beforeRouteEnter: (to, from, next) => {
-    console.log(from.name, 'from.namefrom.name')
     next(vm => {
       if (from.name == 'detailFilter') {
         vm.$store.commit("cache", "Home,Common,HighSeas,detailFilter");
@@ -286,10 +304,19 @@ export default {
         vm.$store.commit("cache", "Home,Common,HighSeas");
       } else if (from.name == 'OrderDetailInfo') {
         vm.$store.commit("cache", "Order,LinkDetailed");
+      } else if (from.name == 'Addcustomer ') {
+        vm.$store.commit("cache", "null");
       } else {
         vm.$store.commit("cache", "Home,Common,HighSeas,LinkDetailed");
       }
     })
+  },
+  beforeRouteLeave: (to, from, next) => {
+    if (to.name === 'ChatCustomer') {
+      next(false);
+    } else {
+      next();
+    }
   },
   mounted() {
     communication.$on('updatecrm', (msg) => {
@@ -301,7 +328,42 @@ export default {
 
 <style lang="less" scoped>
 .detail {
-  font-size: 16px;
+  font-size: 0.3rem;
+  header {
+    padding: 5px 20px;
+    height: 80px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    background: #fff;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    img {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    > div {
+      flex: 1;
+      & p {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      & p:first-child {
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+      & p:last-child {
+        color: #5f5f5f;
+        font-size: 0.27rem;
+        padding-top: 2px;
+      }
+    }
+  }
   // height: calc(~"100vh - 46px");
   background: #f1f1f1;
   .tab2 {
@@ -311,7 +373,7 @@ export default {
   /deep/ .van-tabs__wrap {
     // 兼容vant tabar 修改部分样式
     position: fixed;
-    top: 0;
+    top: 80px;
     left: 0px;
     width: 100%;
     height: 44px;

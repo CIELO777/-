@@ -2,11 +2,11 @@
  * @Author: YUN_KONG 
  * @Date: 2021-02-03 14:12:55 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-03-25 12:06:17
+ * @Last Modified time: 2021-05-25 15:51:04
  * 文档数据展示
  */
 <template>
-  <div class="docView">
+  <div class="docView" :style="{height:datas.length > 8 ? 'calc(100% - 100px)' : 'calc(100vh - 100px)'}">
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
       <van-list
         v-if="datas.length > 0"
@@ -50,12 +50,22 @@
                 >
               </span>
               <div @click.stop="createContent(item)" class="ShareCenter">
-                <img
-                  style="width: 15px; margin-right: 3px"
-                  src="../../../public/img/icon/share.png"
-                  alt=""
-                />
-                <span style="font-size: 13px">分享</span>
+                <template v-if="$route.name == 'ChatBarShare'">
+                  <img
+                    style="width: 0.28rem; margin-right: 5px"
+                    src="../../../public/img/icon/send.png"
+                    alt=""
+                  />
+                  <span class="shareText">发送</span>
+                </template>
+                <template v-else>
+                  <img
+                    style="width: 0.28rem; margin-right: 3px"
+                    src="../../../public/img/icon/share.png"
+                    alt=""
+                  />
+                  <span class="shareText">分享</span>
+                </template>
               </div></span
             >
           </div>
@@ -78,7 +88,7 @@
 
 <script>
 import share from '../../components/share'
-
+import wxxx from '../../uilts/wxconfig'
 export default {
   name: "docView",
   components: {},
@@ -127,7 +137,7 @@ export default {
       this.$router.push({
         name: 'Iframe',
         params: {
-          url: item.initialUrl,
+          url: item.initialUrl + '?shareType=15',
           title: item.title,
           desc: item.description,
           imgUrl: item.thumb
@@ -139,7 +149,7 @@ export default {
         wx.invoke('sendChatMessage', {
           msgtype: "news", //消息类型，必填
           news: {
-            link: item.shareUrl, //H5消息页面url 必填
+            link: item.initialUrl + '?shareType=15', //H5消息页面url 必填
             title: item.title, //H5消息标题
             desc: item.description, //H5消息摘要
             imgUrl: `https://dist.jiain.net/itr/dom/svg_type_${item.fileSuffix}.png`, //H5消息封面图片URL
@@ -156,7 +166,7 @@ export default {
           title: item.title,
           imgUrl: `https://dist.jiain.net/itr/dom/svg_type_${item.fileSuffix}.png`,
           desc: item.description,
-          url: item.shareUrl
+          url: item.initialUrl + '?shareType=15'
         }
 
       }
@@ -168,7 +178,11 @@ export default {
       // return require(`@/${urlPath}`);
     },
   },
-  created() { },
+  created() {
+    if (this.$route.name !== 'ChatBarShare') { // 这个授权只是在工作台时候授权
+      wxxx()
+    }
+  },
   mounted() { }
 };
 </script>
@@ -250,6 +264,9 @@ export default {
   .ShareCenter {
     display: flex;
     align-items: center;
+  }
+  .shareText {
+    font-size: 0.24rem;
   }
 }
 </style>

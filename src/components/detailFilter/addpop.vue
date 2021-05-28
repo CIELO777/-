@@ -2,31 +2,89 @@
   <div class="addpop">
     <!-- 1.type为选择框 -->
     <!-- {{ this.client.starLeve}} -->
-    <van-action-sheet v-model="datas.popshow" :actions="datas.list" @select="onSelect" />
+    <van-action-sheet
+      v-model="datas.popshow"
+      :actions="datas.list"
+      @select="onSelect"
+    />
     <!-- 2.type为输入框 -->
-    <van-popup :overlay="false" v-model="datas.popshow" :style="{ height: '250px' }" v-if="datas.types == 2" @click-overlay="close" position="bottom">
-      <div class="module ">
-        <p>{{datas.title}}</p>
-        <van-field v-model="message" rows="4" autosize label="" :placeholder="datas.placeholder" :type="datas.inpType" :maxlength="datas.maxLength" show-word-limit />
-        <van-button color="#60C6C6" size="mini" type="primary" @click="savaForm(datas.form)">保存</van-button>
+    <van-popup
+      :overlay="false"
+      v-model="datas.popshow"
+      :style="{ height: '250px' }"
+      v-if="datas.types == 2"
+      @click-overlay="close"
+      position="bottom"
+    >
+      <div class="module">
+        <p>{{ datas.title }}</p>
+        <van-field
+          v-model="message"
+          rows="4"
+          autosize
+          label=""
+          :placeholder="datas.placeholder"
+          :type="datas.inpType"
+          :maxlength="datas.maxLength"
+          show-word-limit
+        />
+        <van-button
+          color="#60C6C6"
+          size="mini"
+          type="primary"
+          @click="savaForm(datas.form)"
+          >保存</van-button
+        >
       </div>
     </van-popup>
     <!-- 3.type为日期 -->
-    <van-popup :overlay="false" v-if="datas.types == 3" close-icon-position="top-left" :safe-area-inset-bottom="true" v-model="datas.popshow" position="bottom" :style="{ height: '40%' }">
-      <van-datetime-picker v-model="datas.birther" type="date" title="出生日期" @confirm="birthdayOk" @cancel="cancel" :formatter="formatter" />
+    <van-popup
+      :overlay="false"
+      v-if="datas.types == 3"
+      close-icon-position="top-left"
+      :safe-area-inset-bottom="true"
+      v-model="datas.popshow"
+      position="bottom"
+      :style="{ height: '40%' }"
+    >
+      <van-datetime-picker
+        v-model="datas.birther"
+        type="date"
+        title="出生日期"
+        @confirm="birthdayOk"
+        @cancel="cancel"
+        :formatter="formatter"
+      />
     </van-popup>
     <!-- 4. 区间选择-->
-    <van-popup v-model="datas.popshow" :style="{ height: '300px' }" v-if="datas.types == 4" @click-overlay="close" position="bottom">
+    <van-popup
+      v-model="datas.popshow"
+      :style="{ height: '300px' }"
+      v-if="datas.types == 4"
+      @click-overlay="close"
+      position="bottom"
+    >
       <div class="module">
-        <p>{{datas.title}}</p>
+        <p>{{ datas.title }}</p>
         <div class="max">
-          <input type="text" :placeholder="'最小'+ datas.title" class="inp" v-model="min" />
-          <input type="text" :placeholder="'最大'+ datas.title" class="inp" v-model="max" />
+          <input
+            type="text"
+            :placeholder="'最小' + datas.title"
+            class="inp"
+            v-model="min"
+          />
+          <input
+            type="text"
+            :placeholder="'最大' + datas.title"
+            class="inp"
+            v-model="max"
+          />
         </div>
-        <van-button color="#60C6C6" size="mini" type="primary" @click="maxSave">保存</van-button>
+        <van-button color="#60C6C6" size="mini" type="primary" @click="maxSave"
+          >保存</van-button
+        >
       </div>
     </van-popup>
-
   </div>
 </template>
 <script>
@@ -187,10 +245,13 @@ export default {
     maxSave() { // 区间选择
       this.$emit('MaxinSava', this.min, this.max);
       this.close();
+    },
+    formatters(value) {
+      console.log(value)
     }
 
   },
-  created(){
+  created() {
     console.log(this.datas)
   }
 

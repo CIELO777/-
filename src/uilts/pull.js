@@ -3,12 +3,16 @@ export const pullMixin = {
 		return {
 			count: 0,
 			isLoading: false,
-			successtext:""
+			successtext: ""
 		}
 	},
 	methods: {
 		onRefresh() {
-			this.getList(1)
+			console.log(231231);
 		},
+	},
+	created() {
+		console.log('1231312');
+
 	}
 }

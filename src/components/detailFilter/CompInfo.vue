@@ -14,7 +14,7 @@
       >
         <van-search
           v-model="SearchValue"
-          placeholder="请输入搜索关键词"
+          placeholder="请输入搜索关键词1"
           @input="searchChange"
         />
         <!-- 客户管理快捷搜索 -->
@@ -410,7 +410,7 @@ export default {
     // box-sizing: border-box;
   }
   #abc {
-    height: calc(100% - 100px);
+    height: calc(100% - 96px);
     overflow-y: scroll;
     margin-bottom: 42px;
     .chooseView {

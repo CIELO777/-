@@ -34,13 +34,22 @@
         />
       </div>
     </div>
-    <van-button
-      type="primary"
-      size="large"
-      style="margin-top: 20px; background: #51bbba"
-      @click="sheetSave"
-      >保存</van-button
-    >
+    <div class="btn">
+      <van-button
+        type="default"
+        size="normal"
+        style="margin-top: 20px"
+        @click="backgo"
+        >返回</van-button
+      >
+      <van-button
+        type="primary"
+        size="normal"
+        style="margin-top: 20px; background: #51bbba"
+        @click="sheetSave"
+        >保存</van-button
+      >
+    </div>
   </div>
 </template>
 
@@ -56,6 +65,7 @@ export default {
       message: '',
       imageList: [],
       checked: '',
+      page:''
     }
   },
   methods: {
@@ -166,16 +176,17 @@ export default {
     backgo() {  // 点击返回的时候保存信息
       console.log(this.$route);
       if (this.$route.name === 'SheetImg') {
-        this.$router.push('/linkDetailed')
-
+        this.$router.go(-1)
         sessionStorage.setItem('tabNum', 1);
       }
     },
   },
   created() {
     console.log('dasasdas');
-    this.message = '',
-      this.imageList = []
+    console.log(this.$route, '$route.name')
+    this.message = '';
+    this.imageList = [];
+    this.page = sessionStorage.getItem("active")
   },
   activated() {
     console.log('activatedactivatedactivated');
@@ -214,31 +225,42 @@ export default {
   .van-uploader {
   }
   .backGo {
-    width: 1rem;
-    height: 45px;
-    position: fixed;
-    top: 0;
-    z-index: 999;
-    left: 0;
-    background: #5c5c5c;
-    i {
-      padding-top: 14px;
-      display: inherit;
-      padding-left: 16px;
-    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 10px;
+    width: 38px;
+    height: 38px;
+    background: #000;
+    color: red;
+    border-radius: 50%;
+    z-index: 9;
+    left: 10px;
+    top: 0.2rem;
   }
   button {
-    margin-top: 10px;
-    display: block;
-    margin: 10px auto 0;
-    width: 100%;
-    position: fixed;
-    bottom: 0;
-    left: 0;
+    // margin-top: 10px;
+    // display: block;
+    // margin: 10px auto 0;
+    // width: 100%;
+    // position: fixed;
+    // bottom: 0;
+    // left: 0;
   }
   .boxcheck {
     margin: 0.4rem 0;
     padding: 0 6px;
+  }
+  .btn {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    button {
+      flex: 1;
+    }
   }
 }
 </style>
