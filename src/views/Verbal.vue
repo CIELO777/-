@@ -86,12 +86,13 @@ export default {
             }
           })
           qq.data = (cur == 1 || cur == undefined) ? cc : qq.data.concat(cc);
+          qq.config.empty = qq.data.length > 0 ? false : true;
           qq.userMap = Object.assign(qq.userMap, res.user);
           qq.config.total = res.totalPageCount;
-          this.treeData = JSON.parse(JSON.stringify(this.treeData))
-          this.atData = JSON.parse(JSON.stringify(this.treeData[this.id].data))  // 传入当前数组
-          this.userMap = JSON.parse(JSON.stringify(this.treeData[this.id].userMap))  // 传入当前对象
-          this.config = JSON.parse(JSON.stringify(this.treeData[this.id].config));  // 总页数
+          this.treeData = JSON.parse(JSON.stringify(this.treeData));
+          this.atData = JSON.parse(JSON.stringify(this.treeData[this.id].data));  // 传入当前数组
+          this.userMap = JSON.parse(JSON.stringify(this.treeData[this.id].userMap));  // 传入当前对象
+          this.config = JSON.parse(JSON.stringify(this.treeData[this.id].config));// 总页数
           this.$toast.clear();
         })
         .catch((error) => {
@@ -128,6 +129,7 @@ export default {
                 scroll: 0,
                 current: 1,
                 total: -1,
+                empty: false,
               },
             }
           })

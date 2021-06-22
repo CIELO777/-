@@ -99,6 +99,7 @@ export default {
             }
           });
           qq.data = (cur == 1 || cur == undefined) ? cc : bb;
+          qq.config.empty = qq.data.length > 0 ? false : true;
           qq.userMap = res.user;
           qq.config.total = res.totalPageCount;
           this.treeData = JSON.parse(JSON.stringify(this.treeData))
@@ -139,6 +140,7 @@ export default {
                 scroll: 0,
                 current: 1,
                 total: -1,
+                empty:false,
               },
             }
           })

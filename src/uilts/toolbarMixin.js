@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:13:08 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-05-25 16:59:51
+ * @Last Modified time: 2021-06-22 11:16:59
  * 聊天工具栏素材分享功能组件，
  */
 export const Toolbar = {
@@ -15,6 +15,7 @@ export const Toolbar = {
 			compId: '',
 			show: false,
 			accomplish: false,
+			imgSrc: ''
 		}
 	},
 	async created() {
@@ -129,6 +130,7 @@ export const Toolbar = {
 						// 如果有公司ID 那么就存数据，
 						let a = { ...res.data, bind_comp_id: that.compId, bind_comp_id1: 40021450 } // 会话存储，锁死compID
 						sessionStorage.setItem("userinfo", JSON.stringify(a)); // 公司id 存入本地；
+						// that.imgSrc = a.portrait; // 客户头像
 						that.Single = true; // 为true证明是单聊；
 						sessionStorage.setItem('Single', true);
 						if (that.$route.name === 'ChatBarShare' || that.$route.name === 'ColorPage') {

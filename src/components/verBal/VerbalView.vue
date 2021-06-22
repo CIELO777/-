@@ -1,5 +1,10 @@
 <template>
-  <div class="verbalView" :style="{height:datas.length > 8 ? 'calc(100% - 90px)' : 'calc(100vh - 90px)'}">
+  <div
+    class="verbalView"
+    :style="{
+      height: datas.length > 8 ? 'calc(100% - 90px)' : 'calc(100vh - 90px)',
+    }"
+  >
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
       <van-list
         v-if="datas.length > 0"
@@ -69,7 +74,7 @@
         </div>
       </van-list>
       <van-empty
-        v-else
+        v-else-if="configs.empty"
         class="custom-image"
         image="https://img.yzcdn.cn/vant/custom-empty-image.png"
         description="暂无相关消息"

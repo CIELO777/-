@@ -23,15 +23,10 @@
       n.addEventListener && (e.addEventListener(i, d, !1), n.addEventListener("DOMContentLoaded", d, !1));
     })(document, window);
 
-    // window.onbeforeunload = function (e) {  // 监听用户是否按住了f5刷新，如果刷新了，那么就把参数都指向home
-    //   console.log(e)
-    //   e = e || window.event;
-    //   if (e) {
-    //     sessionStorage.setItem('active','Home')
-    //     sessionStorage.setItem('TabIndex',6)
-    //     this.$router.push('/')
-    //   }
-    // };
+    // window.onbeforeunload = function (e) {
+    //   var e = window.event || e;
+    //   e.returnValue = ("确定离开当前页面吗？");
+    // }
   </script>
   <style>
     html,

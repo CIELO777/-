@@ -14,8 +14,9 @@
       >
         <van-search
           v-model="SearchValue"
-          placeholder="请输入搜索关键词1"
+          placeholder="请输入搜索关键词"
           @input="searchChange"
+          @clear="clearSearch"
         />
         <!-- 客户管理快捷搜索 -->
         <div class="shortcut" v-if="route == 'shareUser'">
@@ -240,7 +241,6 @@ export default {
             this.$emit('touchSearchs', [this.SearchValue, this.current])
           } else if (this.route == 'LinkDetailed') {
             this.$parent.compList(this.current);
-
           } else {
             this.$parent.searchs([this.SearchValue, this.current]);
           }
@@ -341,7 +341,7 @@ export default {
         if (this.route == 'shareUser') { // 区分是哪个页面调用的
           this.$emit('changeCur', 1)
         } else {
-          console.log('清空；额')
+        
           this.$parent.compList(1);
         }
       } else {
@@ -351,6 +351,8 @@ export default {
           this.$emit('search', value, this.current)
         }
       }
+    },
+    clearSearch(){
     },
     close() {
       this.$emit('update:compshow', false)
@@ -554,12 +556,13 @@ export default {
     position: fixed;
     bottom: 0;
     left: 0;
-    height: 44px;
+    height: 45px;
     border: none;
     color: #fff;
     z-index: 999999;
     button {
       width: 50%;
+      height: 100%;
     }
   }
   .shortcut {

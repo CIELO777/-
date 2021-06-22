@@ -1,8 +1,8 @@
 /*
  * @Author: YUN_KONG 
  * @Date: 2021-05-21 10:50:24 
- * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-05-21 10:51:09
+ * @Last Modified by: Tian
+ * @Last Modified time: 2021-06-16 10:46:22
  * 营销画像模块专用授权，针对客户画像模块进行了优化; 
  */
 import { post1 } from './https';
@@ -97,7 +97,6 @@ let getWxJsJdk = async () => {
 					wx.hideMenuItems({
 						menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari', 'menuItem: refresh'] // 要隐藏的菜单项
 					});
-					console.log(AgentConfig, 'AgentConfigAgentConfigAgentConfig', res.agentId);
 					wx.agentConfig({
 						corpid: AgentConfig.appid2, // 必填，企业微信的corpid，必须与当前登录的企业一致
 						agentid: res.agentId, // 必填，企业微信的应用id （e.g. 1000247）
@@ -106,12 +105,10 @@ let getWxJsJdk = async () => {
 						signature: AgentConfig.signature2, // 必填，签名，见附录-JS-SDK使用权限签名算法
 						jsApiList: ["sendChatMessage", 'getContext', 'getCurExternalContact'], //必填
 						success: (res) => {
-							console.log(res, 'agentConfigSuccess');
 							wx.invoke('getCurExternalContact', {
 							}, function (res) {
 								if (res.err_msg == "getCurExternalContact:ok") {
 									resolve(res.userId)
-									console.log(res.userId, 'res.userId');
 									wxId = res.userId;
 								} else {
 									//错误处理

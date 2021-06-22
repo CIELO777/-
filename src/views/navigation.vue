@@ -516,7 +516,8 @@ export default {
           this.$toast('营销架构已到期，不能使用');
           return;
         };
-        this.$router.push('/haiRing')
+        // 此处为了朋友圈功能，路由后面拼接字段 compID userID UserName;
+        this.$router.push(`/haiRing?compId=${local.C()}&userId=${local.U()}&userName=${sessionStorage.getItem('UserId')}`)
       } else if (data == 'verbal') {
         if (outData) {
           this.$toast('营销架构已到期，不能使用');
@@ -1035,8 +1036,6 @@ export default {
     }
   },
   async created() {
-    console.log(2132131)
-    
     let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
     this.code = this.$route.query.code;
     let first = sessionStorage.getItem('first');
@@ -1079,7 +1078,7 @@ export default {
       // this.getUserinfo();
       this.created()
     });
-    
+
   },
   beforeRouteEnter: (to, from, next) => {
     next(vm => {

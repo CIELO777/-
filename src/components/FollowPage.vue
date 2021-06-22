@@ -19,12 +19,12 @@
         <div class="firm" @click="linkmanClick()" v-else>
           <img src="../assets/img/企业微信1.png" alt="" />
         </div>
-        <!-- <div class="firm" @click="Chatconfig()">
+        <div class="firm" @click="Chatconfig()">
           <img src="../assets/img/config.png" alt="" />
         </div>
         <div class="firm" @click="ChatRecord()">
           <img style="width: 75%" src="../assets/img/记录.png" alt="" />
-        </div> -->
+        </div>
       </div>
 
       <!-- 语音弹框 -->
@@ -93,7 +93,7 @@
       </div>
     </div>
     <van-empty
-      v-else
+      v-else-if="empty"
       image="https://img.yzcdn.cn/vant/custom-empty-image.png"
       description="暂无相关消息"
     />
@@ -876,7 +876,7 @@ export default {
     float: right;
   }
   .van-empty {
-    padding-top:186px;
+    padding-top: 186px;
   }
   .audio {
     height: 35px;

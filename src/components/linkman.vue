@@ -421,7 +421,7 @@ export default {
   box-sizing: border-box;
   padding-bottom: 50px;
   background: #eee;
-  height: calc(100vh - 50px);
+  // height: calc(100vh - 50px);
   margin-top: -50px;
   .nav-item {
     width: 100%;

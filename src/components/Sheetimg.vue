@@ -40,6 +40,7 @@
         size="normal"
         style="margin-top: 20px"
         @click="backgo"
+        v-if="skip != 'noSkip'"
         >返回</van-button
       >
       <van-button
@@ -60,12 +61,13 @@ import local from '../uilts/localStorage';
 
 export default {
   name: 'SheetImg',
+  props: ['skip'],
   data() {
     return {
       message: '',
       imageList: [],
       checked: '',
-      page:''
+      page: ''
     }
   },
   methods: {
@@ -75,21 +77,28 @@ export default {
         this.$toast.fail('内容不能为空')
         return;
       }
-      let crmInfoId = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
       let timeout = generateTimeout();
       let nonce = generateNonce();
-      let signature = generateSignature3(0, this.$U || local.U(), this.$C || local.C(), crmInfoId, timeout, nonce);
       let data = {
         id: 0,
         title: this.message,
         content: JSON.stringify(this.imageList),
-        itrId: this.$U || local.U(),
-        pid: crmInfoId,
         type: 0,
-        compId: this.$C || local.C(),
         timeout,
         nonce,
-        signature,
+      };
+      if (this.$route.name === 'ChatCustomer') {  // 客户画像限定
+        let linkmanId = sessionStorage.getItem('linkmanId') // 当前联系人的ID
+        data.itrId = this.userInfos().id;
+        data.compId = this.userInfos().bind_comp_id1;
+        data.pid = linkmanId;
+        data.signature = generateSignature3(0, data.itrId, data.compId, linkmanId, timeout, nonce);
+      } else { // 客户管理模块-跟进记录模块
+        let crmInfoId = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
+        data.itrId = this.$U || local.U();
+        data.pid = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
+        data.signature = generateSignature3(0, this.$U || local.U(), this.$C || local.C(), crmInfoId, timeout, nonce);
+        data.compId = this.$C || local.C();
       };
       let param = new URLSearchParams();
       param.append("compId", data.compId);
@@ -102,7 +111,6 @@ export default {
       param.append("timeout", data.timeout);
       param.append("title", data.title);
       param.append("type", data.type);
-      console.log(this.checked)
       param.append("notifyMode", this.checked ? 1 : 0);
       this.$post1('/api/request/itr/comp/customer/record/save', param
       )
@@ -113,10 +121,14 @@ export default {
               position: 'bottom',
             });
             that.$store.commit("ManualUpdate", { target: 'sheet', data: data.title })
-            setTimeout(() => {
-              that.$router.replace('/linkDetailed')
-              sessionStorage.setItem('tabNum', 1)
-            }, 800)
+            if (that.skip !== 'noSkip') { // 如果不等于noSkip 就跳转。此处时为了兼容客户画像
+              setTimeout(() => {
+                that.$router.replace('/linkDetailed')
+                sessionStorage.setItem('tabNum', 1)
+              }, 800)
+            } else {
+              that.$emit('sheetClose')
+            }
           }
         })
         .catch(function (error) {
@@ -149,9 +161,6 @@ export default {
     S4() {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
     },
-    uuid() {
-      return (this.S4() + this.S4() + this.S4() + this.S4() + this.S4() + this.S4() + this.S4() + this.S4());
-    },
     uploadImg(file, compId) {
       var that = this;
       var formData = new FormData();
@@ -180,6 +189,15 @@ export default {
         sessionStorage.setItem('tabNum', 1);
       }
     },
+    userInfos() { // 获取当前联系人信息
+      return JSON.parse(sessionStorage.getItem('userinfo'));
+    },
+    empty() { // 清空表单数据
+      this.message = '';
+      this.imageList.length = 0;
+      this.checked = '';
+
+    }
   },
   created() {
     console.log('dasasdas');

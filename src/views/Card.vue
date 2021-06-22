@@ -11,16 +11,14 @@
     <iframe id="iframe" :src="url" frameborder="0" scrolling="auto"></iframe>
   </div>
 </template>
-
 <script>
-import share from '../components/share'
+import share from '../components/share';
 import { generateTimeout, generateNonce, generateSignature3, generateSignatureQrcode } from '../uilts/tools';
-let timeout = generateTimeout()
+let timeout = generateTimeout();
 let nonce = generateNonce();
 import sha1 from "../uilts/sha1";
 import local from '../uilts/localStorage';
 import wxxx from '../uilts/wxconfig';
-
 export default {
   name: "Card",
   components: {},

@@ -36,7 +36,7 @@
         </div>
       </van-list>
       <van-empty
-        v-else
+        v-else-if="configs.empty"
         class="custom-image"
         image="https://img.yzcdn.cn/vant/custom-empty-image.png"
         description="暂无相关消息"
@@ -162,7 +162,7 @@ export default {
   background: #eee;
   font-size: 0.28rem;
   padding-top: 90px;
-  height:calc(100vh - 90px);
+  height: calc(100vh - 90px);
   .card {
     margin: 15px 0;
     background-color: #fff;

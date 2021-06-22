@@ -84,7 +84,7 @@ export default {
     },
     getList() {
       let that = this;
-      let staff_id = JSON.parse(sessionStorage.getItem('userinfo'))?.bind_staff_id;
+      let staff_id = JSON.parse(sessionStorage.getItem('userinfo'))?.id;
       let signature = generateSignature3(this.$C || local.C(), staff_id, timeout, nonce);
       this.$get('/api/request/itr/comp/staff/result', {
         params: {
@@ -93,7 +93,7 @@ export default {
           nonce,
           queryStatus: 1,
           signature,
-          size: 20,
+          size: 999,
           timeout,
           userId: staff_id,
         },
@@ -130,7 +130,7 @@ export default {
           nonce,
           queryStatus: 1,
           signature,
-          size: 20,
+          size: 999,
           timeout,
           userId: staff_id,
           fuzzy: value

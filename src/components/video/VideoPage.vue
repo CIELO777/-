@@ -72,7 +72,7 @@
           </div>
         </van-list>
         <van-empty
-          v-else
+          v-else-if="configs.empty"
           class="custom-image"
           image="https://img.yzcdn.cn/vant/custom-empty-image.png"
           description="暂无相关消息"

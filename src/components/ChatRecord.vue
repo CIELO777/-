@@ -6,6 +6,8 @@
       :immediate-check="false"
       finished-text="没有更多了"
       @load="onLoad"
+      class="chatList"
+      v-if="list.length > 0"
     >
       <template v-for="(item, index) in list">
         <div
@@ -112,6 +114,11 @@
         </div>
       </template>
     </van-list>
+    <van-empty
+      v-else-if="empty"
+      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+      description="暂无相关消息"
+    />
     <van-popup
       closeable
       v-model="show"
@@ -161,6 +168,7 @@ export default {
       current: 1,
       fileDuration: 0,
       surplus: true,
+      empty: false,
     };
   },
   watch: {},
@@ -180,8 +188,9 @@ export default {
       }, 1500);
     },
     getList() {
-      let { wxCrmId, itrId } = JSON.parse(sessionStorage.getItem('_crm_info'));
+      let wxCrmId = this.$route.name == 'ChatCustomer' ? sessionStorage.getItem('wxcrmId') : JSON.parse(sessionStorage.getItem('_crm_info')).wxCrmId;
       this.openId = sessionStorage.getItem('openId');
+      let itrId = JSON.parse(sessionStorage.getItem('userinfo')).id;
       let signature = generateSignature4(timeout, nonce, itrId);
       this.$get("/wx-crm-server/session/list", {
         params: {
@@ -207,12 +216,15 @@ export default {
             this.total = res.data.totalPageCount;
             this.fromUser = res.data.fromUser;
             this.toUser = res.data.toUser;
-            window.document.title = `与${res.data.toUser.nickname}的会话记录`;
+            if (this.list.length == 0) this.empty = true; //如果数据大于0，就显示空信息
+            window.document.title = res.data.toUser?.nickname ? `与${res.data.toUser.nickname}的会话记录` : '会话记录';
           } else {
             this.finished = true;
+            this.empty = true;
           }
         })
         .catch((error) => {
+          this.empty = true;
           console.log(error);
         });
     },
@@ -311,15 +323,29 @@ export default {
         });
     },
     balance() { // 查询余额
-      let signature = generateSignature4(this.$U, this.$C, nonce, timeout)
-      this.$get("/aliyun/remote/base/flow", {
-        params: {
+      var data = {};
+      let signature = '';
+      if (this.$route.name == 'ChatCustomer') {
+        signature = generateSignature4(this.userInfos().id, this.userInfos().bind_comp_id1, nonce, timeout)
+        data = {
+          userId: this.userInfos().id,
+          compId: this.userInfos().bind_comp_id1,
+          nonce,
+          timeout,
+          signature,
+        }
+      } else {
+        signature = generateSignature4(this.$U, this.$C, nonce, timeout)
+        data = {
           userId: this.$U,
           compId: this.$C,
           nonce,
           timeout,
           signature,
-        },
+        };
+      }
+      this.$get("/aliyun/remote/base/flow", {
+        params: data,
       }).then((res) => {
         console.log(res);
         if (!res.surplus || res.surplus == 0) { // 余额不足
@@ -339,7 +365,10 @@ export default {
     updateTime(e) {
       // console.log(e.target.currentTime);
       this.fileDuration = e.target.currentTime * 1000;
-    }
+    },
+    userInfos() { // 获取当前联系人信息
+      return JSON.parse(sessionStorage.getItem('userinfo'));
+    },
   },
   created() {
     this.updateList() // 先更新
@@ -354,7 +383,7 @@ export default {
 <style lang="less" scoped>
 .ChatRecord {
   font-size: 0.32rem;
-  background: #eee;
+  // background: #eee;
   padding-top: 0.2rem;
   .card {
     display: flex;
@@ -479,6 +508,10 @@ export default {
     order: 2;
     color: rgba(0, 0, 0, 0.6);
     text-shadow: unset;
+  }
+  .chatList {
+    // min-height: 100vh;
+    padding-bottom: 25px;
   }
 }
 </style>

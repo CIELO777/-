@@ -50,9 +50,8 @@
           </div>
         </div>
       </van-list>
-
       <van-empty
-        v-else
+        v-else-if="configs.empty"
         class="custom-image"
         image="https://img.yzcdn.cn/vant/custom-empty-image.png"
         description="暂无相关消息"
@@ -123,7 +122,7 @@ export default {
   background: #eee;
   font-size: 0.32rem;
   padding-top: 105px;
-  height:calc(100vh - 105px);
+  height: calc(100vh - 105px);
   .ww {
     display: flex;
     flex-wrap: wrap;

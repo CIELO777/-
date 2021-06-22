@@ -111,6 +111,7 @@ export default {
                 scroll: 0,
                 current: 1,
                 total: -1,
+                empty:false,
               },
               formCount: {},
             }
@@ -179,7 +180,8 @@ export default {
             }
           });
           qq.data = (cur == 1 || cur == undefined) ? cc : bb;
-          console.log(qq.data)
+          qq.config.empty = qq.data.length > 0 ? false : true;
+          console.log(qq.config.empty)
           qq.userMap = Object.assign(qq.userMap, res.user);
           res.formCount.forEach(item => {
             qq.formCount[item.id] = item.counts;

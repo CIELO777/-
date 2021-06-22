@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-02-03 11:22:09 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-04-29 11:25:31
+ * @Last Modified time: 2021-06-04 11:16:59
  * 该页面是文档页面
  */
 <template>
@@ -107,6 +107,7 @@ export default {
             }
           });
           qq.data = (cur == 1 || cur == undefined) ? cc : bb;
+          qq.config.empty = qq.data.length > 0 ? false : true;
           qq.userMap = Object.assign(qq.userMap, res.user);
           qq.config.total = res.totalPageCount;
           this.treeData = JSON.parse(JSON.stringify(this.treeData))
@@ -147,6 +148,7 @@ export default {
                 scroll: 0,
                 current: 1,
                 total: -1,
+                empty:false,
               },
             }
           })

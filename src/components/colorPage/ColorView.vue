@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-01-12 13:56:29 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-05-25 15:47:43
+ * @Last Modified time: 2021-06-04 11:04:47
  8 此模块用于彩页，软文列表
  */
 <template>
@@ -131,7 +131,7 @@
         </div>
       </van-list>
       <van-empty
-        v-else
+        v-else-if="configs.empty"
         class="custom-image"
         image="https://img.yzcdn.cn/vant/custom-empty-image.png"
         description="暂无相关消息"
@@ -146,7 +146,7 @@
 </template>
 <script>
 import share from '../../components/share';
-import wxxx from '../../uilts/wxconfig'
+import wxxx from '../../uilts/wxconfig';
 
 export default {
   name: "colorView",
@@ -244,6 +244,7 @@ export default {
   activated() {
   },
   created() {
+    console.log(this.configs)
     this.uid = JSON.parse(sessionStorage.getItem('userinfo')).id;
     // wxxx(); // 为了授权分享接口使用，所以一定要在这调用
   },

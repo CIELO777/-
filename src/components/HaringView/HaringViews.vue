@@ -1,7 +1,10 @@
 <template>
   <div
     class="HaringViews"
-    :style="{ 'padding-top': $route.name === 'HaringDetail' ? '0' : '60px' }"
+    :style="{
+      'padding-top':
+        $route.name === 'HaringDetail' || UI == '0' ? '60px' : '0px',
+    }"
   >
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
       <van-list
@@ -29,7 +32,7 @@
           v-if="$route.name == 'HaiRing'"
           @click="historyNews"
         >
-          <span>查看历史消息</span>
+          <!-- <span>查看历史消息</span> -->
         </div>
         <div class="card" v-for="(item, index1) in datas" :key="index1">
           <div class="head">
@@ -109,7 +112,7 @@
         </div>
       </van-list>
       <van-empty
-        v-else
+        v-else-if="empty"
         class="custom-image"
         image="https://img.yzcdn.cn/vant/custom-empty-image.png"
         description="暂无相关消息"
@@ -139,7 +142,7 @@ let nonce = generateNonce();
 export default {
   name: "HaringViews",
   components: { share },
-  props: ['datas', 'userMap', 'current', 'total', 'states', 'comment', 'thumb', 'userInfo'],
+  props: ['datas', 'userMap', 'current', 'total', 'states', 'comment', 'thumb', 'userInfo', 'UI', 'empty'],
   data() {
     return {
       loading: false,
@@ -156,10 +159,12 @@ export default {
   computed: {},
   methods: {
     skip(item) {
+      console.log(typeof (item))
+      item = typeof (item) === 'object' ? item.userId : item;
       this.$router.push({
         name: 'HaringDetail',
         params: {
-          id: item.userId
+          id: item
         }
       })
     },
@@ -272,15 +277,6 @@ export default {
     },
 
   },
-  updated() {
-
-  },
-  mounted() {
-    console.log(this.datas)
-
-  },
-  created() {
-  }
 };
 </script>
 
@@ -419,7 +415,7 @@ export default {
     padding-top: 60px;
   }
   .historyMessAge {
-    height: 80px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;

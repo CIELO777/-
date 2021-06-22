@@ -76,7 +76,7 @@ export default {
           this.total = res.totalPageCount;
           setTimeout(() => {
             this.$toast.clear()
-          }, 500)
+          }, 800)
         })
         .catch(function (error) {
           console.log(error);
@@ -112,15 +112,18 @@ export default {
           console.log(error);
         });
     },
+    loading() {
+      this.$toast.loading({
+        message: '加载中...',
+        forbidClick: true,
+        overlay: true,
+        forbidClick: true,
+        duration: 0
+      });
+    }
   },
   created() {
-    this.$toast.loading({
-      message: '加载中...',
-      forbidClick: true,
-      overlay: true,
-      forbidClick: true,
-      duration: 0
-    });
+    this.loading();
     this.getList(this.$route.params.id)
     this.initMineInfo();
   },

@@ -1,5 +1,6 @@
 <template>
   <div class="ChatConfig">
+    <van-field v-model="secretKey" label="secretKey" placeholder="请输入secretKey" />
     <template v-if="List && List.length > 0">
       <van-swipe-cell class="card" v-for="(item, index) in List" :key="index">
         <van-cell title="版本">
@@ -65,6 +66,7 @@ export default {
     return {
       secretKey: '',
       List: [],
+      
     };
   },
   watch: {},
@@ -131,11 +133,10 @@ export default {
       this.List.push({ privateKey: '', version: 1, id: 0, wxCompId: sessionStorage.getItem('CorpId'), compId: this.$C || local.C() })
     },
     Save() {
-      console.log(this.List);
       let signature = generateSignature4(timeout, nonce);
       this.$post1(`/wx-crm-server/session/conf/save?timeout=${timeout}&nonce=${nonce}&signature=${signature}`, {
         userId: this.$U || local.U(),
-        SecretKey: this.secretKey,
+        secretKey: this.secretKey,
         privateKeyList: this.List
       }
       ).then((res) => {

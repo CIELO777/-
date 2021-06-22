@@ -51,7 +51,7 @@ import Taber from './components/Tabbar';
 import { generateTimeout, generateNonce, generateSignature3, generateSignature4 } from './uilts/tools';
 let timeout = generateTimeout();
 let nonce = generateNonce();
-import websocket from './uilts/websocket'
+import websocket from './uilts/websocket';
 import Utils from './uilts/utils';
 export default {
   components: {

@@ -924,7 +924,7 @@ export default {
         signature: signature,
       };
       if (DATAS !== '') {
-        data.fuzzy = cur
+        data.fuzzy = DATAS
       } else {
         delete data.fuzzy
       };
@@ -966,6 +966,7 @@ export default {
       this.$post1("/api/request/itr/comp/column/config/detail", param)
         .then((res) => {
           let form = JSON.parse(res.data);
+          console.log(form)
           if (form.length !== 0) {
             // 数组转对象。偷个懒去控制显隐。这个只支持默认表单隐藏
             //  默认表单

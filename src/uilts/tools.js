@@ -73,7 +73,6 @@ let generateSignature8 = (...arg) => {
 	}
 	param.push("a4132d61f1c28078d246ed0eb5c06282");
 	param.sort();
-	console.log(param);
 	let paramStr = param.toString();
 	let result = sha1.hex_sha1(paramStr.replace(/,/g, ""));
 	return result;

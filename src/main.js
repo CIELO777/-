@@ -16,7 +16,7 @@ import Vconsole from 'vconsole';
 import UUID from 'vue-uuid';
 import '@vant/touch-emulator'; //
 Vue.use(UUID);
-// new Vconsole();
+new Vconsole();
 Vue.prototype.$wx = wx; // 挂载wx-jdk 插件
 Vue.prototype.$post = post;
 Vue.prototype.$post1 = post1;

@@ -430,8 +430,6 @@ export default {
     console.log(sessionStorage.getItem("active"), ' this.page ')
   },
   activated() {
-    console.log(JSON.parse(sessionStorage.getItem('shelvesData')), 'activated');
-    console.log('213123212321321321312')
     if (sessionStorage.getItem('orderSelectInfo')) {
       this.OrderquantityName = JSON.parse(sessionStorage.getItem('orderSelectInfo')).name;
       this.OrderquantityId = JSON.parse(sessionStorage.getItem('orderSelectInfo')).id;

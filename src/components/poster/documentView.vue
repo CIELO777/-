@@ -2,11 +2,16 @@
  * @Author: YUN_KONG 
  * @Date: 2021-02-03 14:12:55 
  * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-05-25 15:51:04
+ * @Last Modified time: 2021-06-04 10:51:53
  * 文档数据展示
  */
 <template>
-  <div class="docView" :style="{height:datas.length > 8 ? 'calc(100% - 100px)' : 'calc(100vh - 100px)'}">
+  <div
+    class="docView"
+    :style="{
+      height: datas.length > 8 ? 'calc(100% - 100px)' : 'calc(100vh - 100px)',
+    }"
+  >
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
       <van-list
         v-if="datas.length > 0"
@@ -72,7 +77,7 @@
         </div>
       </van-list>
       <van-empty
-        v-else
+        v-else-if="configs.empty"
         class="custom-image"
         image="https://img.yzcdn.cn/vant/custom-empty-image.png"
         description="暂无相关消息"

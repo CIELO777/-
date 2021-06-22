@@ -505,7 +505,7 @@ export default {
     }
   },
   destroyed() {
-    this.$store.commit('destroyedSearch', '2')
+    this.$store.commit('destroyedSearch', '2');
   },
   mounted() {
     communication.$on('update', (msg) => {

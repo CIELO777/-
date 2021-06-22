@@ -103,6 +103,7 @@ export default {
     },
     goback() {
       communication.$emit("updatecrm", "msg"); // 清空followPage本地数据，
+      this.$emit("closeShare")
       setTimeout(() => { // 延迟关闭，为了先让数据回显
         this.$emit('update:shareshow', false);
       }, 200)

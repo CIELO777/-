@@ -15,7 +15,7 @@
         <div @click="search">搜索</div>
       </template>
     </van-search>
-    <van-tabs v-model="active" @click="tabClick" color="#51BBBA" >
+    <van-tabs v-model="active" @click="tabClick" color="#51BBBA">
       <template v-for="(item, index) in tabArray">
         <van-tab :title="item.title" :key="index">
           <!--  宣传彩页 -->
@@ -56,7 +56,7 @@
             ></verbals>
           </main>
           <!-- 微站 -->
-          <main v-show="active === 3">
+          <main v-if="active === 3">
             <MicroStationViews
               :datas="treeData[active].data"
               :configs="treeData[active].config"
@@ -163,7 +163,7 @@
   </div>
 </template>
 
-<script>
+<script> 
 import { generateTimeout, generateSignature, generateSignature8, generateNonce, generateSignature3, generateSignature4 } from "../uilts/tools";
 let timeout = generateTimeout();
 import local from '../uilts/localStorage';
@@ -200,11 +200,13 @@ export default {
             scroll: 0,
             current: 1,
             total: -1,
+            empty: false,
           },
           userMap: {},
           trajectoryCount: {},
           formCount: {},
-          state: 'list'
+          state: 'list',
+          empty: false,
         },
         1: {
           data: [],
@@ -213,8 +215,11 @@ export default {
             scroll: 0,
             current: 1,
             total: -1,
+            empty: false,
+
           },
-          state: 'list'
+          state: 'list',
+          empty: false,
         },
         2: {
           data: [],
@@ -224,9 +229,11 @@ export default {
             scroll: 0,
             current: 1,
             total: -1,
+            empty: false,
           },
           formCount: {},
-          state: 'list'
+          state: 'list',
+          empty: false,
         },
         3: {
           data: [],
@@ -235,9 +242,11 @@ export default {
             current: 1,
             currentC: 0,
             total: -1,
+            empty: false,
           },
           state: 'list',
-          soles: ''
+          soles: '',
+          empty: false,
         },
         // 4: {
         //   data: [],
@@ -255,9 +264,11 @@ export default {
             scroll: 0,
             current: 1,
             total: -1,
+            empty: false,
           },
           userMap: {},
-          state: 'list'
+          state: 'list',
+          empty: false,
         },
         5: {
           data: [],
@@ -265,11 +276,13 @@ export default {
             scroll: 0,
             current: 1,
             total: -1,
+            empty: false,
           },
           userMap: {},
           state: 'list',
           formCount: {},
-          trajectoryCount: {}
+          trajectoryCount: {},
+          empty: false,
         },
       },
       loading: false,
@@ -364,13 +377,14 @@ export default {
               }
             });
             qq.data = (cur == 1 || cur == undefined) ? cc : bb;
+            qq.config.empty = qq.data.length > 0 ? false : true;
             qq.userMap = Object.assign(qq.userMap, res.user);
             res.formCount.forEach(item => {
               qq.formCount[item.id] = item.counts;
-            })
+            });
             res.trajectoryCount.forEach(item => {
               qq.trajectoryCount[item.id] = item.counts;
-            })
+            });
             qq.config.total = res.totalPageCount;
           } else if (their === 'document') {// 营销文档
             let bb = qq.data.concat(res.data).map(item => {
@@ -388,6 +402,7 @@ export default {
               }
             });
             qq.data = (cur == 1 || cur == undefined) ? cc : bb;
+            qq.config.empty = qq.data.length > 0 ? false : true;
             qq.userMap = Object.assign(qq.userMap, res.user);
             qq.config.total = res.totalPageCount;
           } else if (their === 'advertorial') { // 软文素材
@@ -428,6 +443,7 @@ export default {
               qq.trajectoryCount[item.id] = item.counts;
             })
             qq.data = (cur == 1 || cur == undefined) ? cc : bb;
+            qq.config.empty = qq.data.length > 0 ? false : true;
             qq.userMap = Object.assign(qq.userMap, res.user);
             qq.config.total = res.totalPageCount;
 
@@ -445,6 +461,7 @@ export default {
               }
             });
             qq.data = (cur == 1 || cur == undefined) ? cc : bb;
+            qq.config.empty = qq.data.length > 0 ? false : true;
             qq.userMap = res.user;
             qq.config.total = res.totalPageCount;
           } else if (their === 'video') { // 视频素材
@@ -456,6 +473,7 @@ export default {
               }
             })
             qq.data = (cur == 1 || cur == undefined) ? cc : qq.data.concat(cc);
+            qq.config.empty = qq.data.length > 0 ? false : true;
             qq.userMap = Object.assign(qq.userMap, res.user);
             qq.config.total = res.totalPageCount;
           } else if (their === 'verbal') { // 营销话术
@@ -466,10 +484,12 @@ export default {
               }
             })
             qq.data = (cur == 1 || cur == undefined) ? cc : qq.data.concat(cc);
+            qq.config.empty = qq.data.length > 0 ? false : true;
             qq.userMap = Object.assign(qq.userMap, res.user);
             qq.config.total = res.totalPageCount;
           } else if (their === 'MicroStation') {  // 微站详情页
             qq.data = (cur == 1 || cur == undefined) ? res.data : qq.data.concat(res.data);
+            qq.config.empty = qq.data.length > 0 ? false : true;
             if (cur == 1) { //只有第一页时候再追加
               qq.data.unshift({
                 type: 'micHome',
@@ -480,10 +500,9 @@ export default {
                 id: this.micInfo.id,
                 userId: this.micInfo.userId,
               })
-            }
+            };
             qq.config.total = res.totalPageCount;
           } else if (their === 'classify') { // 微站分类页
-            console.log(this.treeData[this.active].config.currentC, res.totalPageCount)
             if (this.treeData[this.active].config.currentC == res.totalPageCount) {
               this.treeData[this.active].soles = true; // 让子组件空组件
             }
@@ -493,7 +512,7 @@ export default {
             } else {
               qq.data = qq.data.concat(res.data);
             }
-          }
+          };
         })
         .catch(function (error) {
           console.log(error);

@@ -9,14 +9,19 @@ const requestInterceptor = instance.interceptors.request.use(
 		} else if (config.url.indexOf("sms") !== -1 || config.url.indexOf("login") !== -1) {
 			config.headers['Company-Id'] = 0; //如果本地里面有用户数据，请求头带comp参数
 		} else {
-			// let userInfo = JSON.parse(sessionStorage.getItem('userinfo'))?.bind_comp_id;  // 生产
-			let userInfo = process.env.VUE_APP_ENV === 'production' ? JSON.parse(sessionStorage.getItem('userinfo'))?.bind_comp_id : 40021450
-			if (userInfo) {
-				config.headers['Company-Id'] = userInfo; //如果本地里面有用户数据，请求头带comp参数
-			} else {
-				config.headers['Company-Id'] = 0; //如果本地里面有用户数据，请求头带comp参数
+			if (sessionStorage.getItem('CompIdFriend')) { // 朋友圈请求头
+				config.headers['Company-Id'] = sessionStorage.getItem('CompIdFriend');
+			} else {  // 正常请求头
+				let userInfo = process.env.VUE_APP_ENV === 'production' ? JSON.parse(sessionStorage.getItem('userinfo'))?.bind_comp_id : 40021450
+				if (userInfo) {
+					config.headers['Company-Id'] = userInfo; //如果本地里面有用户数据，请求头带comp参数
+				} else {
+					config.headers['Company-Id'] = 0; //如果本地里面有用户数据，请求头带comp参数
+				}
 			}
+			// || JSON.parse(sessionStorage.getItem('RouteQuery'))?.compId；
 		}
+		// console.log(config.headers['Company-Id'], 'config.headers');
 		return config;
 	},
 	(error) => {
@@ -56,7 +61,6 @@ function post(url, data) {
 			url,
 			data,
 			{ headers: { 'Content-Type': 'multipart/form-data' }, processData: false, contentType: false, cache: false, async: false, }
-
 		)
 			.then(res => {
 				resolve(res.data);

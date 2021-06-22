@@ -310,40 +310,40 @@ export default {
           types: 1,
           popshow: true,
           title: "修改职务",
-          list: [
-            {
-              name: "未知",
-              companyOcc: -1,
-            },
-            {
-              name: "职员",
-              companyOcc: 0,
-            },
-            {
-              name: "经理",
-              companyOcc: 1,
-            },
-            {
-              name: "总监",
-              companyOcc: 2,
-            },
-            {
-              name: "总经理",
-              companyOcc: 3,
-            },
-            {
-              name: "董事长",
-              companyOcc: 4,
-            },
-            {
-              name: "企业法人",
-              companyOcc: 5,
-            },
-            {
-              name: "公司股东",
-              companyOcc: 6,
-            },
-          ],
+            list: [
+              {
+                name: "未知",
+                companyOcc: -1,
+              },
+              {
+                name: "职员",
+                companyOcc: 0,
+              },
+              {
+                name: "经理",
+                companyOcc: 1,
+              },
+              {
+                name: "总监",
+                companyOcc: 2,
+              },
+              {
+                name: "总经理",
+                companyOcc: 3,
+              },
+              {
+                name: "董事长",
+                companyOcc: 4,
+              },
+              {
+                name: "企业法人",
+                companyOcc: 5,
+              },
+              {
+                name: "公司股东",
+                companyOcc: 6,
+              },
+            ],
           form: 'job'
 
         }
@@ -514,7 +514,7 @@ export default {
         crm.gender = this.sheetData.gender?.key;
         console.log(this.company)
         crm.company = this.company;
-        console.log(this.sheetData.companyOcc)
+        console.log(this.sheetData.companyOcc);
         crm.companyOcc = this.sheetData.companyOcc?.key;
         crm.customSourceType = this.sheetData.title?.key;
         // crm.validity = this.sheetData.status?.key;

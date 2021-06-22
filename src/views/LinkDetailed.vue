@@ -203,8 +203,9 @@ export default {
               share: shareStr,
               share1: res.share,
               phone_back: res.phone,
-              phone: res.phone && res.phone.replace(res.phone.substring(3, 7), "****")
+              phone: res.phone && res.phone.replace(res.phone.substring(3, 7), "****"),
             }
+            console.log(a)
             that.crmInfos = a;
             that.info.nickname = res.nickname;
             that.info.company = res.company;
@@ -238,7 +239,6 @@ export default {
       let nonce = generateNonce();
       let compID = JSON.parse(sessionStorage.getItem("userinfo"))?.bind_comp_id;
       let signature = generateSignature3(compID, timeout, nonce);
-
       let data = {
         current: 1,
         size: 999,
