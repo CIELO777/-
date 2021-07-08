@@ -171,16 +171,15 @@ export default {
     },
     createContent(item) { //send
       let temp = item.title;
-      console.log(item.content)
-      // let content = JSON.parse(item.content);
-      // if (content) {
-      //   content.forEach((item) => {
-      //     temp += '\n' + item.data;
-      //   })
-      // }
-      temp += '\n' + item.content.data;
+      let content = item.content
+      if (content) {
+        content.forEach((item) => {
+          temp += '\n' + item.data;
+        })
+      }
       if (sessionStorage.getItem('Single')) { //单聊模式发送  正常模式赋值
         this.editPop = true;
+        console.log(temp)
         this.message = temp;
         // wx.invoke('sendChatMessage', {
         //   msgtype: "text", //消息类型，必填

@@ -57,5 +57,7 @@ export default function setTitle(data) {
 		store.commit('saveTitle', { title: '营销素材', leftShow: false, tabarShow: false });
 	} else if (data.includes('ChatCustomer')) {
 		store.commit('saveTitle', { title: '客户画像', leftShow: false, tabarShow: false });
+	} else if (data.includes('ConfigParam')) {
+		store.commit('saveTitle', { title: '企业微信配置', leftShow: false, tabarShow: false });
 	}
 }

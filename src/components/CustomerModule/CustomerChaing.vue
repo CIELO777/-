@@ -4,7 +4,7 @@
     @scroll="scrollEventselect"
     class="CustomerChaing"
   >
-    <ChatRecord></ChatRecord>  
+    <ChatRecord></ChatRecord>
   </div>
 </template>
 
@@ -42,5 +42,6 @@ export default {
 <style lang="less" scoped>
 .CustomerChaing {
   overflow-y: scroll;
+  height: 78vh;
 }
 </style>

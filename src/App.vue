@@ -1,17 +1,9 @@
 <template>
   <div id="app">
-    <!-- 下拉菜单 -->
-    <div class="test_triangle_border" v-show="MenuPop" ref="treeWrap">
-      <div class="popup">
-        <ul>
-          <li @click="unbind">确定解绑？</li>
-        </ul>
-      </div>
-    </div>
     <!-- 下拉弹框 -->
     <van-popup
       closeable
-      v-model="show"
+      v-model="shows"
       round
       :style="{ height: '350px', width: '75%' }"
       class="popUnbind"
@@ -40,6 +32,7 @@
         >解绑</van-button
       >
     </van-popup>
+    <BindPop :shows="registerPop"></BindPop>
     <Taber v-if="$store.state.tabarShow"></Taber>
     <keep-alive :include="cacheState">
       <router-view v-if="isRouterAlive" />
@@ -51,16 +44,19 @@ import Taber from './components/Tabbar';
 import { generateTimeout, generateNonce, generateSignature3, generateSignature4 } from './uilts/tools';
 let timeout = generateTimeout();
 let nonce = generateNonce();
-import websocket from './uilts/websocket';
+import BindPop from './components/ChatCustomer/BindPop'
 import Utils from './uilts/utils';
 export default {
   components: {
     Taber,
+    BindPop,
   },
   provide() {    //父组件中通过provide来提供变量，在子组件中通过inject来注入变量。                                             
     return {
       reload: this.reload,
       unbind: this.unbind,
+      registerOpen: this.registerOpen,
+      registerClose: this.registerClose,
     }
   },
   data() {
@@ -69,10 +65,11 @@ export default {
       topBar: true,
       cacheStates: '',
       MenuPop: false,
-      show: false,
+      shows: false,
       userinfo: "",
       unvalue: "",
-      isRouterAlive: true
+      isRouterAlive: true,
+      registerPop: false,
     }
   },
   methods: {
@@ -84,7 +81,7 @@ export default {
     },
     unbind() { // 解绑菜单按钮
       this.userinfo = JSON.parse(sessionStorage.getItem('userinfo'))?.id; // 回显userID
-      this.show = true;
+      this.shows = true;
     },
     unbindSave() { // 确认解绑
       let that = this;
@@ -93,19 +90,24 @@ export default {
         let userinfo = JSON.parse(sessionStorage.getItem('userinfo'))?.id
         let signature = generateSignature4(openId, userinfo, nonce, timeout)
         let param = new URLSearchParams();
+        let code = JSON.parse(sessionStorage.getItem('codeBasice'))
         param.append("openId", openId);
         param.append("itrId", userinfo);
         param.append("nonce", nonce);
         param.append("timeout", timeout);
+        param.append("suiteId", code.suiteId);
+        param.append("code", code.code);
         param.append("signature", signature);
-        this.$post1('/wx-crm-server/wx/un/bind/itr', param)
+        this.$post1('/work/wx/un/bind/itr', param)
           .then(function (res) {
-            if (res.code === 200) {
+            if (res.code === 200 && res.msg == 'success') {
               that.$toast.success('该账号解绑成功');
-              that.show = false; // 解绑成功关闭弹框
+              that.shows = false; // 解绑成功关闭弹框
               sessionStorage.clear() // 清除所有缓存
               that.$router.replace('/') // 跳转到首页进行重新绑定
               Utils.$emit('reset', 'msg');
+              sessionStorage.setItem('codeBasice', JSON.stringify(code))
+              // that.registerOpen();
             } else {
               that.$toast.fail('解绑失败,请稍后再试');
             }
@@ -116,6 +118,19 @@ export default {
       } else {
         this.$toast.fail('请在输入框输入unbind确认解绑')
       }
+    },
+    registerOpen() { // 绑定乐语账号
+      this.registerPop = true;
+    },
+    registerClose(res) {  // 绑定成功后逻辑
+      this.registerPop = false;
+      Utils.$emit('bindSuccess', res);
+      // console.log(this.$route.name,'this.$route.name')
+      // if(this.$route.name === 'ChatBarShare' || this.$route.name === 'ColorPage'){
+      //     Utils.$emit('bindSuccess',res)
+      // }else if(this.$route.name === 'ChatCustomer'){
+      //     Utils.$emit('bindSuccess',res)
+      // }
     },
     unbindsss() {
       this.unbind()
@@ -156,8 +171,7 @@ body {
 /deep/ .van-loading {
   color: red;
 }
-/deep/ 
-#app {
+/deep/ #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

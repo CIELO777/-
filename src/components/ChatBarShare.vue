@@ -4,6 +4,14 @@
 此模块是用户从企业微信对话聊天工具栏打开跳到此分享页面， */
 <template>
   <div class="ChatBarShare">
+    <div :style="maskings">
+      <van-loading
+        size="36"
+        color="rgb(25, 137, 250)"
+        v-if="maskings"
+        type="spinner"
+      />
+    </div>
     <van-search
       v-model="value"
       show-action
@@ -183,6 +191,18 @@ export default {
   data() {
     return {
       active: 0,
+      maskings: {
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        background: '#fff',
+        zIndex: 999,
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: 'flex'
+      },
       value: "",
       tabArray: [
         { title: "彩页", id: 0 },
@@ -359,6 +379,7 @@ export default {
         params: params,
       })
         .then((res) => {
+          console.log(res,their)
           let qq = this.treeData[this.active];
           let cur = qq.config.current;
           if (their === 'colorPage') {  // 宣传彩页
@@ -390,14 +411,14 @@ export default {
             let bb = qq.data.concat(res.data).map(item => {
               return {
                 ...item,
-                time: item.createTime.split(' ')[0],
+                time: item.updateTime.split(' ')[0],
                 img: `https://dist.jiain.net/itr/dom/svg_type_${item.fileSuffix}.png`
               }
             });
             let cc = res.data.map(item => {
               return {
                 ...item,
-                time: item.createTime.split(' ')[0],
+                time: item.updateTime.split(' ')[0],
                 img: `https://dist.jiain.net/itr/dom/svg_type_${item.fileSuffix}.png`
               }
             });
@@ -480,10 +501,11 @@ export default {
             let cc = res.data.map(item => {
               return {
                 ...item,
-                content: JSON.parse(item.content)[0]
+                content: JSON.parse(item.content)
               }
             })
             qq.data = (cur == 1 || cur == undefined) ? cc : qq.data.concat(cc);
+            console.log(qq.data[0].content)
             qq.config.empty = qq.data.length > 0 ? false : true;
             qq.userMap = Object.assign(qq.userMap, res.user);
             qq.config.total = res.totalPageCount;
@@ -513,6 +535,7 @@ export default {
               qq.data = qq.data.concat(res.data);
             }
           };
+          this.maskings = '';
         })
         .catch(function (error) {
           console.log(error);
@@ -852,7 +875,7 @@ export default {
       //发送验证码倒计时，和发送验证码
       let that = this;
       let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
-      var myreg = /^[1][3,4,5,7,8][0-9]{9}$/;
+      var myreg = /^[1][3,4,5,7,8,9][0-9]{9}$/;
       if (!myreg.test(this.sms)) {
         this.$toast.fail("请输入正确的手机号");
         return;
@@ -1019,17 +1042,17 @@ export default {
     },
   },
   async created() {
-    this.$toast.loading({
-      message: '加载中...',
-      forbidClick: true,
-      overlay: true,
-      duration: 0,
-      className: 'overFFF'
-    });
-    if (sessionStorage.getItem('not_bind')) {
-      this.show = true;
-      return;
-    };
+    // this.$toast.loading({
+    //   message: '加载中...',
+    //   forbidClick: true,
+    //   overlay: true,
+    //   duration: 0,
+    //   className: 'overFFF'
+    // });
+    // if (sessionStorage.getItem('not_bind')) {
+    //   this.show = true;
+    //   return;
+    // };
     wxxx(); // 拉去企业微信授权
     await this.getMicInfo() // 获取微站信息
     this.processing({
@@ -1049,8 +1072,8 @@ export default {
     //   their: "classify",
     //   url: "/api/request/mall/shelves/result",
     // }); // 微站分类页
-    sessionStorage.setItem('chatBar', true)
-    this.getMicUrl() // 执行获取微站url
+    sessionStorage.setItem('chatBar', true);
+    sessionStorage.setItem('Single', true);
     // this.processing({
     //   cateId: 0,
     //   their: "document",
@@ -1083,7 +1106,8 @@ export default {
     // }); // 营销话术
   },
   mounted() {
-    window.addEventListener('scroll', this.scrollToTop)
+    window.addEventListener('scroll', this.scrollToTop);
+
   },
   beforeRouteEnter: (to, from, next) => {
     // console.log(to, from, next, 'to, from, nextChatBarShare')

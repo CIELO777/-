@@ -95,7 +95,7 @@ let timeout = generateTimeout()
 let nonce = generateNonce();
 import { formatDate, yesterday, lastSevent, getFirstAndLastDay } from '../uilts/date';
 import local from '../uilts/localStorage';
-import debounce from '../uilts/debounce'
+import {debounce} from '../uilts/debounce'
 
 export default {
   props: ['SearchtotalPageCounts', 'modes', 'shortTitle', 'mergeData'],

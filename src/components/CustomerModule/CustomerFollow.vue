@@ -1,73 +1,130 @@
 <template>
-  <div
-    class="CustomerFollow"
-    @scroll="scrollEventselect"
-    :style="{ height: height }"
-  >
-    <div class="follCont" v-if="follList.length > 0">
-      <div v-for="(item, index) in follList" :key="index" class="follMain">
-        <div class="time">
-          <span>{{ item.day }}</span>
-          <span>{{ item.month }}月</span>
+  <div class="CustomerFollow">
+    <div class="follTit">
+      <div style="margin-left: 15px">
+        <img src="../../assets/img/pencil3.png" class="addicon" alt="" />
+        <div style="color:'#5f97ae'">
+          <span style="padding-top: 2px;color: #5f97ae;" @click="Tabclick(1)">添加记录</span>
         </div>
-        <div class="content">
-          <div class="text">
-            <!-- 如果type === 4 证明是对话，对话展示content内容，其他展示title -->
-            <template>
-              <span v-if="item.type == 4" style="white-space: pre-wrap">{{
-                item.content
-              }}</span>
-              <span style="white-space: pre-wrap"
-                >{{ item.title == null ? "" : item.title }}
-                <br />
-                <!-- <a
+      </div>
+      <div class="FollIcon">
+        <a @click="Tabclick(3)">
+          <van-icon name="phone-o" size="0.46rem" style="margin-right: 15px" />
+        </a>
+      </div>
+      <!-- <van-popup v-model="audioPop" :style="{ height: '30%' }" position="bottom">
+            <div class="circle"><span>按住说话</span></div>
+            </van-popup>  -->
+    </div>
+    <div @scroll="scrollEventselect" :style="{ height: height,overflowY:'scroll',paddingTop:'15px'}">
+      <div class="follCont" v-if="follList.length > 0">
+        <div v-for="(item, index) in follList" :key="index" class="follMain">
+          <div class="time">
+            <icon
+              :name="item.type + ''"
+              :w="20"
+              :height="20"
+              style="background: #eee; border-radius: 50%"
+            ></icon>
+            <div class="wire"></div>
+          </div>
+          <div class="content">
+            <div class="text">
+              <!-- 如果type === 4 证明是对话，对话展示content内容，其他展示title -->
+              <template>
+                <span v-if="item.type == 4" style="white-space: pre-wrap">{{
+                  item.content
+                }}</span>
+                <span style="white-space: pre-wrap"
+                  >{{ item.title == null ? "" : item.title }}
+                  <br />
+                  <!-- <a
                   v-if="item.url != false"
                   @click="JumpOrder(item.url)"
                   style="color: blue"
                   >查看链接</a
-                >
-                <a
-                  v-else-if="item.callRecordUrl && item.callRecordUrl !== ''"
-                  @click="callRecord(item)"
-                  style="color: blue"
-                  >查看通话录音</a
-                > -->
-              </span>
-            </template>
-            <div
-              v-if="item.type == 0 && item.content && item.content.length > 0"
-              class="img-list"
-            >
-              <template v-for="(itr, i) in item.content">
-                <img :key="i" :src="itr" @click="ImgClick(itr)" />
+                >-->
+                  <a
+                    v-if="
+                      item.url &&
+                      item.callRecordUrl &&
+                      item.callRecordUrl !== ''
+                    "
+                    @click="callRecord(item)"
+                    style="color: blue"
+                    >查看通话录音</a
+                  >
+                </span>
               </template>
-            </div>
-            <div v-if="item.type == 1">
-              <div class="media" @click="handelClickMadiaPlay(item.content)">
-                <van-icon size="20px" color="#AAA" name="volume-o" />
+              <div
+                v-if="item.type == 0 && item.content && item.content.length > 0"
+                class="img-list"
+              >
+                <template v-for="(itr, i) in item.content">
+                  <img :key="i" :src="itr" @click="ImgClick(item.content)" />
+                </template>
+              </div>
+              <div v-if="item.type == 1">
+                <!-- <div class="media" @click="handelClickMadiaPlay(item.content)">
+              </div> -->
+                <!-- <van-icon size="20px" color="#AAA" name="volume-o" /> -->
+                <audio
+                  controls="controls"
+                  preload="auto"
+                  :src="item.content"
+                  class="audio"
+                ></audio>
               </div>
             </div>
-          </div>
-          <div class="info">
-            <span style="font-size: 12px">{{ item.detTime }}</span>
-            <!-- <span v-show="limits" class="user" @click="dele(item.id, item.pid)"
+            <div class="info">
+              <span style="font-size: 12px">{{ item.detTime }}</span>
+              <!-- <span v-show="limits" class="user" @click="dele(item.id, item.pid)"
               >删除</span
             > -->
-            <span
-              @click="chat(followUserMap[item.itrId], item.pid)"
-              class="user"
-              v-if="followUserMap[item.itrId]"
-              >{{ followUserMap[item.itrId].nickname || "" }}</span
-            >
+              <span
+                @click="chat(followUserMap[item.itrId], item.pid)"
+                class="user"
+                v-if="followUserMap[item.itrId]"
+                >{{ followUserMap[item.itrId].nickname || "" }}</span
+              >
+            </div>
           </div>
         </div>
       </div>
+      <van-empty
+        v-else-if="empty"
+        image-size="40px"
+        image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+        description="暂无相关消息"
+      />
+      <!-- 查看录音弹框 -->
+      <van-popup
+        v-model="call.pop"
+        :style="{
+          width: '80%',
+          height: '100px',
+          padding: '10px',
+          fontSize: '.30rem',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'space-evenly',
+          display: 'flex',
+        }"
+        round
+      >
+        <p style="margin-bottom: 20px; margin-left: 5px">{{ call.title }}</p>
+        <!-- <p class="downLoad">
+        <van-icon name="down" size="18px" @click="downLoadMp3" />下载
+      </p> -->
+        <audio
+          :src="call.url"
+          controls="controls"
+          preload="auto"
+          class="audio"
+        />
+        <!-- controlslist="nodownload" -->
+      </van-popup>
     </div>
-    <van-empty
-      v-else-if="empty"
-      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
-      description="暂无相关消息"
-    />
   </div>
 </template>
 
@@ -81,7 +138,7 @@ import local from '../../uilts/localStorage';
 export default {
   name: "CustomerFollow",
   components: {},
-  props: ['height'],
+  props: ['height', 'userInfo'],
   data() {
     return {
       follList: [],
@@ -91,6 +148,11 @@ export default {
       limits: "",
       total: 0,
       timer: null,
+      call: {
+        pop: false,
+        title: '',
+        url: ''
+      }
     };
   },
   watch: {},
@@ -119,12 +181,13 @@ export default {
     getAgendaList() {  // 获取跟进记录
       let that = this;
       let crmInfo = sessionStorage.getItem('linkmanId');
-      let signature = generateSignature3(crmInfo, this.userInfos()?.bind_comp_id1, this.userInfos()?.id, timeout, nonce);
+      console.log(crmInfo, 'crmInfocrmInfo')
+      let signature = generateSignature3(crmInfo, this.userInfo.itr_compid, this.userInfo.itr_userid, timeout, nonce);
       this.$get('/api/request/itr/comp/customer/record/result', {
         params: {
           pid: crmInfo,
-          compId: this.userInfos()?.bind_comp_id1,
-          userId: this.userInfos()?.id,
+          compId: this.userInfo.itr_compid,
+          userId: this.userInfo.itr_userid,
           nonce: nonce,
           timeout: timeout,
           signature: signature,
@@ -133,7 +196,7 @@ export default {
         },
       })
         .then(function (res) {
-          console.log(res,'getAgendaList')
+          console.log(res, 'getAgendaList')
           if (!res.error) {
             let str = '';
             let data = res.data.map(item => {
@@ -171,35 +234,45 @@ export default {
 
         });
     },
-    chat() { },
     ImgClick(src) {
-      ImagePreview([src]);
+      ImagePreview({
+        images: src,
+        closeable: true,
+      });
     },
-    userInfos() { // 获取当前联系人信息
-      return JSON.parse(sessionStorage.getItem('userinfo'));
+    handelClickMadiaPlay(item) {
+      this.call.pop = true;
     },
-    oneselfWxId() { // 获取当前wxID
-      return sessionStorage.getItem('openId');
+    callRecord(data) { // 查看录音弹框
+      this.call.pop = true;
+      this.call.title = this.followUserMap[data.itrId].nickname + '于 ' + data.createTime + ' 呼叫' + data.crmName;
+      this.call.url = data.callRecordUrl;
     },
+    Tabclick(data) {
+      console.log(data)
+      // Tabclick(data);
+      this.$emit('onTavclick', data)
+    }
   },
   created() {
     this.timer = setInterval(() => {
-      if (this.userInfos()) { // 当有内容时候在请求数据;
-        clearInterval(this.timer);
+      if (this.userInfo && sessionStorage.getItem('linkmanId')) { // 当有内容时候在请求数据;
         this.getAgendaList()
+        clearInterval(this.timer);
       }
     }, 100)
   },
   beforeDestroy() {
     clearInterval(this.timer);
     this.timer = null;
-  }
+  },
+
 };
 </script>
 
 <style lang="less" scoped>
 .CustomerFollow {
-  overflow-y: scroll;
+  // position: relative;
   .follCont:nth-child(2) {
     // padding-top: 3.4rem;
   }
@@ -227,10 +300,10 @@ export default {
         }
       }
       .content {
-        width: 77%;
+        flex: 1;
         // margin-left: 0.2rem;
         .text {
-          background: #f1f1f1;
+          background:rgb(249,249,249);
           padding: 10px 5px;
           overflow: hidden;
           span {
@@ -309,12 +382,95 @@ export default {
     margin: 10px;
     float: right;
   }
-  .van-empty {
-  }
   .audio {
     height: 35px;
     width: 100%;
     outline: none;
+  }
+  .wire {
+    width: 1px;
+    height: calc(100% - 35px);
+    background: rgb(193 190 190);
+    margin: 0 auto;
+    margin-top: 5px;
+  }
+  audio::-webkit-media-controls-enclosure {
+    background: #eee;
+    border-radius: 4px;
+  }
+  .media-controls-container,
+  .media-controls-container * {
+    background: #fff;
+    border-radius: 4px;
+  }
+  audio::-webkit-media-controls-play-button {
+    height: 15px;
+    width: 15px;
+    min-width: 22px;
+    border-radius: 50%;
+    flex-basis: 22px;
+  }
+
+  // 音量隐藏
+  audio::-webkit-media-controls-volume-control-container {
+    display: none;
+  }
+
+  audio::-webkit-media-controls-current-time-display {
+    order: 1; //设置弹性盒对象元素的顺序
+    color: #000;
+    text-shadow: unset;
+  }
+
+  audio::-webkit-media-controls-time-remaining-display {
+    order: 2;
+    color: rgba(0, 0, 0, 0.6);
+    text-shadow: unset;
+  }
+  .follTit {
+    display: flex;
+    background: rgb(249,249,249);
+    justify-content: space-between;
+    // margin-top: 0.2rem;
+    height: 0.8rem;
+    align-items: center;
+    color: #468af1;
+    height: 0.6rem;
+    border-bottom: 8px solid rgb(249,249,249);
+    border-top: 8px solid rgb(249,249,249);
+    // position: absolute;
+    // left: 0;
+    // width: 100%;
+    // top: 0;
+    div {
+      display: flex;
+      i {
+        margin-right: 0.2rem;
+        margin-top: -2px;
+      }
+    }
+  }
+  .firm {
+    width: 0.7rem;
+    height: 0.6rem;
+    padding-top: 2px;
+    flex: 1;
+    flex-shrink: 0;
+    img {
+      width: 80%;
+      height: 80%;
+    }
+  }
+  .FollIcon {
+    margin-right: 0.2rem;
+    a {
+      margin-top: 0.1rem;
+    }
+  }
+  .addicon {
+    width: 0.32rem;
+    height:.3rem;
+    margin-right: 5px;
   }
 }
 </style>

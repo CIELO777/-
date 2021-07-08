@@ -23,10 +23,21 @@ module.exports = {
             '/wx-crm-server': {
                 target: 'https://wxa.jiain.net/',
                 // target: 'http://192.168.3.78:8088/',
+                // target: 'https://wxa.jiain.net/',
                 changeOrigin: true,
                 // 路径重写： 下面的意思是重写访问路径中的  '/api' 为 '' ，如果没有重写, /api 代表 http://127.0.0.1:8090/api
                 pathRewrite: {
                     '^/wx-crm-server': '/wx-crm-server'//base_api是自定义用来代替http://www.baidu.com/的
+                }
+            },
+            '/work': {
+                target: 'https://wxa.jiain.net/',
+                // target: 'http://192.168.3.78:8088/',
+                // target: 'https://wxa.jiain.net/',
+                changeOrigin: true,
+                // 路径重写： 下面的意思是重写访问路径中的  '/api' 为 '' ，如果没有重写, /api 代表 http://127.0.0.1:8090/api
+                pathRewrite: {
+                    '^/work': '/work'//base_api是自定义用来代替http://www.baidu.com/的
                 }
             },
             '/aliyun': {
@@ -62,5 +73,15 @@ module.exports = {
         //修改文件引入自定义路径
         config.resolve.alias
             .set('@', resolve('src'))
+        // 修改当前项目默认svg 配置，排除icons目录
+        config.module.rule('svg')
+            .exclude.add(resolve('./src/icons'))
+        // 新增一个 rule：添加icons 里面svg
+        config.module.rule('icons')
+            .test(/\.svg$/)
+            .include.add(resolve('./src/icons')).end()
+            .use('svg-sprite-loader')
+            .loader('svg-sprite-loader')
+            .options({ symbolId: 'icon-[name]' })
     }
 };

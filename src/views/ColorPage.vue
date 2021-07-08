@@ -1,10 +1,11 @@
 <template>
   <div class="colorPage" v-show="show">
+    
     <van-search
       @clear="onCancel"
       v-model="value"
       show-action
-      placeholder="请输入搜索关键词"
+      placeholder="请输入搜索·关键词"
     >
       <template #action>
         <div @click="search">搜索</div>
@@ -28,6 +29,7 @@
 <script>
 import Tab from '../components/colorPage/Tab';
 import local from '../uilts/localStorage';
+import Utils from '../uilts/utils';
 
 import {
   generateTimeout,
@@ -68,7 +70,19 @@ export default {
       UserId: '',
       open_userid: '',
       CorpId: '',
-      show: true
+      show: true,
+      maskings: {
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        background: '#fff',
+        zIndex: 999,
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: 'flex'
+      },
     };
   },
   watch: {},
@@ -111,7 +125,7 @@ export default {
                 scroll: 0,
                 current: 1,
                 total: -1,
-                empty:false,
+                empty: false,
               },
               formCount: {},
             }
@@ -159,6 +173,7 @@ export default {
         size: 20,
         version: 1,
         categroyId: this.id
+        
       }
       await this.$get("/api/request/itr/page/recommend/result", {
         params: data,
@@ -198,6 +213,7 @@ export default {
           this.config = JSON.parse(JSON.stringify(this.treeData[this.id].config));  // 总页数
           this.formCount = JSON.parse(JSON.stringify(this.treeData[this.id].formCount))  // 传入当前对象
           this.$toast.clear()
+					this.maskings = ''; //清空mengban
         })
         .catch(function (error) {
           console.log(error);
@@ -339,21 +355,27 @@ export default {
       });
     },
   },
-  activated() {
-  },
   async created() {
-    this.$toast.loading({
-      message: '加载中...',
-      forbidClick: true,
-      overlay: true,
-      duration: 0,
-      className: 'overFFF'
-    });
+    // this.$toast.loading({
+    //   message: '加载中...',
+    //   forbidClick: true,
+    //   overlay: true,
+    //   duration: 0,
+    //   className: 'overFFF'
+    // });
     this.show = sessionStorage.getItem('userinfo') ? true : false;
     // mixin
   },
   mounted() {
     window.addEventListener('scroll', this.scrollToTop);
+    Utils.$on("bindSuccess", (res) => {  // 该函数通过聊天工具栏素材库列表触发，绑定手机号成功时触发。
+      this.$nextTick(() => {
+        console.log('I\'M IRON MAN')
+        let a = { ...res.data.user, bind_comp_id: this.compId || res.data.compId, bind_comp_id1: res.data.user.bind_comp_id };
+        sessionStorage.setItem("userinfo", JSON.stringify(a)); // 公司id 存入本地；
+        this.$router.replace('/chatBarShare')
+      })
+    });
   },
   activated() {
   },
@@ -388,6 +410,5 @@ export default {
     right: 0;
     z-index: 999;
   }
- 
 }
 </style>

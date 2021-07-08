@@ -102,7 +102,7 @@
             <div :class="item.photos.length > 1 ? 'cont' : 'cont one'">
               <div class="item" v-for="(i, index) in item.photos" :key="index">
                 <img
-                  @click="preview(i)"
+                  @click="preview(item.photos)"
                   :src="i + '?x-oss-process=image/resize,m_fill,h_400,w_400'"
                   id="girlImg"
                 />
@@ -159,6 +159,7 @@ export default {
   computed: {},
   methods: {
     skip(item) {
+      return;
       console.log(typeof (item))
       item = typeof (item) === 'object' ? item.userId : item;
       this.$router.push({
@@ -196,7 +197,7 @@ export default {
     },
     preview(src) {
       ImagePreview({
-        images: [src],
+        images: src,
         closeable: true,
       });
     },

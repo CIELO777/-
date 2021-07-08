@@ -91,7 +91,12 @@ export default {
       Search: "",
       current: 1,
       total: 0,
-      queryType: 2
+      queryType: 2,
+      portrait: {
+        id: '',
+        itr_userid: '',
+        itr_compid: '',
+      }
     }
   },
   methods: {
@@ -157,16 +162,16 @@ export default {
     getShareList(filter, ids, cur) {
       //   console.log(filter, ids, queryStatus);
       // 请求自定义列表
-      let compID =  this.$C || local.C();
+      let compID = this.$C || local.C() || this.portrait.itr_compid;
       let signature = generateSignature3(
         compID,
-        this.$U || local.U(),
+        this.$U || local.U()|| this.portrait.itr_userid,
         timeout,
         nonce
       );
       let param = new URLSearchParams();
-      param.append("compId", this.$C || local.C());
-      param.append("userId", this.$U || local.U());
+      param.append("compId", this.$C || local.C() || this.portrait.itr_compid);
+      param.append("userId", this.$U || local.U() || this.portrait.itr_userid);
       param.append("current", cur || 1);
       param.append("filter", filter); // 0 是未过滤 1是可过滤
       param.append("ids", ids);  // 当前的ids
@@ -190,7 +195,11 @@ export default {
           console.log(error);
         });
     },
-    clickshare(ids) { //触发请求共享联系人列表，由父元素调用
+    clickshare(ids, data) { //触发请求共享联系人列表，由父元素调用
+      console.log(ids)  // data 第二个参数是 id userid compid 客户画像模块需要的
+      this.portrait.id = data.id;
+      this.portrait.itr_userid = data.itr_userid;
+      this.portrait.itr_compid = data.itr_compid;
       this.getShareList(0, ids, this.current)
     },
     loading() {
@@ -206,14 +215,14 @@ export default {
     },
     searchs(value) { // 为共享资源的搜索接口
       // console.log(value[0])
-      let compID =  this.$C || local.C();
+      let compID = this.$C || local.C() || this.portrait.itr_compid;
       let signature = generateSignature3(
         compID,
         timeout,
         nonce
       );
       let param = new URLSearchParams();
-      param.append("compId", this.$C || local.C());
+      param.append("compId", compID);
       param.append("current", value[1] || 1);
       param.append("fuzzy", value[0]); // 0 是未过滤 1是可过滤
       param.append("filter", 1); // 0 是未过滤 1是可过滤
@@ -278,21 +287,21 @@ export default {
         return;
       }
       let signature = generateSignature3(
-        this.$C || local.C(),
-        this.$U || local.U(),
+        this.$C || local.C() || this.portrait.itr_compid,
+        this.$U || local.U() || this.portrait.itr_userid,
         timeout,
         nonce
       );
       let ids = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
       let param = new URLSearchParams();
-      param.append("from", ids);
+      param.append("from", ids || this.portrait.id);
       param.append("to", data.join(','));
       param.append("type", 6);  // 当前的ids
-      param.append("userId", this.$U || local.U()); //queryStatus ==0 未共享列表
+      param.append("userId", this.$U || local.U() || this.portrait.itr_userid); //queryStatus ==0 未共享列表
       param.append("signature", signature);
       param.append("timeout", timeout);
       param.append("nonce", nonce);
-      param.append("compId", this.$C || local.C());
+      param.append("compId", this.$C || local.C() || this.portrait.itr_compid);
       this.shareList.length = 0;
       this.$toast.loading({
         message: '加载中...',

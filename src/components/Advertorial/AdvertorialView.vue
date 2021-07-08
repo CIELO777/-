@@ -335,7 +335,7 @@ export default {
           news: {
             link: item.initialUrl + '&shareType=15', //H5消息页面url 必填
             title: item.title, //H5消息标题
-            desc: item.description, //H5消息摘要
+            desc: item.description ? item.description : '暂无数据', //H5消息摘要
             imgUrl: item.thumb, //H5消息封面图片URL
           },
         }, function (res) {

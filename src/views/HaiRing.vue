@@ -1,6 +1,13 @@
 <template>
   <div class="haiRing">
-    <div :style="masking"></div>
+    <div :style="masking">
+      <van-loading
+        size="36"
+        color="rgb(25, 137, 250)"
+        v-if="masking"
+        type="spinner"
+      />
+    </div>
     <van-search
       @clear="onCancel"
       v-model="value"
@@ -35,10 +42,13 @@ import {
 let timeout = generateTimeout();
 let nonce = generateNonce();
 import local from '../uilts/localStorage';
+import { Toolbar } from '../uilts/toolbarMixin';
+
 import HaiRingView from '../components/HaringView/HaringViews';
 export default {
   name: "HaiRing",
   components: { HaiRingView },
+  mixins: [Toolbar],
   data() {
     return {
       value: "",
@@ -63,16 +73,18 @@ export default {
       haveMore: false,
       state: 'list',
       userInfo: {},
-      UI: '0',
-      UN: '',
-      CI: '',
+      // UI: '0',
+      // CI: '',
       external_userid: "",
       backName: '',
-      backUserIds: ''
+      backUserIds: '',
+      login2: {
+        code: {}
+      },
     };
   },
   methods: {
-    async getList(cur) {
+    getList(cur) {
       let signature = generateSignature3(
         this.$U || local.U() || this.UI,
         timeout,
@@ -81,8 +93,6 @@ export default {
       let data = {
         userId: this.$U || local.U() || this.UI,
         nonce: nonce,
-        // sort: "id",
-        // direct: "desc",
         timeout: timeout,
         signature: signature,
         current: cur || 1,
@@ -92,7 +102,7 @@ export default {
       };
       this.$get("/api/request/itr/page/material/result", {
         params: data,
-        // headers: { 'Company-Id': 12312312 }
+        headers: { 'Company-Id': this.CI }
       })
         .then((res) => {
           res.data.forEach(item => {
@@ -112,9 +122,16 @@ export default {
           this.comment = Object.assign(this.comment, res.comment);
           this.thumb = Object.assign(this.thumb, res.thumb);
           this.total = res.totalPageCount;
-          setTimeout(() => {
-            this.$toast.clear()
-          }, 800)
+          console.log(this.$U || local.U() || this.UI)
+          this.userInfo = {
+            nick: res.user[this.$U || local.U() || this.UI]?.nickname || '粉丝' + this.UI.substring(11 - 4),
+            background: res.user[this.UI]?.background || 'http://ego-file.soperson.com/itver/18600630743/20171016/33971508152959763.png',
+            portrait: res.user[this.UI]?.portrait || 'http://ego-file.soperson.com/itver/13522008806/201712271708/85671523589501951.png'
+          };
+          this.masking = '';
+          // setTimeout(() => {
+          //   this.$toast.clear()
+          // }, 800)
         })
         .catch(function (error) {
           console.log(error);
@@ -149,6 +166,7 @@ export default {
       }
       this.$get("/api/request/itr/page/material/result", {
         params: data,
+        headers: { 'Company-Id': this.CI }
       })
         .then((res) => {
           res.data.forEach(item => {
@@ -213,51 +231,10 @@ export default {
       })
         .then((res) => {
           this.userInfo = res;
+          this.s = '';
         })
-        .catch(function (error) {
-          console.log(error);
-        });
-    },
-    getURl() {
-      // 没有code 获取code
-      let url = window.location.href;
-      // console.log(this.entry, 'this.entrythis.entrythis.entrythis.entry')
-      // console.log(this.CorpId, ' that.CorpId that.CorpId that.CorpId')
-      // if (this.entry == 'single_chat_tools') { // 如果是通过单聊中进入的，那么就截取code
-      if (url.includes('code')) {
-        url = window.location.href.split('?code=')[0];
-      }
-      // }
-      sessionStorage.setItem('RouteQuery', JSON.stringify(this.$route.query));
-      // location.href = "https://wxa.jiain.net/wx-crm-server/wx/oauth2/login?url=" + url;
-      location.href = 'https://api.jiain.net/pay/wx/auth?compId=10000008&scope=snsapi_userinfo&state=0s&url=' + url;
-    },
-    async getUserinfo(code) {
-      // 获取用户信息
-      let that = this;
-      // /wx-crm-server/wx/get/userinfo
-      this.$get("/api/view/util/wx/user_info", {
-        params: {
-          code: code,
-        },
-      })
-        .then(
-          await function (res) {
-            if (res.nickname && res.nickname !== "") {
-              // that.external_userid = res.nickname; // 取名字用
-              that.backName = res.nickname; // 备份IDs
-              that.getList();
-              // that.gethattory(); // 查看历史消息
-              that.initMineInfo(); //
-              that.pushText() // 推送
-              // that.getname(); // 获取姓名
-            } else {
-              // that.getURl();
-            }
-          }
-        )
-        .catch(function (error) {
-          console.log(error);
+        .catch((error) => {
+          console.log(error, 'error');
         });
     },
     async getCompId(code) {
@@ -295,47 +272,22 @@ export default {
       });
     },
     pushText() { // 推送;
-      this.$get("/wx-crm-server/message/push", {
+      this.$get("/work/message/push", {
         params: {
           type: 'text',
-          itrId: JSON.parse(sessionStorage.getItem('RouteQuery')).userId,
-          text: `客户【${this.backName}】打开了你的朋友圈。`,
+          itrId: this.UI,
+          compId: this.CI,
+          text: '客户访问了你的朋友圈。',
+          // text: `客户【${this.backName}】打开了你的朋友圈。`,
         },
       }).then((res) => {
         console.log(res)
       }).catch(function (error) {
         console.log(error)
       });
-    },
+    }
   },
   async created() {
-    if (sessionStorage.getItem('userinfo')) {
-      this.masking = '';
-      this.loading();
-      this.initMineInfo(); // 头像,背景墙,
-      this.getList();
-      // this.getHistory(); // 查看历史消息
-    } else {
-      let code = this.$route.query.code;
-      if (code) {
-        this.loading();
-        setTimeout(() => {
-          this.masking = '';
-        }, 800)
-        let { compId, userId, userName } = JSON.parse(sessionStorage.getItem("RouteQuery"));
-        this.UI = userId;
-        console.log(this.UI, 'this.UI this.UI');
-        console.log(compId, 'compIdcompIdcompIdcompIdcompIdcompId');
-        sessionStorage.setItem("CompIdFriend", compId);
-        this.UN = userName;
-        this.CI = compId;
-        await this.getUserinfo(code); //拿code 获取用户信息；
-      } else {
-        this.getURl(); // 没有code 请求code
-      }
-    }
-
-    console.log(this.UI, 'this.UI ')
   },
   beforeRouteEnter: (to, from, next) => {
     next(vm => {

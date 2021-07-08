@@ -218,7 +218,6 @@
   </div>
 </template>
 <script> 
-import { initWxConfig, wxAgentConfig } from '../uilts/wx-js-sdk/wxConfig'
 import { ScorllMixin } from '@/uilts/mixins';
 import communication from "../uilts/communication";
 import ColorPageVue from '../views/ColorPage.vue';

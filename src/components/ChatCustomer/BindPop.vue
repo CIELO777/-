@@ -1,8 +1,8 @@
   /*
  * @Author: YUN_KONG 
  * @Date: 2021-05-19 09:51:48 
- * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-05-21 14:13:08
+ * @Last Modified by: Tian
+ * @Last Modified time: 2021-07-07 17:49:45
    绑定弹框组件
  */
 <template>
@@ -13,6 +13,7 @@
     position="bottom"
     :style="{ height: '300px' }"
     overlay-class="popup"
+    @close="popclose"
   >
     <div class="hView">
       <div class="hint">
@@ -67,10 +68,10 @@ import { generateTimeout, generateSignature, generateSignature8, generateNonce, 
 let nonce = generateNonce();
 let timeout = generateTimeout();
 import local from '../../uilts/localStorage';
-
 export default {
   name: "bindPop",
   components: {},
+  inject: ['registerOpen', 'registerClose'],
   props: ['shows'],
   data() {
     return {
@@ -87,7 +88,7 @@ export default {
     clicksendCode() {
       let that = this;
       let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
-      var myreg = /^[1][3,4,5,7,8][0-9]{9}$/;
+      var myreg = /^[1][3,4,5,7,8,9][0-9]{9}$/;
       if (!myreg.test(this.sms)) {
         this.$toast.fail("请输入正确的手机号");
         return;
@@ -136,10 +137,13 @@ export default {
           console.log(error);
         });
     },
+    userInfos() { // 获取当前联系人信息
+      return JSON.parse(sessionStorage.getItem('userinfo'));
+    },
     bindlooyuCode() {
+      let that = this;
       this.bindLooyu()
       return;
-      let that = this;
       let signature = generateSignature8(this.sms, 1, 3, timeout, nonce);
       let param = new URLSearchParams();
       param.append("id", this.sms);
@@ -151,11 +155,10 @@ export default {
       param.append("signature", signature);
       this.$post1("/api/remote/itr/user/login", param)
         .then(function (res) {
-          alert(res)
           if (res.error != "success") {
             that.$toast.fail("验证码错误");
           } else {
-            that.bindLooyu();
+            that.bindLooyu(); // 绑定乐语
           }
         })
         .catch(function (error) {
@@ -164,32 +167,55 @@ export default {
     },
     bindLooyu() {
       // 确定绑定
+      if (!this.codes) {
+        this.$toast('请输入验证码')
+        return;
+      }
       let CorpId = sessionStorage.getItem("CorpId"); // 保存openID 解绑用
       let openId = sessionStorage.getItem("openId"); // 保存openID 解绑用
       let bind_UserID = sessionStorage.getItem("bind_UserID"); // 保存openID 解绑用
+      let UserId = sessionStorage.getItem("UserId"); // 保存openID 解绑用 
+      let code = JSON.parse(sessionStorage.getItem('codeBasice'))
       let signature = generateSignature4(
         openId,
         this.sms,
         timeout,
         nonce
       );
-      this.$get("/wx-crm-server/wx/bind/itr", {
+      this.$get("/work/wx/bind/itr", {
         params: {
           openId: openId,
           itrId: this.sms,
-          wxUserId: bind_UserID,
+          wxUserId: bind_UserID || UserId,
           timeout,
           nonce,
           signature,
           bindWxCompId: CorpId,
+          code: this.codes,
+          suiteId: code.suiteId,
+          remark:'通过企业微信加入'
         },
       })
         .then((res) => {
-          this.$emit('BindComplete')
+          console.log(res,'QQA')
+          if (res.msg == 'success' && res.code == 200) {
+            console.log(2132131)
+            this.registerClose(res);
+            this.times = 60;
+          } else {
+            this.$toast(res.msg)
+            this.times = 60;
+          }
         })
         .catch((error) => {
+          console.log(error,'123312')
         });
     },
+    popclose() { // 关闭时候清空状态
+      this.sms = '';
+      this.codes = '';
+      this.times = 60;
+    }
   },
   created() { },
   mounted() { }

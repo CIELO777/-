@@ -1,10 +1,16 @@
 /*
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:13:08 
- * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-06-22 11:16:59
+ * @Last Modified by: Tian
+ * @Last Modified time: 2021-07-08 15:37:59
  * 聊天工具栏素材分享功能组件，
  */
+
+import { generateSignature3, generateTimeout, generateNonce } from './tools'
+let timeout = generateTimeout();
+import sha1 from "./sha1";
+import local from './localStorage';
+let nonce = generateNonce();
 export const Toolbar = {
 	data() {
 		return {
@@ -15,31 +21,42 @@ export const Toolbar = {
 			compId: '',
 			show: false,
 			accomplish: false,
-			imgSrc: ''
+			imgSrc: '',
+			login2: {
+				code: {}
+			},
+			open_userid: '',
+			UI: '0',
+			CI: '',
 		}
 	},
+	inject: ['registerOpen'],
 	async created() {
-		// this.$router.replace('/ChatBarShare');
-		// return;
+		let url = window.location.href;
+		let urlparame = window.location.search; //通过location.href获取code 和suiteId;
+		// console.log(sessionStorage.getItem('userinfo'), 'sessionStorage.getIteuserinfo')
 		if (sessionStorage.getItem('userinfo')) { // 通过userinfo字段判断是从哪个接口进入的
-			if (this.$route.name !== 'ChatCustomer') { // 客户画像模块不需要 执行如下方法
+			if (this.$route.name !== 'ChatCustomer' && this.$route.name !== 'HaiRing') { // 客户画像模块不需要 执行如下方法
 				this.loading()
 				await this.getTabList();  // 存在就是从第三方应用进入的，没有存在就是从通讯录进入的
 				await this.getList();
+			} else if (this.$route.name === 'HaiRing') { // 朋友圈逻辑
+				this.masking = '';
+				this.loading();
+				this.getList();
+				// this.initMineInfo(); // 头像,背景墙,
 			}
-			// wxxx()	
 		} else {
-			this.code = this.$route.query.code;
-			if (this.code) {
-				if (JSON.parse(sessionStorage.getItem("userinfo"))?.bind_comp_id) {
-					this.loading()
-					await this.getTabList()
-					await this.getList();
-				} else {
-					await this.getUserinfo(); //拿code 获取用户信息
+			if (url.includes('compId') && url.includes('userId')) { //如果有参数请求信息
+				this.login2.code = this.urlcut(urlparame); // 将suiteId 和 code 信息储存 data 中
+				sessionStorage.setItem("codeBasice", JSON.stringify(this.login2.code))
+				if (this.$route.name === 'HaiRing') {
+					this.UI = this.login2.code.userId;
+					this.CI = this.login2.code.compId;
+					this.getList();  //推送
 				}
 			} else {
-				this.getURl(); // 没有code 请求code
+				this.$toast('url有误')
 			}
 		}
 	},
@@ -47,32 +64,62 @@ export const Toolbar = {
 		async getUserinfo() {
 			// 获取用户信息
 			let that = this;
-			await this.$get("/wx-crm-server/wx/get/userinfo", {
+			await this.$get("/work/wx/get/userinfo", {
 				params: {
-					code: this.code,
+					code: this.login2?.code?.code,
+					suiteId: this.login2?.code?.suiteId,
+					ticket: 1,
 				},
 			}).then(
-				async function (res) {
-					if (res.code === 200 && JSON.stringify(res.data) != "{}") {
-						if (res.data.CorpId ?? res.data.open_userid) {
-							// openid 和wxid 都存在在发送请求，请求用户信息
-							that.CorpId = res.data.CorpId;
-							that.compId = res.data.compId;  // 会话存储后的公司ID  不可变更
-							await that.getopenId(res.data.CorpId, res.data.open_userid);
-							that.UserId = res.data.UserId;
-							await sessionStorage.setItem('bind_UserID', res.data.UserId)
-							that.open_userid = res.data.open_userid;
-							sessionStorage.setItem('bind_compId', res.data.compId);
-							sessionStorage.setItem("openId", that.open_userid); // 保存openID 解绑用
-							sessionStorage.setItem("CorpId", res.data.CorpId); // 保存openID 解绑用
+				async (res) => {
+					if (res.code === 200 && res.msg == 'success' && JSON.stringify(res.data) != "{}") {
+						// openid 和wxid 都存在在发送请求，请求用户信息
+						this.UserId = res.data.userId;
+						this.compId = res.data.compId;  // 会话存储后的公司ID  不可变更
+						this.open_userid = res.data.open_userid;
+						this.CorpId = res.data.corpId;
+						await sessionStorage.setItem('bind_UserID', res.data.userId);
+						sessionStorage.setItem('bind_compId', res.data.compId);
+						sessionStorage.setItem("openId", that.open_userid); // 保存openID 解绑用
+						sessionStorage.setItem("CorpId", res.data.corpId); // 保存openID 解绑用
+						if (res.data.user) { // itr 那么就缓存itr数据
+							// console.log(2131231,res.data.user)
+							if (res.data.compId === 0 || !res.data.compId) { // 通过compID判断当前是否绑定了联系人。
+								// 没有绑定
+								this.$toast.clear();
+								this.registerOpen();
+							} else {    // 如果不等于0 && 存在 那么就拉取数据
+								let a = { ...res.data.user, bind_comp_id: this.compId, bind_comp_id1: res.data.user.bind_comp_id };
+								sessionStorage.setItem("userinfo", JSON.stringify(a)); // 公司id 存入本地；
+								localStorage.clear(); // 如果拉去到的话，那么就清除他的值
+								console.log(this.$route.name)
+								if (this.$route.name === 'ChatBarShare' || this.$route.name === 'ColorPage') { // 素材库
+									this.outData(res.data.user.id);  // 获取是否过期；
+									this.getTabList();  // 存在就是从第三方应用进入的，没有存在就是从通讯录进入的
+									this.getList();
+									console.log('weqeqwkejqwjehwqehqwikehjqwikewhqioewjoweqjieoqwjeioqwjeqwioej')
+									this.$router.push('/chatBarShare')
+								} else if (this.$route.name === 'ChatCustomer') { // 营销画像
+									this.init() // 请求数据
+									this.accomplish = true;
+								} else if (this.$route.name === 'HaiRing') {  //朋友圈素材
+									this.initMineInfo(); //
+									this.getList();
+									this.pushText() // 推送
+
+								}
+								sessionStorage.setItem('Single', true);
+								this.masking = ''; //清空mengban
+							}
+						} else { //没有绑定直接弹框
+							this.registerOpen();
+							this.$toast.clear()
 						}
-					} else {   //没有信息，
-						// console.log(that.entry, 'that.entry1112213')
-						// if (that.entry == 'single_chat_tools') {
-						that.getURl(); //单聊应该先重定向拿去新code
-						// } else {
-						// that.show = true;  // 没有信息，让他注册账号;
-						// }
+						if (res.data.tickets) {
+							sessionStorage.setItem('tickets', JSON.stringify(res.data.tickets))
+						}
+					} else {
+						this.$toast(res.msg);
 					}
 				}
 			)
@@ -80,78 +127,41 @@ export const Toolbar = {
 					console.log(error);
 				});
 		},
-		getURl() {
-			// 没有code 获取code
-			let url = window.location.href;
-			//  (this.entry, 'this.entrythis.entrythis.entrythis.entry')
-			// alert(this.CorpId, ' that.CorpId that.CorpId that.CorpId')
-			// alert(url,'url')
-			// if (this.entry == 'single_chat_tools') { // 如果是通过单聊中进入的，那么就截取code
-			if (url.includes('code')) {
-				location.href = url;
-				url = window.location.href.split('?code=')[0]
-			}
-			// }
-			location.href =
-				"https://wxa.jiain.net/wx-crm-server/wx/oauth2/login?url=" + url;
-			sessionStorage.setItem('first', '1');
-
-		},
-		async getopenId(wxCompId, openId) { // 检测是否绑定公司了，
-			// 拉去是否绑定企业微信
-			let that = this;
-			await this.$get("/wx-crm-server/wx/get/itr", {
+		outData(cid) { // 过期校验
+			let signature = generateSignature3(
+				this.$U || local.U(),
+				timeout,
+				nonce
+			);
+			this.$get("/api/request/itr/comp/permission/current", {
 				params: {
-					wxCompId,
-					openId,
+					userId: cid || this.$U || local.U(),
+					timeout: timeout,
+					nonce: nonce,
+					signature: signature
 				},
-			}).then(function (res) {
-				console.log(res, 'resresres');
-				if (res.code === 500 || !res.data || res.msg == "not_bind") {
-					console.log("🚀 ~ file: toolbarMixin.js ~ line 109 ~ getopenId ~ res", res)
-					// 没有绑定
-					that.show = true;
-					sessionStorage.setItem("not_bind", true)
-					that.Single = true; // 为true证明是单聊；
-					sessionStorage.setItem('Single', true);
-					if (that.$route.name === 'ColorPage') { // 如果是彩页，那么就跳转 分享页面
-						that.$router.replace('/chatBarShare')
-					} else if (that.$route.name === 'ChatCustomer') { // 如果不是那么就分享到 客户画像
-						that.accomplish = true; // 目的是为了让企业微信客户端
-					}
-				} else if (
-					res.code === 200 &&
-					res.msg === "success" &&
-					res.data != "{}"
-				) {
-					// 
-					if (res.data.bind_comp_id) {
-						console.log(that.$route.name, 'that.$route.name ');
-						// 如果有公司ID 那么就存数据，
-						let a = { ...res.data, bind_comp_id: that.compId, bind_comp_id1: 40021450 } // 会话存储，锁死compID
-						sessionStorage.setItem("userinfo", JSON.stringify(a)); // 公司id 存入本地；
-						// that.imgSrc = a.portrait; // 客户头像
-						that.Single = true; // 为true证明是单聊；
-						sessionStorage.setItem('Single', true);
-						if (that.$route.name === 'ChatBarShare' || that.$route.name === 'ColorPage') {
-							that.$router.push('/chatBarShare')
-						} else if (that.$route.name === 'ChatCustomer') {
-							// that.$router.push('/chatCustomer')
-							that.init() // 请求数据
-						}
-						that.accomplish = true; // 目的是为了让企业微信客户端
-						console.log("🚀 ~ file: toolbarMixin.js ~ line 134 ~ getopenId ~ that.accomplish", that.accomplish)
-					} else {
-						// 如果不存在那么就弹框提示他没有绑定公司
-						that.$toast.fail("当前账号没有绑定公司，请绑定公司。");
-					}
+			}).then((res) => {
+				if (res.license[2] == undefined || Object.keys(res).length == 0 || !res.license[2].startTime || res.license[2].startTime == '' || !res.license[2].expireTime || res.license[2].expireTime == '') {
+					sessionStorage.setItem("pastDate", true)  // 过期
+					this.$toast('过期')
 				} else {
-					that.$toast.fail("未知错误，请联系管理员");
+					sessionStorage.setItem("pastDate", false) // 
 				}
 			})
-				.catch(function (error) {
+				.catch((error) => {
 					console.log(error);
 				});
 		},
+		urlcut(url) {
+			let theRequest = new Object()
+			if (url.indexOf('?') != -1) {
+				var str = url.substr(1) //substr()方法返回从参数值开始到结束的字符串；
+				var strs = str.split('&')
+				for (var i = 0; i < strs.length; i++) {
+					theRequest[strs[i].split('=')[0]] = strs[i].split('=')[1]
+				}
+				return theRequest //{code:'1213',suiteId:'456',state:0} 返回格式;
+			}
+		}
 	}
 };

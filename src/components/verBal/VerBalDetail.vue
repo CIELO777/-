@@ -7,6 +7,7 @@
       <div class="page-title">
         {{ item.title }}
       </div>
+
       <div class="page-author">
         <div class="img">
           <img
@@ -29,19 +30,22 @@
               >会员</span
             >
           </div>
-          <div class="line1">{{ user.company }} {{ item.time }}</div>
+          <div class="line1" style="margin-bottom: 8px">
+            {{ user.company }} {{ item.time }}
+          </div>
+          <span> {{ item.refreshTime }}</span>
         </div>
       </div>
-      <!-- <div class="cont" v-for="(item, index) in item.content" :key="index">
+      <div class="cont" v-for="(item, index) in item.content" :key="index">
         <div v-if="item.type == 0 && item.data != '&nbsp;'">
           <div class="cont-span" :style="item.allStyle">
             <span>{{ item.data }}</span>
           </div>
         </div>
-      </div> -->
-      <div class="cont-span" :style="item.allStyle">
-        <span>{{ item.content.data }}</span>
       </div>
+      <!-- <div class="cont-span" :style="item.allStyle">
+        <span>{{ item.content.data }}</span>
+      </div> -->
     </div>
   </div>
 </template>
@@ -106,6 +110,8 @@ export default {
     },
     parseCont() {
       let item = this.item;
+      console.log(item.content)
+      console.log(item.content.data);
       item.content = item.content;
       // item.content.forEach(i => {
       //   if (i.type == 0) {

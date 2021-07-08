@@ -177,7 +177,7 @@
 </template>
 
 <script>
-import debounce from '../../uilts/debounce';
+import {debounce} from '../../uilts/debounce';
 import {
   generateTimeout,
   generateNonce,

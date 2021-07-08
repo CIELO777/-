@@ -1,8 +1,8 @@
 /*
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:48:39 
- * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-06-22 14:54:02
+ * @Last Modified by: Tian
+ * @Last Modified time: 2021-07-08 16:08:25
    聊天工具栏客户管理工具栏,和我的客户对话时候快捷打开
    1.先获取当前企业微信联系人ID，并通过code 授权获取this.U and this.C()。
    2.拉取联系人列表通过（wx。wxcrmID）判断在联系人列表里有是否有当前联系人。
@@ -11,20 +11,40 @@
  */
 <template>
   <div class="ChatCustomer">
-    <div :style="masking"></div>
+    <div :style="maskings">
+      <van-loading
+        size="36"
+        color="rgb(25, 137, 250)"
+        v-if="maskings"
+        type="spinner"
+      />
+    </div>
     <header>
-      <img :src="imgSrc" alt="" />
+      <img :src="userInfo.avatar || imgSrc" alt="" />
       <div class="infoBox">
-        <p>名字：{{ name }}</p>
+        <p style="display: flex; align-items: center">
+          <strong class="namebold"
+            >名字：{{ userInfo.remark || userInfo.name }}</strong
+          >
+          <template v-if="userInfo.gender == 1 || userInfo.gender == 2">
+            <img
+              :src="require(`../../assets/img/sex${userInfo.gender}.png`)"
+              alt=""
+              style="width: 20px; height: 20px; vertical-align: text-bottom"
+            />
+          </template>
+          <van-icon name="question-o" v-else />
+        </p>
         <div class="details">
-          <span>添加时间：{{ createtime }}</span
-          ><span @click="details = detailsPop = true">详情 ></span>
+          <span style="color: #6b6a6a">添加时间：{{ userInfo.createtime }}</span
+          ><span @click="details">详情 ></span>
         </div>
       </div>
     </header>
+    <!--   个人信息暂时隐藏
     <article class="info">
       <p class="origin">
-        <span>手机：{{ crmInfos.phone }}</span>
+        <span @click="applyComp">手机：{{ crmInfos.phone }}</span>
       </p>
       <ul>
         <li>
@@ -38,14 +58,8 @@
             >所属公司：{{ crmInfos.company ? crmInfos.company : "暂无" }}</span
           >
         </li>
-        <!-- <li><span>邮箱：</span><span>-</span></li> -->
       </ul>
-      <!-- 星级暂时注释掉了 -->
-      <!-- <div class="star" @click="starSelect">
-        <p style="margin-right: 15px">星级 ></p>
-        <p>{{ star.data }}</p>
-      </div> -->
-    </article>
+    </article> -->
     <!-- <article class="add">
       <p class="origin"><span>Ta添加的：</span><span>-</span></p>
       <span>共{{}}个群聊 ></span>
@@ -55,43 +69,51 @@
         <div>
           <span class="title">企业标签</span>
           <div>
-            <van-button
+            <!-- <van-button
               type="primary"
               size="small"
               style="margin-right: 10px"
               @click="syncTag"
               >同步</van-button
-            ><van-button
+            > -->
+            <van-button
               style="margin-right: 10px"
+              plain
+              color="#5f97ae"
               type="info"
-              size="small"
-              @click="AddTab = enterpriseTab = true"
-              >操作</van-button
+              size="mini"
+              @click="AddTab"
+              icon="plus"
+              >添加</van-button
             >
           </div>
         </div>
-        <div
-          v-for="(item, index) in TagList2"
-          :key="index"
-          style="margin-top: 5px"
-        >
-          <p class="grade">{{ item.name }}</p>
-          <div v-if="item.tag && item.tag.length > 0">
-            <template v-for="(item1, index1) in item.tags">
-              <van-button
-                style="margin-right: 5px"
-                type="default"
-                size="small"
-                :key="index1"
-                >{{ item1.name }}</van-button
-              >
-            </template>
+        <template v-if="TagList2.length > 0">
+          <div
+            v-for="(item, index) in TagList2"
+            :key="index"
+            style="margin-top: 5px"
+          >
+            <p class="grade" v-show="item.checked">{{ item.group_name }}</p>
+            <div v-if="item.tag && item.tag.length > 0">
+              <template v-for="(item1, index1) in item.tag">
+                <van-button
+                  v-show="item1.checked"
+                  plain
+                  type="default"
+                  style="
+                    margin: 0 10px 5px 0;
+                    color: #767676;
+                    background-color: #f5f5f5;
+                  "
+                  size="mini"
+                  :key="index1"
+                  >{{ item1.name }}</van-button
+                >
+              </template>
+            </div>
           </div>
-        </div>
-        <!-- 
-        <van-button type="default" size="small">一般</van-button>
-        <p class="grade" style="margin-top: 10px">跟进阶段：</p>
-        <van-button type="default" size="small">一般</van-button> -->
+        </template>
       </div>
       <!-- <div class="personage">
         <p>
@@ -101,35 +123,40 @@
       </div> -->
     </article>
     <article class="dynamic">
-      <van-tabs v-model="active" color="#1989FA">
+      <van-tabs v-model="active" color="#53b1d8">
         <van-tab title="跟进记录">
           <CustomerFollow
             :height="height"
+            :userInfo="userInfo"
             ref="customerFollow"
+            @onTavclick="Tabclick"
           ></CustomerFollow>
         </van-tab>
         <van-tab title="企微记录">
-          <CustomerChaing :height="height"></CustomerChaing>
+          <CustomerChaing
+            :height="height"
+            :userInfo="userInfo"
+          ></CustomerChaing>
         </van-tab>
         <van-tab title="操作记录">
-          <CustomerOpera :height="height"></CustomerOpera>
+          <CustomerOpera :height="height" :userInfo="userInfo"></CustomerOpera>
         </van-tab>
       </van-tabs>
     </article>
-    <van-tabbar v-model="TabActive" active-color="#646566" z-index="99">
+    <!-- <van-tabbar v-model="TabActive" active-color="#646566" z-index="99">
       <van-tabbar-item icon="search" @click="Tabclick(1)"
         >添加跟进</van-tabbar-item
       >
-      <!-- <van-tabbar-item icon="friends-o" @click="Tabclick(2)"
+     <van-tabbar-item icon="friends-o" @click="Tabclick(2)"
         >转接客户</van-tabbar-item
-      > -->
+      > 
       <van-tabbar-item @click="Tabclick(3)">
         <template #icon>
           <van-icon name="chat-o" />
         </template>
         <span> 拨打电话</span>
       </van-tabbar-item>
-    </van-tabbar>
+    </van-tabbar> -->
     <!-- 详情弹框 -->
     <van-popup
       v-model="detailsPop"
@@ -143,9 +170,9 @@
         <header>
           <img :src="imgSrc" alt="" />
           <div class="infoBox">
-            <p>名字：{{ name }}</p>
+            <p>名字：{{ userInfo.name }}</p>
             <div class="details">
-              <span>添加时间：{{ createtime }}</span>
+              <span>添加时间：{{ userInfo.createtime }}</span>
             </div>
           </div>
         </header>
@@ -154,7 +181,7 @@
         <template v-for="(item, index) in form">
           <van-cell
             style="max-height: 44px"
-            v-if="item._checked"
+            v-if="item._checked && item.key !== 'tagIds'"
             :key="index"
             :is-link="item.nolink == false"
             :title="item.title"
@@ -174,24 +201,24 @@
     <van-popup
       v-model="enterpriseTab"
       round
+      position="bottom"
       class="enterPrisePop"
-      :style="{ height: '60%', width: '65%' }"
+      :style="{ height: '80%', width: '100%' }"
     >
       <p>添加企业标签</p>
-      <article style="height: 45vh; overflow-y: scroll">
+      <article style="height: 63vh; overflow-y: scroll; margin-top: 8px">
         <div
           v-for="(item, index) in TagList"
           :key="index"
           style="margin-top: 5px"
         >
-          <p class="grade">{{ item.name }}</p>
+          <p class="grade">{{ item.group_name }}</p>
           <div v-if="item.tag && item.tag.length > 0">
-            <template v-for="(item1, index1) in item.tags">
+            <template v-for="(item1, index1) in item.tag">
               <van-button
                 style="margin-right: 5px; margin-bottom: 6px"
                 :type="item1.checked ? 'info' : 'default'"
                 size="mini"
-                plain
                 @click="hitTagBtn(item, index, item1, index1)"
                 :key="index1"
                 >{{ item1.name }}</van-button
@@ -199,8 +226,15 @@
             </template>
           </div>
         </div>
+        <van-empty
+          v-if="emptyTag"
+          image-size="40px"
+          class="custom-image"
+          image="https://img01.yzcdn.cn/vant/custom-empty-image.png"
+          description="没有标签，请到企业微信后台配置"
+        />
       </article>
-      <!-- <van-tabs v-model="tagAction" color="#1989FA">
+      <!-- <van-tabs v-model="tagAction" color="#53b1d8">
         <van-tab title="标签">
           <div style="display: flex; flex-shirk: 1">
             <span style="flex-shrink: 0; line-height: 23px">选择标签组：</span
@@ -261,13 +295,12 @@
           </template>
         </van-tab>
       </van-tabs> -->
-
       <van-button
         class="btn"
         type="primary"
         block
         size="small"
-        color="#1989FA"
+        color="#53b1d8"
         @click="enterPriseSave"
         >保存</van-button
       >
@@ -362,6 +395,7 @@
     >
       <Sheetimg
         @sheetClose="colseSheet"
+        :userInfo="userInfo"
         skip="noSkip"
         ref="Sheetimg"
       ></Sheetimg>
@@ -695,9 +729,8 @@
   </div>
 </template>
 <script>
-// import wxxx from '../../uilts/wxconfig';
 import BindPop from '../../components/ChatCustomer/BindPop'
-import wxxxChat from '../../uilts/wxconfigChat';
+import wxxxChat from '../../uilts/wxconfigChat.js';
 import { Toolbar } from '../../uilts/toolbarMixin';
 import local from '../../uilts/localStorage';
 import { generateTimeout, generateNonce, generateSignature3, generateSignature4 } from "../../uilts/tools";
@@ -710,14 +743,16 @@ import { formatDate, timestampToTime } from "../../uilts/date";
 import CustomerFollow from '../../components/CustomerModule/CustomerFollow.vue';
 import CustomerOpera from '../../components/CustomerModule/CustomerOpera.vue';
 import CustomerChaing from '../../components/CustomerModule/CustomerChaing.vue';
+import Utils from '../../uilts/utils';
 import Sheetimg from '../../components/Sheetimg.vue';
 export default {
   name: "ChatCustomer",
   components: { VDistpicker, compInfo, shareUser, CustomerFollow, CustomerOpera, CustomerChaing, Sheetimg, BindPop },
   mixins: [Toolbar],
+  inject: ['reload'],
   data() {
     return {
-      height: '58vh',
+      height: '400px',
       show: false,
       overlay: true,
       sheetPop: false,
@@ -813,6 +848,7 @@ export default {
           starLevel: 5,
         },
       ],
+      emptyTag: false,
       actionsSex: [
         {
           name: "女",
@@ -950,7 +986,7 @@ export default {
       changeOverEnter: false,
       changeValue: '',
       linkmanId: '',
-      imgSrc: '',
+      imgSrc: 'http://ego-file.soperson.com/itver/15/2016/icon_tel_user.png?x-oss-process=image/resize,m_fill,h_200,w_200,quality,q_1',
       name: '',
       createtime: '',
       StaffCur: 1,
@@ -965,7 +1001,7 @@ export default {
       SelectTag: '',
       SelectTagList: [],
       echoTag: [],
-      masking: {
+      maskings: {
         position: 'fixed',
         left: 0,
         right: 0,
@@ -973,6 +1009,9 @@ export default {
         bottom: 0,
         background: '#fff',
         zIndex: 999,
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: 'flex'
       },
     };
   },
@@ -990,11 +1029,33 @@ export default {
         this.takeover_userid = ''; // 清空选中员工
         this.getStaffList(); // 请求员工列表
       } else if (data == 3) {
-        window.location.href = `tel:${this.crmInfos.phone}`; // type== 0 关闭弹框
+        let result = this.check_mobil(this.crmInfos.phone_back)
+        if (result) {
+          window.location.href = `tel:${this.crmInfos.phone_back}`; // type== 0 关闭弹框
+        } else {
+          if (result == null) {
+            this.$toast('初始化,请稍后...')
+          } else {
+            this.$toast('手机号码错误，请修改后再拨打电话')
+          }
+          // setTimeout(() => {
+          //   this.detailsPop = true;
+          // }, 800)
+        }
+      } else if (data == 4) {
+        console.log(this.crmInfos)
+        return
+        window.location.href = `sms:${this.crmInfos.phone}?body=${12}`; // type== 0 关闭弹框
+      }
+    },
+    check_mobil(phone) { // 校验手机号
+      if (!(/^1[3456789]\d{9}$/.test(phone))) {
+        return false;
+      } else {
+        return true;
       }
     },
     showPopup(e, d, items) {
-      console.log(e, d, items)
       this.item = items; // 备份ITEM; 必填校验用
       if (e.includes("column")) {
         let item = this.findSelect(e);
@@ -1023,8 +1084,12 @@ export default {
           this.share.show = true;
           this.share.ids = this.crmInfos.share1.map(item => {
             return item.userId;
-          }).join(',')
-          this.$refs.shareUser.clickshare(this.share.ids) // 触发子元素方法目的请求已经共享的数据
+          }).join(',');
+          this.$refs.shareUser.clickshare(this.share.ids, {
+            id: this.userInfo.itr_external_userid,
+            itr_userid: this.userInfo.itr_userid,
+            itr_compid: this.userInfo.itr_compid
+          }) // 触发子元素方法目的请求已经共享的数据
         };
         if (e == 'region' && d) { // 地区回显
           this.province = d.split('-')[0];
@@ -1041,6 +1106,14 @@ export default {
           this.formData[e] = this.crmInfos.phone_back; // 回显数据
         }
       }
+    },
+    details() {
+      setTimeout(() => {
+        this.detailsPop = true;
+      }, 200)
+      this.getCrm();
+      this.getCid();
+      this.getColumn();  // 拉去表单页面
     },
     onSelect(e) {
       this.FormSave(e.value, this.diy.headline, 'showaction')
@@ -1081,7 +1154,6 @@ export default {
     },
     allocationChange(data) {
       console.log('allocationChange')
-
     },
     allocaCurs(data) {
       console.log('allocationChange')
@@ -1135,9 +1207,9 @@ export default {
       // 下拉表单提交
       let that = this;
       let crm = {};
-      crm.id = this.crmInfos.id;
-      crm.itrId = this.userInfos().id;
-      crm.compId = this.userInfos().bind_comp_id1;
+      crm.id = this.userInfo.itr_external_userid;
+      crm.itrId = this.userInfo.itr_userid;
+      crm.compId = this.userInfo.itr_compid;
       // crm.phone = this.crmInfo.phone; // 去掉
       let signature = generateSignature3(
         crm.id,
@@ -1186,9 +1258,9 @@ export default {
       let that = this;
       let crm = {};
       let lock = 0; // 如果为1走自定义编辑1了，区分弹框关闭
-      crm.id = this.crmInfos.id;
-      crm.itrId = this.userInfos().id;
-      crm.compId = this.userInfos().bind_comp_id1;
+      crm.id = this.userInfo.itr_external_userid;
+      crm.itrId = this.userInfo.itr_userid;
+      crm.compId = this.userInfo.itr_compid;
       // crm.phone = this.crmInfo.phone;  // 传这个参数会导致有时联系人已经存在
       let signature = generateSignature3(
         crm.id,
@@ -1296,7 +1368,7 @@ export default {
       let that = this;
       let timeout = generateTimeout();
       let nonce = generateNonce();
-      let compID = this.userInfos().bind_comp_id1;
+      let compID = this.userInfo.itr_compid;
       let signature = generateSignature3(compID, timeout, nonce);
       let data = {
         current: cur || 1,
@@ -1332,7 +1404,7 @@ export default {
       let that = this;
       let timeout = generateTimeout();
       let nonce = generateNonce();
-      let compID = this.userInfos().bind_comp_id1;
+      let compID = this.userInfo.itr_compid;
       let signature = generateSignature3(compID, timeout, nonce);
       let data = {
         current: 1,
@@ -1361,20 +1433,21 @@ export default {
     },
     getColumn() { // 获取客户详情表单;
       let signature = generateSignature3(
-        this.userInfos().id,
-        this.userInfos().bind_comp_id1,
+        this.userInfo.itr_userid,
+        this.userInfo.itr_compid,
         timeout,
         nonce
       );
       let param = new URLSearchParams();
       param.append("timeout", timeout);
       param.append("nonce", nonce);
-      param.append("userId", this.userInfos().id);
+      param.append("userId", this.userInfo.itr_userid);
       param.append("signature", signature);
-      param.append("compId", this.userInfos().bind_comp_id1);
+      param.append("compId", this.userInfo.itr_compid);
       this.$post1("/api/request/itr/comp/column/config/detail", param)
         .then((res) => {
           let form = JSON.parse(res.data);
+          console.log(form)
           this.form = form
             .map((item) => {
               if (
@@ -1422,14 +1495,14 @@ export default {
       return result;
     },
     async getCrm() { // 获取基本信息
-      let that = this;
-      let crmInfoId = this.linkmanId;
-      let signature = generateSignature3(this.userInfos().id, this.userInfos().bind_comp_id1, crmInfoId, timeout, nonce);
+      console.log(this.userInfo)
+      let { itr_external_userid, itr_compid, itr_userid } = this.userInfo;
+      let signature = generateSignature3(itr_external_userid, itr_compid, itr_userid, timeout, nonce);
       await this.$get('/api/request/itr/comp/customer/detail', {
         params: {
-          id: crmInfoId,
-          compId: this.userInfos().bind_comp_id1,
-          userId: this.userInfos().id,
+          id: itr_external_userid,
+          compId: itr_compid,
+          userId: itr_userid,
           nonce,
           timeout,
           signature: signature
@@ -1464,10 +1537,8 @@ export default {
               phone_back: res.phone,
               phone: res.phone && res.phone.replace(res.phone.substring(3, 7), "****"),
             }
-            that.imgSrc = res.portrait;
-            that.crmInfos = a;
-            this.masking = '';  // 清空蒙版
-            this.$toast.clear(); // 清空loading框
+            this.imgSrc = res.portrait;
+            this.crmInfos = a;
           }
         })
         .catch((error) => {
@@ -1479,26 +1550,87 @@ export default {
       return this.form.find(item => name === item.key)
     },
     init() {
-      this.wxxxx().then(async res => { // 企业微信授权
-        await this.verifyWxId() // 检查联系人列表是否存在
+      this.wxxxx().then(res => { // 企业微信授权
+        this.getlinkmanDetail() // 拉取联系人详情。
       })
     },
     wxxxx() { // 企业微信授权 获取当前客户的wxID
-      let that = this;
-      return new Promise(function (resolve, reject) {
-        let begin = setInterval(async () => {
-          if (that.accomplish) {
-            clearInterval(begin); // 清空定时器
-            wxxxChat().then(res => {
-              that.wxcrmId = res;
-              sessionStorage.setItem('wxcrmId', res)
-              resolve(res);
-            }).catch(error => {
-              reject(error)
+      return new Promise((resolve, reject) => {
+        wxxxChat().then(res => {
+          this.wxcrmId = res;
+          sessionStorage.setItem('wxcrmId', res)
+          resolve(res);
+        }).catch(error => {
+          reject(error)
+        })
+      })
+    },
+    async getlinkmanDetail() { // 获取联系人详情
+      await this.$get("/work/contact/detail", {
+        params: {
+          external_userid: sessionStorage.getItem('wxcrmId') || 'wmoqMGCgAA5ozhmAajLTV-IZ2tjbxtnA',
+          itrId: JSON.parse(sessionStorage.getItem('userinfo'))?.id || 13394171296,
+          compId: JSON.parse(sessionStorage.getItem('userinfo'))?.bind_comp_id || 40007760,
+          suiteId: JSON.parse(sessionStorage.getItem('codeBasice'))?.suiteId || 'wx067ebd9128dbc908',
+        },
+      })
+        .then((res) => {
+          if (res.code == 200 && res.msg === 'success') {
+            this.userInfo = res.data;
+            sessionStorage.setItem('linkmanId', res.data.itr_external_userid)
+            res.data.createtime ? this.userInfo.createtime = timestampToTime(res.data.createtime) : this.userInfo.createtime = '-';
+            if (res.data.tags) {
+              this.getdispost(res.data.tags) // 赋值标签
+
+            }
+            this.maskings = '';  // 清空蒙版
+            this.$toast.clear();
+            setTimeout(() => {
+              this.getTagList();
+              this.getCrm()
+            }, 5000)
+          } else {
+            this.$toast.fail(res.msg);
+          };
+        })
+        .catch((error) => {
+          console.log(error);
+          this.$toast.clear();
+        });
+    },
+    getdispost(data) { // 处理detail 数据
+      let arr = [];
+      let arr1 = [];
+      let obj = {};
+      if (!data) return;
+      data.forEach(item => {
+        arr.push(item.group_name)
+      });
+      Array.from(new Set(arr)).forEach(item => {
+        let tag = [];
+        data.forEach(item1 => {
+          if (item == item1.group_name) {
+            obj = {
+              checked: true,
+              group_name: item1.group_name,
+              tag: tag,
+            };
+            obj.tag.push({
+              ...item1,
+              checked: true,
+              name: item1.tag_name
             })
           }
-        }, 500)
+        })
+        arr1.push(obj);
       })
+      this.TagList2 = arr1;
+    },
+    AddTab() {
+      this.enterpriseTab = true;
+      if (!this.TagList.length) { // 没有的时候证明没请求
+        this.getTagList();
+      }
     },
     async verifyWxId() { // 校验wxcrmID 查询联系人列表是否存在
       this.getName(); // 获取名字
@@ -1513,7 +1645,7 @@ export default {
       param.append("compId", this.userInfos().bind_comp_id1);
       param.append("timeout", timeout);
       param.append("nonce", nonce);
-      param.append("wxCrmId", this.wxcrmId || 'wmmmFVEAAAQbwte-CPVAc-zHKbGgErzA'); //  联系人的微信ID 'wmmmFVEAAAQbwte-CPVAc-zHKbGgErzA'
+      param.append("wxCrmId", this.wxcrmId); //  联系人的微信ID 'wmmmFVEAAAQbwte-CPVAc-zHKbGgErzA'
       param.append("wxUserId", this.oneselfWxId()); // 自己的微信ID
       param.append("current", 1); // 默认页数是1
       param.append("signature", signature);
@@ -1573,56 +1705,9 @@ export default {
       })
       // 通过查找
       this.TagList2 = qList;
+      this.TagList = qList;
     },
     allocation() { }, //转接客户
-    Save() { // 表单保存
-      let crm = {};
-      crm.id = 0;
-      crm.itrId = this.userInfos().id;
-      crm.compId = this.userInfos().bind_comp_id1;
-      crm.phone = this.oneselfWxId();
-      crm.wxCrmId = this.wxcrmId;
-      crm.wxUserId = this.oneselfWxId();
-      crm.nickname = this.userInfos().nickname; // + '【' + '企业微信' + '】' 
-      crm.crmCompId = 0;
-      let signature = generateSignature3(0, crm.itrId, crm.compId, timeout, nonce);
-      crm.timeout = timeout;
-      crm.nonce = nonce;
-      crm.signature = signature;
-      this.$get("/api/request/itr/comp/customer/save", {
-        params: crm,
-      })
-        .then((res) => {
-          if (res.error === 'success') {
-
-          } else {
-            this.$toast.fail(res.errMsg);
-          };
-          this.$toast.clear();
-        })
-        .catch((error) => {
-          console.log(error);
-          this.$toast.clear();
-        });
-    },
-    getName() { // 获取当前客户的企业微信名字
-      // return new Promise((resolve, reject) => {
-      this.$get("/wx-crm-server/wx/get/customer/info", {
-        params: {
-          external_userid: this.wxcrmId,
-          itrId: this.userInfos()?.id,
-        },
-      }).then((res) => {
-        if (res.data && res.data.follow_user && res.data.follow_user[0]) {
-          this.name = res.data.follow_user[0].remark;
-          this.createtime = timestampToTime(res.data.follow_user[0].createtime) || '暂无';
-        } else {
-          // this.name = '企业微信用户';
-        }
-      }).catch((error) => {
-        console.log(error)
-      });
-    },
     userInfos() { // 获取当前联系人信息
       return JSON.parse(sessionStorage.getItem('userinfo'));
     },
@@ -1674,33 +1759,59 @@ export default {
         this.getStaffList();
       }
     },
-    OpenDataClick(event, data, index) {
+    OpenDataClick(event, data, index) { // 转接客户
       this.pitchIndex = index;
       this.takeover_userid = data.wxUserId;
       // this.changeOverEnter = true;
     },
+    findPitchTag(unlist) { // 处理选中元素,未选中元素包含checked：false 字段， 选中元素包含 checked：true 字段。
+      let pitchTags = this.userInfo.tags;
+      let pithchId = new Array();
+      pitchTags && pitchTags.length > 0 && pitchTags.forEach(item3 => {
+        pithchId.push(item3.tag_id)
+      })
+      unlist && unlist.length > 0 && unlist.forEach(item => {
+        if (item.tag && item.tag.length > 0) {
+          item.tag.forEach(item2 => {
+            if (pithchId.includes(item2.id)) {
+              item2.checked = true; // 给当前层级添加checked。
+              item.checked = true; // 给父层级添加checked。
+            } else {
+              item2.checked = false; // 给子层级添加false，证明该元素没有选中。
+            }
+          })
+        }
+      })
+      this.TagList2 = JSON.parse(JSON.stringify(unlist)); // 展示数组
+      this.TagList = JSON.parse(JSON.stringify(unlist)); // 操作数组
+      this.emptyTag = unlist.length > 0 ? false : true; // 标签空状态。
+      this.$forceUpdate()
+    },
     getTagList(type) { // 标签列表
       let param = new URLSearchParams();
-      let signature = generateSignature3(40000013, 13394171296, timeout, nonce);
+      let signature = generateSignature4(this.userInfo.itr_compid, this.userInfo.itr_userid, timeout, nonce);
       param.append("timeout", timeout);
       param.append("nonce", nonce);
-      param.append("userId", 13394171296);
+      param.append("itrId", this.userInfo.itr_userid);
       param.append("signature", signature);
-      param.append("compId", 40000013);
-      this.$post1("/api/request/crm/tag/list", param)
+      param.append("compId", this.userInfo.itr_compid);
+      param.append("suiteId", JSON.parse(sessionStorage.getItem('codeBasice'))?.suiteId || 'wx067ebd9128dbc908');
+      this.$post1("/work/tag/result", param)
         .then((res) => {
-          this.TagList = res;
+          this.findPitchTag(res.data) // 处理数据结构，选中添加checked
+          console.log(this.TagList)
+
         })
         .catch((error) => {
           console.log(error);
         });
     },
     syncTag() { // 同步标签
-      let signature = generateSignature3(40000013, 13394171296, timeout, nonce);
+      let signature = generateSignature3(this.userInfos().bind_comp_id1, this.userInfos().id, timeout, nonce);
       this.$get("/api/request/crm/tag/sync", {
         params: {
-          userId: 13394171296,
-          compId: 40000013,
+          userId: this.userInfos().id,
+          compId: this.userInfos().bind_comp_id1,
           timeout,
           nonce,
           signature
@@ -1716,12 +1827,12 @@ export default {
         });
     },
     getDetail() { // 获取一条企业标签详情
-      let signature = generateSignature3('3457769eac79471ea15229a5b7c9f6b9', 40000013, 13394171296, timeout, nonce);
+      let signature = generateSignature3('3457769eac79471ea15229a5b7c9f6b9', this.userInfos().bind_comp_id1, this.userInfos().id, timeout, nonce);
       this.$get("/api/request/crm/tag/detail", {
         params: {
           id: '3457769eac79471ea15229a5b7c9f6b9',
-          compId: 40000013,
-          userId: 13394171296,
+          compId: this.userInfos().bind_comp_id1,
+          userId: this.userInfos().id,
           timeout,
           nonce,
           signature
@@ -1739,7 +1850,8 @@ export default {
         });
     },
     hitTagBtn(item, index, item1, index1) {  // 打标签确认按钮
-      this.TagList[index].tags[index1].checked = !this.TagList[index].tags[index1].checked; // 选中状态
+      console.log(item, index, item1, index1)
+      this.TagList[index].tag[index1].checked = !this.TagList[index].tag[index1].checked; // 选中状态
       this.$forceUpdate(); // 刷新视图
     },
     saveTagLoyoo(data) { // 保存乐语数据保存标签数据
@@ -1767,71 +1879,144 @@ export default {
         })
         .catch((error) => {
           console.log(error);
-          this.$toast.clear();
         });
 
     },
     saveTagWx() { // 保存企业微信打标签数据
-      let signature = generateSignature4(40000013, timeout, nonce);
+      let signature = generateSignature4(this.userInfo.itr_compid, timeout, nonce);
       let { unwxtagIds, wxtagIds } = this.GeneralFilter();
       let params = {
         timeout,
         nonce,
-        userid: sessionStorage.getItem('bind_UserID'),
-        external_userid: sessionStorage.getItem('wxcrmId'),
+        userid: sessionStorage.getItem("bind_UserID"),
+        external_userid: sessionStorage.getItem("wxcrmId"),
         add_tag: wxtagIds,
         remove_tag: unwxtagIds,
         signature,
-        compId: 40000013,
+        compId: this.userInfo.itr_compid,
       }
-      this.$post1("/wx-crm-server/tag/mark/tag" + '?compId=' + 40000013 + '&timeout=' + timeout + '&nonce=' + nonce + '&signature=' + signature, params)
-        .then((res) => {
-          this.$toast('标签保存成功')
+      this.$post1("/work/tag/mark_tag" + '?compId=' + this.userInfo.itr_compid + '&timeout=' + timeout + '&nonce=' + nonce + '&signature=' + signature, params)
+        .then(async (res) => {
+          if (res.code == 200 && res.msg == 'success') {
+            // await this.getlinkmanDetail();
+            // this.getTagList();
+            let result = JSON.parse(JSON.stringify(this.TagList.map(item => { //更新数组
+              if (item.tag && item.tag.length) {
+                for (let index = 0; index < item.tag.length; index++) {
+                  if (item.tag[index].checked) { // 如果有check字段，那么就给父元素
+                    item.checked = true;
+                    break;
+                  }
+                  if (!item.tag[index].checked) {
+                    item.checked = false;
+                  }
+                }
+              }
+              return item;
+            })))
+            this.TagList2 = result;
+            this.$forceUpdate();
+            this.$toast('标签保存成功');
+          } else {
+            this.$toast(res.msg)
+          }
         })
         .catch((error) => {
           this.$toast('标签保存失败', error)
         });
     },
     GeneralFilter() { // 通用：过滤选中未选中状态
-      let tagIds = new Array(), unwxtagIds = new Array(), wxtagIds = new Array();
+      let tagIds = new Array(), unwxtagIds = new Array(), wxtagIds = new Array(), showObj = new Array();
       this.TagList.forEach(item => { // 过滤选中的标签ID
-        if (item.tags && item.tags.length > 0) {
-          item.tags.forEach(item1 => {
+        if (item.tag && item.tag.length > 0) {
+          item.tag.forEach(item1 => {
             if (item1.checked) { // true 证明选中了拼接ID
+              showObj.push({
+                group_name: item.group_name,
+                tag_name: item1.name
+              });
               tagIds.push(item1.id)
-              wxtagIds.push(item1.workTagId) // 获取企业标签选中ID
+              wxtagIds.push(item1.id) // 获取企业标签选中ID
             } else {
-              unwxtagIds.push(item1.workTagId) // 获取企业标签未选中ID
+              unwxtagIds.push(item1.id) // 获取企业标签未选中ID
             }
           })
         }
       });
+      console.log(showObj)
       return {
         tagIds,
         unwxtagIds,
-        wxtagIds
+        wxtagIds,
+        showObj
       }
     },
     enterPriseSave() { // 企业标签保存按钮
       this.enterpriseTab = false;
-      this.saveTagLoyoo()  // 保存乐语标签数据
-      // this.saveTagWx();
+      this.saveTagWx();
     },
     async BindCompletes() { // 关闭弹框
       this.show = false;
       await this.getUserinfo();  // 重新拉去信息接口。
+    },
+    applyComp() { // 企业微信用户自动加入公司 sessionStorage.getItem('bind_compId') ||
+      //  let { compId } = this.comp.item;
+      // let ids = sessionStorage.getItem('temporaryId')
+      let signature = generateSignature3(40021450, timeout, nonce);
+      let data = {
+        to: 13243259739,
+        fromCompId: 40021450,
+        nonce: nonce,
+        signature: signature,
+        timeout: timeout,
+        remark: '企业微信用户自动加入',
+      }
+      this.$get(
+        "/api/request/comp/invite/do",
+        {
+          params: data,
+        },
+      ).then((res) => {
+        if (res.error == 'success') {
+          // this.getUserinfo();
+          let CorpId = sessionStorage.getItem('CorpId')
+          let openId = sessionStorage.getItem('openId')
+          this.getopenId(CorpId, openId) // 重新拉取加入公司的信息;
+        } else {
+          // this.comp.applyShow = false;
+          // this.compApply = true;
+        }
+      })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    loading() {
+      this.$toast.loading({
+        message: '加载中...',
+        forbidClick: true,
+        overlay: true,
+        duration: 0,
+      });
     }
   },
   async created() {
-    this.$toast.loading({
-      message: '加载中...',
-      forbidClick: true,
-      overlay: true,
-      duration: 0,
-    });
+    // await this.getlinkmanDetail();
+    // this.getTagList()
+    // this.init();
+    //  wxxxChat().then(res => {
+    //    console.log(res)
+    //     // that.wxcrmId = res;
+    //     // sessionStorage.setItem('wxcrmId', res)
+    //   //  resolve(res);
+    //   }).catch(error => {
+    //     console.log(error)
+    //  })
+    // this.applyComp()
     // this.init();
     // console.log(this.getDetail())
     // console.log(this.userInfos())
+    // this.syncTag()
     // this.getTagList()
     // await this.getCrm()
     // this.getCid()
@@ -1839,12 +2024,34 @@ export default {
   },
   computed: {},
   mounted() {
-    // console.log(WWOpenData, 'WWOpenData')
+    Utils.$on("bindSuccess", (res) => {  // 该函数通过聊天工具栏客户画像列表触发，绑定手机号成功时触发。
+      console.log(res, '213131')
+      this.maskings = '';
+      this.maskings = {
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        background: '#fff',
+        zIndex: 999,
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: 'flex'
+      };
+      this.$nextTick(() => {
+        console.log('I\'M IRON sss')
+        let a = { ...res.data.user, bind_comp_id: this.compId || res.data.compId, bind_comp_id1: res.data.user.bind_comp_id };
+        sessionStorage.setItem("userinfo", JSON.stringify(a)); // 公司id 存入本地；
+        this.init() // 重新拉取数据
+      })
+    });
   },
   watch: {
     show(val, oldVal) {//普通的watch监听
       if (val) {
         this.$toast.clear();
+        this.maskings = '';
       }
     },
   },
@@ -1853,14 +2060,19 @@ export default {
 
 <style lang="less" scoped>
 @fontcolor: #7a7878;
-.ChatCustomer {
+.commonPadd {
+  margin-bottom: 0.2rem;
+  border-bottom: 10px solid rgb(249, 249, 249);
   padding: 0.4rem 0.2rem;
+}
+.ChatCustomer {
+  // padding: 0.4rem 0.2rem;
   font-size: 0.29rem;
-  padding-bottom: 1.3rem;
+  // padding-bottom: 1.3rem;
   // background: #eee;
   header {
     display: flex;
-    margin-bottom: 0.2rem;
+    .commonPadd;
     img {
       width: 1rem;
       height: 1rem;
@@ -1870,7 +2082,11 @@ export default {
       align-self: center;
       margin-left: 0.3rem;
       p {
-        padding-bottom: 0.25rem;
+        padding-bottom: 0.24rem;
+        font-weight: 600;
+        font-size: 0.3rem;
+      }
+      .namebold {
         font-weight: 600;
         font-size: 0.3rem;
       }
@@ -1885,7 +2101,7 @@ export default {
     }
   }
   .info {
-    border-bottom: 1px dashed #aaaaaa;
+    border-bottom: 1px solid #aaaaaa;
     .origin {
       line-height: 0.6rem;
       font-size: 15px;
@@ -1920,15 +2136,20 @@ export default {
     }
   }
   .tab {
-    border-bottom: 1px dashed #aaaaaa;
+    border-bottom: 1px solid #ebe9e9;
+    .commonPadd;
+    padding-top: 0;
+    padding-bottom: 0;
     .company {
       margin-bottom: 15px;
-      border-top: 1px solid #aaaaaa;
+      // border-top: 10px solid #aaaaaa;
       padding-top: 10px;
-      border-style: dashed;
+      border-style: solid;
       div:first-child {
         display: flex;
         justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.2rem;
         .title {
           font-size: 0.3rem;
           font-weight: 600;
@@ -1944,8 +2165,8 @@ export default {
       }
       .grade {
         margin-bottom: 10px;
-        color: #000;
-        font-weight: 600;
+        color: #6b6a6a;
+        font-weight: 400;
       }
     }
     .personage {
@@ -2107,9 +2328,10 @@ export default {
     padding: 0 0.2rem;
     & > p {
       text-align: center;
-      line-height: 0.7rem;
+      line-height: 0.9rem;
       font-size: 0.32rem;
-      border-bottom: 1px solid rgb(221, 219, 219);
+      border-bottom: 1px solid #dddbdb;
+      font-weight: 600;
     }
     section {
       & > p {
@@ -2120,10 +2342,13 @@ export default {
     .btn {
       position: absolute;
       bottom: 10px;
-      width: 92%;
+      left: 48%;
+      transform: translate(-50%, 0);
+      width: 86%;
     }
   }
   .detailPop {
+    overflow: hidden;
     .titles {
       text-align: center;
       line-height: 1rem;
@@ -2161,7 +2386,7 @@ export default {
     // }
     header {
       padding: 10px 16px;
-      border: 1px dashed #eee;
+      // border: 1px dashed #eee;
       margin-bottom: 0;
     }
   }
@@ -2282,6 +2507,24 @@ export default {
     border-style: none;
     padding: 0 10px;
     outline: none;
+  }
+
+  .addicon {
+    width: 0.32rem;
+    height: 0.3rem;
+    margin-right: 5px;
+  }
+  /deep/ .van-popup--bottom.van-popup--round {
+    border-radius: 0px !important;
+  }
+  .van-empty {
+    padding: 10px 0;
+  }
+  /deep/ .van-button--mini {
+    padding: 0 7px;
+  }
+  /deep/ .van-button--default{
+    background-color: #f1f4f6;
   }
 }
 </style>

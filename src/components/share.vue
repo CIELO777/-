@@ -141,103 +141,6 @@ export default {
       // d.location.href = "http://service.weibo.com/share/share.php?url=" + d.shareUrl + "&title=" + d.sharetitle +
       //   "&pic=" + d.shareImg; //自定义图片用这个
     },
-    async getWxJsJdk() {
-      // 初始化init wx.config
-      let param = new URLSearchParams();
-      let itrId = JSON.parse(sessionStorage.getItem("userinfo")).id;
-      param.append("timeout", timeout);
-      param.append("nonce", nonce);
-      param.append("url", "wxa.jiain.net");
-      param.append("type", 1);
-      param.append("itrId", itrId);
-      let that = this;
-      await this.$post1("/wx-crm-server/wx/js_api_ticket/auth", param)
-        .then((res) => {
-          this.appId = res.appId;
-          this.noncestr = nonce;
-          this.timestamp = timeout / 1000;
-          let url = location.href.split("#")[0];
-          let str1 =
-            "jsapi_ticket=" +
-            res.jsapi_ticket +
-            "&noncestr=" +
-            this.noncestr2 +
-            "&timestamp=" +
-            this.timestamp2 +
-            "&url=" +
-            url;
-          let signature = sha1.hex_sha1(str1);
-          wx.config({
-            beta: true, // 必须这么写，否则wx.invoke调用形式的jsapi会有问题
-            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
-            appId: res.appId, // 必填，企业微信的corpID
-            timestamp: this.timestamp, // 必填，生成签名的时间戳
-            nonceStr: this.noncestr, // 必填，生成签名的随机串
-            signature: signature, // 必填，签名，见附录1
-            jsApiList: ["onMenuShareWechat", "onMenuShareTimeline", 'shareAppMessage', 'shareWechatMessage', 'updateAppMessageShareData', 'updateTimelineShareData'], // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
-          });
-          wx.ready(function () {
-            wx.hideMenuItems({
-              menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari', 'menuItem:refresh'] // 要隐藏的菜单项
-            });
-            // 朋友圈分享
-
-            wx.onMenuShareTimeline({
-              title: this.ShareContents.title, // 分享标题
-              link: this.ShareContents.url, // 分享链接；在微信上分享时，该链接的域名必须与企业某个应用的可信域名一致
-              imgUrl: this.ShareContents.imgUrl, // 分享图标
-              success: function () {
-                console.log('朋友圈成功')
-                that.shareCount()
-
-                // 用户确认分享后执行的回调函数
-              },
-              cancel: function () {
-                console.log('朋友圈失败')
-                // 用户取消分享后执行的回调函数
-              }
-            });
-          });
-          wx.error(function (res) {
-            console.log(res, 'error')
-          });
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-    async getAgentConfig() {
-      // 拉取
-      let param = new URLSearchParams();
-      let url = location.href.split("#")[0];
-      let itrId = JSON.parse(sessionStorage.getItem("userinfo"))?.id;
-      param.append("timeout", timeout / 1000);
-      param.append("nonce", nonce);
-      param.append("url", url);
-      param.append("type", 2); // 为2的时候拉去的是
-      param.append("itrId", itrId);
-      await this.$post1("/wx-crm-server/wx/js_api_ticket/auth", param)
-        .then((res) => {
-          // alert('执行了出来，agentConfig')
-          // alert(res)
-          let str1 =
-            "jsapi_ticket=" +
-            res.jsapi_ticket +
-            "&noncestr=" +
-            nonce +
-            "&timestamp=" +
-            timeout / 1000 +
-            "&url=" +
-            url;
-          this.jsapi2 = res.jsapi_ticket; // 这个值是拉取的值agentConfig 值
-          this.timestamp2 = timeout / 1000;
-          this.noncestr2 = nonce;
-          this.signature2 = sha1.hex_sha1(str1);
-        })
-        .catch((err) => {
-          // alert(err);
-        });
-    },
     shareCount() {
       this.$get("/itver/remote/share/callback", {
         params: {
@@ -254,8 +157,6 @@ export default {
     }
   },
   async created() {
-    // await this.getAgentConfig(); // 同步执行 否则会报错
-    // await this.getWxJsJdk();
     let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
     // console.log(this.ShareContents)
     // this.url = this.ShareContents.url;

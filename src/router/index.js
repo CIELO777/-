@@ -199,6 +199,11 @@ const routes = [
     name: 'CircleFriends',
     component: () => import(/* webpackChunkName: "about" */ '../views/CircleFriends.vue')
   },
+  {
+    path: '/ConfigParam',
+    name: 'ConfigParam',
+    component: () => import(/* webpackChunkName: "about" */ '../views/ConfigParam.vue')
+  },
 ]
 const router = new VueRouter({
   mode: 'history',

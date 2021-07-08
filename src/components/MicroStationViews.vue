@@ -130,12 +130,16 @@ export default {
     },
     createContent(item) { // 发送
       let url;
+      console.log(item.url)
       if (item.type == 'micHome') { // 微站首页
         url = `${item.url.split('/{id}')[0]}/${item.id}?s=${item.id}&promote=${item.userId}`
-        console.log(url)
+      }else if(!item.uuid){
+        let data = `${item.url.split('/{id}')[0]}/${item.id}?s=${item.id}&promote=${item.userId}`;
+        url = data.replace('{sid}',item.sid);
       } else {
         url = `${item.url.split('/{sid}')[0]}/${item.sid}/${item.id}/0?s=${item.sid}&p=${item.id}&promote=${this.$U || local.U()}` // url拼接处理
       }
+      console.log(url)
       wx.invoke('sendChatMessage', {
         msgtype: "news", //消息类型，必填
         news: {

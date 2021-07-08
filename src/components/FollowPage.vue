@@ -35,8 +35,16 @@
     <div class="follCont" v-if="follList.length > 0">
       <div v-for="(item, index) in follList" :key="index" class="follMain">
         <div class="time">
-          <span>{{ item.day }}</span>
-          <span>{{ item.month }}月</span>
+          <!-- <svg-icon icon-class="svg_td_0"></svg-icon> -->
+          <icon
+            :name="item.type + ''"
+            :w="20"
+            :height="20"
+            style="background: #eee; border-radius: 50%"
+          ></icon>
+          <div class="wire"></div>
+          <!-- <span>{{ item.day }}</span>
+          <span>{{ item.month }}月</span> -->
         </div>
         <div class="content">
           <div class="text">
@@ -68,13 +76,19 @@
               class="img-list"
             >
               <template v-for="(itr, i) in item.content">
-                <img :key="i" :src="itr" @click="ImgClick(itr)" />
+                <img :key="i" :src="itr" @click="ImgClick(item.content)" />
               </template>
             </div>
             <div v-if="item.type == 1">
-              <div class="media" @click="handelClickMadiaPlay(item.content)">
+              <!-- <div class="media" @click="handelClickMadiaPlay(item.content)">
                 <van-icon size="20px" color="#AAA" name="volume-o" />
-              </div>
+              </div> -->
+              <audio
+                controls="controls"
+                preload="auto"
+                :src="item.content"
+                class="audio"
+              ></audio>
             </div>
           </div>
           <div class="info">
@@ -186,7 +200,7 @@ import sha1 from '../uilts/sha1';
 import Utils from '../uilts/utils';
 import communication from "../uilts/communication";
 import FileSaver from 'file-saver';
-
+import wxxx from '../uilts/wxconfig'
 export default {
   name: 'FollowPage',
   mixins: [ScorllMixin],
@@ -350,85 +364,10 @@ export default {
         });
     },// 首页触发跟进记录
     ImgClick(src) { // 点击图片进入预览模式
-      ImagePreview([src]);
-    },
-    async getAgentConfig() {  // 拉取
-      let param = new URLSearchParams();
-      let url = location.href.split('#')[0];
-      let itrId = JSON.parse(sessionStorage.getItem("userinfo"))?.id;
-      param.append("timeout", timeout / 1000);
-      param.append("nonce", nonce);
-      param.append("url", url);
-      param.append("type", 2); // 为2的时候拉去的是
-      param.append("itrId", itrId);
-      await this.$post1('/wx-crm-server/wx/js_api_ticket/auth',
-        param
-      ).then((res) => {
-        let str1 = 'jsapi_ticket=' + res.jsapi_ticket + '&noncestr=' + nonce + '&timestamp=' + timeout / 1000 + '&url=' + url
-        this.jsapi2 = res.jsapi_ticket  // 这个值是拉取的值agentConfig 值
-        this.timestamp2 = timeout / 1000;
-        this.noncestr2 = nonce;
-        this.signature2 = sha1.hex_sha1(str1);
-        this.appid2 = res.appId
-      }).catch((err) => {
-        console.log(err)
-      })
-    },
-    async getWxJsJdk() { // 初始化init wx.config 
-      let param = new URLSearchParams();
-      let itrId = JSON.parse(sessionStorage.getItem("userinfo")).id;
-      param.append("timeout", timeout);
-      param.append("nonce", nonce);
-      param.append("url", 'https://wxa.jiain.net/');
-      param.append("type", 1);
-      param.append("itrId", itrId);
-      let that = this;
-      await this.$post1('/wx-crm-server/wx/js_api_ticket/auth',
-        param
-      )
-        .then(res => {
-          this.appId = res.appId;
-          this.noncestr = nonce;
-          this.timestamp = timeout / 1000;
-          let url = location.href.split('#')[0];
-          let str1 = 'jsapi_ticket=' + res.jsapi_ticket + '&noncestr=' + this.noncestr2 + '&timestamp=' + this.timestamp2 + '&url=' + url
-          let signature = sha1.hex_sha1(str1);
-          // console.log(this.timestamp, this.noncestr, signature, 'configData');
-          wx.config({
-            beta: true,// 必须这么写，否则wx.invoke调用形式的jsapi会有问题
-            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
-            appId: res.appId, // 必填，企业微信的corpID
-            timestamp: this.timestamp, // 必填，生成签名的时间戳
-            nonceStr: this.noncestr, // 必填，生成签名的随机串
-            signature: signature,// 必填，签名，见附录1
-            jsApiList: ['agentConfig', 'selectExternalContact'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
-          });
-          wx.ready(function () {
-            wx.agentConfig({
-              corpid: that.appid2, // 必填，企业微信的corpid，必须与当前登录的企业一致
-              agentid: res.agentId, // 必填，企业微信的应用id （e.g. 1000247）
-              timestamp: that.timestamp2, // 必填，生成签名的时间戳
-              nonceStr: that.noncestr2, // 必填，生成签名的随机串
-              signature: that.signature2,// 必填，签名，见附录-JS-SDK使用权限签名算法
-              jsApiList: ['selectExternalContact'], //必填
-              success: function (res) {
-                // 回调
-                // alert('成功')
-              },
-              fail: function (res) {
-                if (res.errMsg.indexOf('function not exist') > -1) {
-                }
-              }
-            });
-
-          });
-          wx.error(function (res) {//通过error接口处理失败验证
-            // config信息验证失败会执行error
-            console.log('执行失败', res);
-          });
-        }).catch(err => {
-          console.log(err, 'readyRrror');
-        })
+      ImagePreview({
+        images: src,
+        closeable: true,
+      });
     },
     openChat() {
       wx.openEnterpriseChat({ // 调用对话
@@ -710,8 +649,7 @@ export default {
     this.phone = JSON.parse(sessionStorage.getItem('_crm_info'))?.phone;
     this.wxCrmId = JSON.parse(sessionStorage.getItem('_crm_info'))?.wxCrmId;
     this.id = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
-    await this.getAgentConfig()  // 同步执行 否则会报错
-    await this.getWxJsJdk();
+    wxxx()
   },
   async activated() {
     this.Actionshow = false;
@@ -793,7 +731,8 @@ export default {
         }
       }
       .content {
-        width: 77%;
+        // width: 77%;
+        flex: 1;
         // margin-left: 0.2rem;
         .text {
           background: #f1f1f1;
@@ -884,6 +823,16 @@ export default {
     outline: none;
   }
   .downLoad {
+  }
+  svg path {
+    fill: #eee;
+  }
+  .wire {
+    width: 1px;
+    height: calc(100% - 35px);
+    background: rgb(193 190 190);
+    margin: 0 auto;
+    margin-top: 5px;
   }
 }
 </style>

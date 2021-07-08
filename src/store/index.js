@@ -40,12 +40,13 @@ export default new Vuex.Store({
       company: "",
       sheet: "",
       gender: "",
-      userId:"",
-      name:""
-    }
+      userId: "",
+      name: ""
+    },
 
   },
   mutations: {
+    
     saveTitle(state, pathName) {
       state.title = pathName.title;
       window.document.title = pathName.title;

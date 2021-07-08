@@ -15,8 +15,10 @@ import wx from "weixin-js-sdk";
 import Vconsole from 'vconsole';
 import UUID from 'vue-uuid';
 import '@vant/touch-emulator'; //
+import Icon from 'vue2-svg-icon/Icon'
+Vue.component('icon',Icon);
 Vue.use(UUID);
-new Vconsole();
+// new Vconsole();
 Vue.prototype.$wx = wx; // 挂载wx-jdk 插件
 Vue.prototype.$post = post;
 Vue.prototype.$post1 = post1;
@@ -40,14 +42,6 @@ router.beforeEach((to, from, next) => {
   }
   // 路由中是否包含即将要进入的路由，如果不包含直接跳转到首页
   next();
-  // let include = router.options.routes.find(item => item.name == toP);
-  // if (include) {
-  //   next()
-  // } else {
-  //   next({
-  //     path: '/'
-  //   })
-  // }
 });
 
 Vue.use(Vant);

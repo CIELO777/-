@@ -115,6 +115,7 @@
       </template>
     </van-list>
     <van-empty
+      image-size="40px"
       v-else-if="empty"
       image="https://img.yzcdn.cn/vant/custom-empty-image.png"
       description="暂无相关消息"
@@ -152,7 +153,7 @@ let nonce = generateNonce();
 export default {
   name: "ChatRecord",
   components: {},
-  props: [],
+  props: ['userInfo'],
   data() {
     return {
       list: [],
@@ -192,7 +193,7 @@ export default {
       this.openId = sessionStorage.getItem('openId');
       let itrId = JSON.parse(sessionStorage.getItem('userinfo')).id;
       let signature = generateSignature4(timeout, nonce, itrId);
-      this.$get("/wx-crm-server/session/list", {
+      this.$get("/work/session/list", {
         params: {
           fromOpenId: this.openId,
           toOpenId: wxCrmId,
@@ -229,9 +230,9 @@ export default {
         });
     },
     updateList() { // 同步消息
-      let CorpId = sessionStorage.getItem('CorpId');
+      let CorpId = sessionStorage.getItem('CorpId') || 'wxa9317077abcb6273';
       let signature = generateSignature4(timeout, nonce);
-      this.$get("/wx-crm-server/session/sync", {
+      this.$get("/work/session/sync", {
         params: {
           wxCompId: CorpId,
           nonce,
@@ -326,10 +327,10 @@ export default {
       var data = {};
       let signature = '';
       if (this.$route.name == 'ChatCustomer') {
-        signature = generateSignature4(this.userInfos().id, this.userInfos().bind_comp_id1, nonce, timeout)
+        signature = generateSignature4(this.userInfo.itr_external_userid, this.userInfo.itr_compid, nonce, timeout)
         data = {
-          userId: this.userInfos().id,
-          compId: this.userInfos().bind_comp_id1,
+          userId: this.userInfo.itr_external_userid,
+          compId: this.userInfo.itr_compid,
           nonce,
           timeout,
           signature,
@@ -365,10 +366,7 @@ export default {
     updateTime(e) {
       // console.log(e.target.currentTime);
       this.fileDuration = e.target.currentTime * 1000;
-    },
-    userInfos() { // 获取当前联系人信息
-      return JSON.parse(sessionStorage.getItem('userinfo'));
-    },
+    }
   },
   created() {
     this.updateList() // 先更新

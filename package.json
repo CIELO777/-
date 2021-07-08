@@ -8,7 +8,8 @@
     "testServe": "vue-cli-service serve --mode delelopment",
     "proServe": "vue-cli-service serve --mode production",
     "test": "vue-cli-service build --mode delelopment",
-    "pro": "vue-cli-service build --mode production"
+    "pro": "vue-cli-service build --mode production",
+    "off": "vue-cli-service build --mode official"
   },
   "dependencies": {
     "@vant/touch-emulator": "^1.2.0",
@@ -34,7 +35,8 @@
     "babel-plugin-transform-remove-strict-mode": "0.0.2",
     "less": "^3.0.4",
     "less-loader": "^5.0.0",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "vue2-svg-icon": "^1.3.2"
   },
   "browserslist": [
     "> 1%",

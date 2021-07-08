@@ -44,6 +44,7 @@
     </template>
     <van-empty
       v-else-if="empty"
+      image-size="40px"
       image="https://img.yzcdn.cn/vant/custom-empty-image.png"
       description="暂无相关消息"
     />
@@ -58,7 +59,7 @@ let nonce = generateNonce();
 export default {
   name: "CustomerOpera",
   components: {},
-  props: ['height'],
+  props: ['height', 'userInfo'],
   data() {
     return {
       optRecordMap: {},
@@ -84,14 +85,14 @@ export default {
     },
     async getOperating() {  // 获取操作记录列表
       let crmInfo = sessionStorage.getItem('linkmanId');
-      let signature = generateSignature3(crmInfo, this.userInfos()?.bind_comp_id1, timeout, nonce);
+      let signature = generateSignature3(crmInfo, this.userInfo.itr_compid, timeout, nonce);
       let that = this;
       let optRecordMap = this.optRecordMap;
       let optRecordUserMap = this.optRecordUserMap;
       this.$get('/api/request/itr/comp/customer/opt/query', {
         params: {
           ptId: crmInfo,
-          compId: this.userInfos()?.bind_comp_id1,
+          compId: this.userInfo.itr_compid,
           timeout: timeout,
           nonce: nonce,
           signature: signature,
@@ -177,6 +178,7 @@ export default {
 <style lang="less" scoped>
 .CustomerOpera {
   overflow-y: scroll;
+  height: 78vh;
   .qs-title {
     background-color: #f0f0f5;
     padding: 5px;

@@ -163,6 +163,7 @@
     <van-popup
       v-model="show"
       :close-on-click-overlay="false"
+      @close="bindPop"
       position="bottom"
       :style="{ height: '300px' }"
       overlay-class="popup"
@@ -271,7 +272,7 @@
         ><van-button plain @click="confirms()">确定</van-button>
       </div>
     </van-dialog>
-    <img src="../assets/1.jpg" alt="" v-show="compApply" class="coverImg" />
+    <!-- <img src="../assets/1.jpg" alt="" v-show="compApply" class="coverImg" /> -->
   </div>
 </template>
 
@@ -289,18 +290,19 @@ import sha1 from "../uilts/sha1";
 let nonce = generateNonce();
 import local from '../uilts/localStorage';
 import Utils from "../uilts/utils";
-import debounce from '../uilts/debounce'
+import { debounce, URLCut } from '../uilts/debounce';
 import { Switch } from 'vant';
 export default {
   name: "",
   components: {},
-  props: {},
+  inject: ['registerOpen'],
   data() {
     return {
       UserId: "",
       open_userid: "",
       CorpId: "",
       show: false,
+      showAAA: false,
       sendings: "发送验证码",
       sms: "",
       codes: "",
@@ -341,6 +343,9 @@ export default {
       entry: '',
       compApply: false,
       compId: '',
+      login2: {
+        code: {}
+      }
     };
   },
   watch: {
@@ -348,112 +353,56 @@ export default {
       if (val == true) {
         this.$toast.clear();
       }
+      console.log(val, 'showshowshow')
     }
   },
   computed: {},
   methods: {
-    async getUserinfo() {
+    getUserinfo(code) {
       // 获取用户信息
-      let that = this;
-      this.$get("/wx-crm-server/wx/get/userinfo", {
+      this.$get("/work/wx/get/userinfo", {
         params: {
-          code: this.code,
+          code: this.login2?.code?.code || code,
+          suiteId: this.login2?.code?.suiteId || 'wx067ebd9128dbc908',
         },
       })
-        .then(
-          await function (res) {
-            console.log(res)
-            if (res.code === 200 && JSON.stringify(res.data) != "{}") {
-              if (res.data.CorpId ?? res.data.open_userid) {
-                // openid 和wxid 都存在在发送请求，请求用户信息
-                that.getopenId(res.data.CorpId, res.data.open_userid);
-                that.UserId = res.data.UserId;
-                that.compId = res.data.compId;  // 会话存储后的公司ID  不可变更
-                that.open_userid = res.data.open_userid;
-                that.CorpId = res.data.CorpId;
-                sessionStorage.setItem("openId", that.open_userid); // 保存openID 解绑用
-                sessionStorage.setItem("CorpId", res.data.CorpId); // 保存openID 解绑用
-                sessionStorage.setItem("UserId", res.data.UserId); // 保存openID 解绑用
+        .then((res) => {
+          if (res.code === 200 && res.msg == 'success' && JSON.stringify(res.data) != "{}") { // userInfo 信息拉取成功.
+            this.UserId = res.data.userId;
+            this.compId = res.data.compId;  // 会话存储后的公司ID  不可变更
+            this.open_userid = res.data.open_userid;
+            this.CorpId = res.data.corpId;
+            sessionStorage.setItem("openId", this.open_userid); // 保存openID 解绑用
+            sessionStorage.setItem("CorpId", res.data.corpId); // 保存openID 解绑用
+            sessionStorage.setItem("UserId", res.data.userId); // 保存openID 解绑用 
+            if (res.data.user) { // itr 那么就缓存itr数据
+              // console.log(2131231,res.data.user)
+              if (res.data.compId === 0 || !res.data.compId) { // 通过compID判断当前是否绑定了联系人。
+                // 没有绑定
+                this.$toast.clear();
+                this.registerOpen();
+              } else {    // 如果不等于0 && 存在 那么就拉取数据
+                let a = { ...res.data.user, bind_comp_id: this.compId, bind_comp_id1: res.data.user.bind_comp_id };
+                sessionStorage.setItem("userinfo", JSON.stringify(a)); // 公司id 存入本地；
+                this.outData(res.data.user.id);  // 获取是否过期；
+                this.getConsole();
+                this.noticeData();
+                localStorage.clear(); // 如果拉去到的话，那么就清除他的值
+                this.$toast.clear();
               }
-            } else {   //没有信息，
-              // console.log(that.entry, 'that.entry1112213')
-              // if (that.entry == 'single_chat_tools') {
-              that.getURl(); //单聊应该先重定向拿去新code
-              // } else {
-              // that.show = true;  // 没有信息，让他注册账号;
-              // }
+            } else { //没有绑定直接弹框
+              this.registerOpen();
+              this.$toast.clear()
             }
+          } else {
+            console.log('userinfo 为空的时候暂时没有操作;')
+            // userinfo 为空的时候暂时没有操作;              
           }
+        }
         )
         .catch(function (error) {
           console.log(error);
         });
-    },
-    async getopenId(wxCompId, openId) { // 检测是否绑定公司了，
-      // 拉去是否绑定企业微信
-      let that = this;
-      this.$get("/wx-crm-server/wx/get/itr", {
-        params: {
-          wxCompId,
-          openId,
-        },
-      })
-        .then(function (res) {
-          console.log(res);
-          if (res.code === 500 || !res.data || res.msg == "not_bind") {
-            // 没有绑定
-            that.show = true;
-          } else if (
-            res.code === 200 &&
-            res.msg === "success" &&
-            res.data != "{}"
-          ) {
-            // 
-            if (res.data.bind_comp_id) {
-              // 如果有公司ID 那么就存数据，
-              // that.$toast.clear()
-              let a = { ...res.data, bind_comp_id: that.compId, bind_comp_id1: res.data.bind_comp_id };
-              sessionStorage.setItem("userinfo", JSON.stringify(a)); // 公司id 存入本地；
-              that.outData(res.data.id);  // 获取是否过期；
-              that.getConsole();
-              // that.getNotice();
-              that.noticeData();
-              localStorage.clear(); // 如果拉去到的话，那么就清除他的值
-            } else {
-              sessionStorage.setItem('temporaryId', res.data.id) //这个数据是备份的id 因为加入绑定公司的操作，肯定·是没有上面的bind——comp——id的。那么这个时候就存一下他的ID 然后给绑定公司的方法用一下就ok
-              let comapply = localStorage.getItem('compApply');
-              if (comapply) {  // 如果为true 证明他申请加入过公司，这时候给他个蒙版
-                that.compApply = true;
-              } else { // 如果为fasle 如果不存在那么就弹框提示他没有绑定公司
-                that.$toast.fail("当前账号没有绑定公司，请绑定公司。");
-                that.comp.show = true;
-              }
-            }
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-    },
-    getURl() {
-      // 没有code 获取code
-      let url = window.location.href;
-      // console.log(this.entry, 'this.entrythis.entrythis.entrythis.entry')
-      // console.log(this.CorpId, ' that.CorpId that.CorpId that.CorpId')
-      // if (this.entry == 'single_chat_tools') { // 如果是通过单聊中进入的，那么就截取code
-      if (url.includes('code')) {
-        url = window.location.href.split('?code=')[0];
-      }
-      // }
-      location.href = "https://wxa.jiain.net/wx-crm-server/wx/oauth2/login?url=" + url;
-      sessionStorage.setItem('first', '1');
-    },
-    totalLodding() {
-      this.$toast.loading({
-        message: "加载中...",
-        forbidClick: true,
-        duration: 800, // 持续展示 toast
-      });
     },
     firstLodding() {  // 初始化时候防流氓加载
       this.$toast.loading({
@@ -465,8 +414,10 @@ export default {
       });
     },
     skip(data) {
-      let compId = local.get('userinfo')?.bind_comp_id;
       let outData = JSON.parse(sessionStorage.getItem('pastDate'))  // 营销架构过期
+      console.log(JSON.parse(sessionStorage.getItem('userinfo')), 'useinfo')
+      console.log(sessionStorage.getItem('userinfo'), 'ssssss');
+      console.log(JSON.parse(sessionStorage.getItem('userinfo'))?.bind_comp_id + '--', !JSON.parse(sessionStorage.getItem('userinfo'))?.bind_comp_id)
       if (!JSON.parse(sessionStorage.getItem('userinfo'))?.bind_comp_id) {  // 没有加入公司 模块全部不让进
         this.$notify({ type: 'danger', message: '当前未加入公司' }); return;
       };
@@ -517,7 +468,9 @@ export default {
           return;
         };
         // 此处为了朋友圈功能，路由后面拼接字段 compID userID UserName;
-        this.$router.push(`/haiRing?compId=${local.C()}&userId=${local.U()}&userName=${sessionStorage.getItem('UserId')}`)
+        // let { suiteId, code } = JSON.parse(sessionStorage.getItem('codeBasice'))
+        // &userName=${sessionStorage.getItem('UserId')}&suiteId=${suiteId}&code=${code}
+        this.$router.push(`/haiRing?compId=${local.C()}&userId=${local.U()}`)
       } else if (data == 'verbal') {
         if (outData) {
           this.$toast('营销架构已到期，不能使用');
@@ -527,10 +480,10 @@ export default {
       }
     },
     clicksendCode() {
+      console.log('clicksendCode')
       //发送验证码倒计时，和发送验证码
-      let that = this;
       let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
-      var myreg = /^[1][3,4,5,7,8][0-9]{9}$/;
+      var myreg = /^[1][3,4,5,7,8,9][0-9]{9}$/;
       if (!myreg.test(this.sms)) {
         this.$toast.fail("请输入正确的手机号");
         return;
@@ -554,7 +507,6 @@ export default {
     },
     sendCode() {
       // 发送验证码
-      let that = this;
       let signature = generateSignature(this.sms, 2, timeout, nonce);
       this.$get(
         "/api/remote/util/sms",
@@ -582,6 +534,8 @@ export default {
     },
     bindlooyuCode() {
       // 验证码验证是否正确 验证码正确调用确认绑定
+      this.bindLooyu()
+      return;
       let that = this;
       let signature = generateSignature8(this.sms, 1, 3, timeout, nonce);
       let param = new URLSearchParams();
@@ -593,28 +547,26 @@ export default {
       param.append("timeout", timeout);
       param.append("signature", signature);
       this.$post1("/api/remote/itr/user/login", param)
-        .then(function (res) {
+        .then((res) => {
           if (res.error != "success") {
-            that.$toast.fail("验证码错误");
+            this.$toast.fail("验证码错误");
           } else {
-            that.bindLooyu();
+            this.bindLooyu();
           }
         })
-        .catch(function (error) {
-          that.$toast.fail("请求失败，请稍后再试");
+        .catch((error) => {
+          this.$toast.fail("请求失败，请稍后再试");
         });
     },
     bindLooyu() {
       // 确定绑定
-      let that = this;
       let signature = generateSignature4(
         this.open_userid,
         this.sms,
         timeout,
         nonce
       );
-      console.log(this.open_userid, this.CorpId)
-      this.$get("/wx-crm-server/wx/bind/itr", {
+      this.$get("/work/wx/bind/itr", {
         params: {
           openId: this.open_userid,
           itrId: this.sms,
@@ -623,19 +575,36 @@ export default {
           nonce,
           signature,
           bindWxCompId: this.CorpId,
+          code: this.login2?.code?.code,
+          suiteId: this.login2?.code?.suiteId,
+          code: this.codes,
+          remark: '企业微信用户自动加入'
         },
       })
-        .then(function (res) {
-          that.$router.push("/");
-          that.show = false;
-          that.getopenId(sessionStorage.getItem('CorpId'), sessionStorage.getItem('openId')); //绑定完成拉去是否绑定公司接口，刷新新赋值的公司信息
+        .then((res) => {
+          if (res.code == 200 && res.msg == 'success') {
+            this.registerClose();
+            let a = { ...res.data.user, bind_comp_id: this.compId, bind_comp_id1: res.data.user.bind_comp_id };
+            sessionStorage.setItem("userinfo", JSON.stringify(a)); // 公司id 存入本地；
+            this.outData(res.data.user.id);  // 获取是否过期；
+            localStorage.clear(); // 如果拉去到的话，那么就清除他的值
+            this.getConsole(); // 请求接口就可以  
+            this.noticeData();
+          } else {
+            this.$toast(res.msg);
+          }
         })
-        .catch(function (error) {
+        .catch((error) => {
           console.log(error);
         });
     },
+    bindPop() {
+      console.log(this.show, 'pop框关闭了');
+      sessionStorage.removeItem('showpop');
+    },
     getConsole() {
       let signature = generateSignature3(this.$U || local.U(), timeout, nonce);
+      console.log('getConsole')
       this.$get("/api/request/console/data",
         {
           params: {
@@ -730,6 +699,7 @@ export default {
     },
     // 内部公告小圆点
     noticeData() {
+      console.log(this.$U || local.U(), 'this.$U || local.U()')
       if (this.$U || local.U()) {
         let signature = generateSignature3(this.$U || local.U(), this.$C || local.C(), timeout, nonce);
         let param = new URLSearchParams();
@@ -761,33 +731,6 @@ export default {
           id: id,
         }
       })
-    },
-    initWebSocket() { //初始化weosock09et
-      let add = Math.floor(Math.random() * 100000000000000000000);
-      const wsuri = `wss://yg2.soperson.com/itver/socket?userId=13394171296&token=${add}`;
-      this.websock = new WebSocket(wsuri);
-      console.log(new WebSocket(wsuri));
-      this.websock.onmessage = this.websocketonmessage;
-      this.websock.onopen = this.websocketonopen;
-      this.websock.onerror = this.websocketonerror;
-      this.websock.onclose = this.websocketclose;
-    },
-    websocketonopen() { //连接建立之后执行send方法发送数据
-      console.log('要发送数据')
-    },
-    websocketonerror() {//连接建立失败重连
-      console.log("连接错误")
-      // this.initWebSocket();
-    },
-    websocketonmessage(e) { //数据接收
-      const redata = JSON.parse(e.data);
-      console.log(e.type, redata, '接收的消息')
-    },
-    websocketsend(Data) {//数据发送
-      this.websock.send(Data);
-    },
-    websocketclose(e) {  //关闭
-      console.log('断开连接', e);
     },
     Search() {
       this.comp.list.length = 0;
@@ -825,7 +768,6 @@ export default {
         });
     },
     onLoad() {
-      console.log('到底了')
       if (this.current >= this.total) {
         this.comp.finished = true;
         return;
@@ -837,42 +779,6 @@ export default {
     apply(item) {
       this.comp.item = item;
       this.comp.applyShow = true;
-    },
-    confirms() { // 加入公司申请
-      localStorage.setItem('compApply', true)
-      let { compId } = this.comp.item;
-      let ids = sessionStorage.getItem('temporaryId')
-      let signature = generateSignature3(compId, timeout, nonce);
-      let data = {
-        to: sessionStorage.getItem('temporaryId'),
-        fromCompId: compId,
-        nonce: nonce,
-        signature: signature,
-        timeout: timeout,
-        remark: this.comp.applyInp
-      }
-      this.$get(
-        "/api/request/comp/invite/do",
-        {
-          params: data,
-        },
-      ).then((res) => {
-        console.log(res)
-        if (res.error == 'success') {
-          // this.$toast('已成功加入该公司');
-          this.comp.applyShow = false;
-          this.comp.show = false;
-          this.laqu();
-        } else {
-          // this.comp.applyShow = false;
-          // this.compApply = true;
-        }
-      })
-        .catch(function (error) {
-          console.log(error);
-        });
-    },
-    cancel() {
     },
     async getWxJsJdk() {
       // 初始化init wx.config
@@ -984,101 +890,42 @@ export default {
           // alert(err);
         });
     },
-    // WXsend() {
-    //   wx.invoke('sendChatMessage', {
-    //     msgtype: "text", //消息类型，必填
-    //     text: {
-    //       content: "你好", //文本内容
-    //     },
-    //   }, function (res) {
-    //     console.log('服务指引返回结果', res);
-    //     if (res.err_msg == 'sendChatMessage:ok') {
-    //       //发送成功
-    //     }
-    //   })
-    // },
-    async laqu() {
-      let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
-      this.code = this.$route.query.code;
-      let first = sessionStorage.getItem('first');
-      if (first == 1) {
-        this.firstLodding();
-        sessionStorage.setItem('first', 2)
-      }
-      if (this.code) {
-        if (userinfo?.bind_comp_id) {
-          // 有公司ID 表示登录成功 判断是否初次登录
-          this.getConsole();
-          // this.getNotice();
-          this.noticeData();
-          // this.initWebSocket();
-        } else {
-          //没有公司ID
-          await this.getUserinfo(); //拿code 获取用户信息
-        }
-      } else {
-        // 无code
-        if (userinfo?.bind_comp_id) {
-          // 如果有就不跳转微信页
-          this.getConsole();
-          // this.getNotice();
-          this.noticeData();
-        } else {
-          // 没有code 请求code
-          this.getURl(); // 没有code 请求code
-        }
-      }
-      setTimeout(async () => {
-        await this.getAgentConfig(); // 同步执行 否则会报错
-        await this.getWxJsJdk();
-      }, 1500);
-
-    }
   },
   async created() {
-    let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
-    this.code = this.$route.query.code;
-    let first = sessionStorage.getItem('first');
-    if (first == 1) {
-      this.firstLodding();
-      sessionStorage.setItem('first', 2)
-    }
-    if (this.code) {
-      if (userinfo?.bind_comp_id) {
-        // 有公司ID 表示登录成功 判断是否初次登录
-        this.getConsole();
-        this.noticeData();
-        // this.initWebSocket();
-      } else {
-        //没有公司ID
-        await this.getUserinfo(); //拿code 获取用户信息
-      }
+    let url = window.location.href;
+    let urlparame = window.location.search; //通过location.href获取code 和suiteId;
+    let userinfo = JSON.parse(sessionStorage.getItem("userinfo"))
+    if (userinfo?.bind_comp_id) { // 判断是否有bind_comp_id；有不授权，
+      this.getConsole();
+      this.noticeData();
     } else {
-      // 无code
-      if (userinfo?.bind_comp_id) {
-        // 如果有就不跳转微信页
-        this.getConsole();
-        this.noticeData();
-      } else {
-        // 没有code 请求code
-        this.getURl(); // 没有code 请求code
+      this.firstLodding() // 第一次弹框
+      if (url.includes('suiteId') && url.includes('code')) { //如果有参数请求信息
+        this.login2.code = URLCut(urlparame); // 将suiteId 和 code 信息储存 data 中
+        sessionStorage.setItem("codeBasice", JSON.stringify(URLCut(urlparame)))
+        this.getUserinfo(); //拿code 获取用户信息;
+      } else { // 如果两个参数就弹出错误;
+        // this.$toast('内部错误3，请联系管理员');
       }
     }
-    setTimeout(async () => {
-      await this.getAgentConfig(); // 同步执行 否则会报错
-      await this.getWxJsJdk();
-      this.outData();
-    }, 1500);
-
   },
   mounted() {
     Utils.$on("reset", (msg) => {
-      // 解绑触发该方法，重新获取code 拉去信息
-      // this.getURl(); // 没有code 请求code
-      // this.getUserinfo();
-      this.created()
+      this.$nextTick(() => {
+        this.getUserinfo();
+      })
     });
-
+    Utils.$on("bindSuccess", (res) => {
+      this.$nextTick(() => {
+        console.log('我来了来了')
+        let a = { ...res.data.user, bind_comp_id: this.compId || res.data.compId, bind_comp_id1: res.data.user.bind_comp_id };
+        sessionStorage.setItem("userinfo", JSON.stringify(a)); // 公司id 存入本地；
+        this.outData(res.data.user.id);  // 获取是否过期；
+        localStorage.clear(); // 如果拉去到的话，那么就清除他的值
+        this.getConsole(); // 请求接口就可以  
+        this.noticeData();
+      })
+    });
   },
   beforeRouteEnter: (to, from, next) => {
     next(vm => {

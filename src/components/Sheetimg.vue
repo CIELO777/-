@@ -21,7 +21,12 @@
           height="1.6rem"
           fit="contain"
           :src="item"
-        />
+          :show-error="false"
+        >
+          <template v-slot:loading>
+            <van-loading color="#53b1d8" size="20" />
+          </template>
+        </van-image>
       </template>
       <div class="uploadView">
         <img src="../assets/img/addPhoto@2x.png" alt="" />
@@ -61,7 +66,7 @@ import local from '../uilts/localStorage';
 
 export default {
   name: 'SheetImg',
-  props: ['skip'],
+  props: ['skip', 'userInfo'],
   data() {
     return {
       message: '',
@@ -89,10 +94,10 @@ export default {
       };
       if (this.$route.name === 'ChatCustomer') {  // 客户画像限定
         let linkmanId = sessionStorage.getItem('linkmanId') // 当前联系人的ID
-        data.itrId = this.userInfos().id;
-        data.compId = this.userInfos().bind_comp_id1;
+        data.itrId = this.userInfo.itr_userid;
+        data.compId = this.userInfo.itr_compid;
         data.pid = linkmanId;
-        data.signature = generateSignature3(0, data.itrId, data.compId, linkmanId, timeout, nonce);
+        data.signature = generateSignature3(0, this.userInfo.itr_userid, this.userInfo.itr_compid, linkmanId, timeout, nonce);
       } else { // 客户管理模块-跟进记录模块
         let crmInfoId = JSON.parse(sessionStorage.getItem('_crm_info'))?.id;
         data.itrId = this.$U || local.U();
@@ -167,6 +172,11 @@ export default {
       formData.append('id', this.uuid());
       formData.append('type', 1);
       formData.append('file', file);
+      that.imageList.push(
+        '1'
+      );
+      console.log(that.imageList.length)
+      let index = that.imageList.length - 1;
       this.$post('//upload.jiain.net/upload', formData).then(res => {
         if (res.state === 'success') {
           let url = 'http://ego-file.soperson.com' + res.url;
@@ -174,12 +184,17 @@ export default {
             that.$toast.fail('最多上传9张图片!');
             return;
           }
-          that.imageList.push(url);
+          console.log(url)
+          that.imageList[index] = url; //成功就填充
+          that.$forceUpdate()
+          console.log(that.imageList)
         } else {
           that.$toast.fail('上传失败请稍后再试!');
+          that.imageList.splice(index, 1)
         }
       }).catch(err => {
         console.log(err)
+        that.imageList.splice(index, 1)
       })
     },
     backgo() {  // 点击返回的时候保存信息
@@ -233,6 +248,7 @@ export default {
       opacity: 0;
       position: absolute;
       width: 100%;
+      height: 100%;
       left: 0;
       top: 0;
     }

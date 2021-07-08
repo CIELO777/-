@@ -126,7 +126,7 @@
         type="primary"
         size="normal"
         @click="OrderSave"
-        >保存1</van-button
+        >保存</van-button
       >
     </div>
     <!-- 类型选择弹框 -->
