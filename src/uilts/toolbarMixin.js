@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:13:08 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-08 15:37:59
+ * @Last Modified time: 2021-07-09 15:51:53
  * 聊天工具栏素材分享功能组件，
  */
 
@@ -47,16 +47,33 @@ export const Toolbar = {
 				// this.initMineInfo(); // 头像,背景墙,
 			}
 		} else {
-			if (url.includes('compId') && url.includes('userId')) { //如果有参数请求信息
-				this.login2.code = this.urlcut(urlparame); // 将suiteId 和 code 信息储存 data 中
-				sessionStorage.setItem("codeBasice", JSON.stringify(this.login2.code))
-				if (this.$route.name === 'HaiRing') {
-					this.UI = this.login2.code.userId;
-					this.CI = this.login2.code.compId;
+			if (this.$route.name == 'HaiRing') { // 朋友圈授权比较特殊，单独处理
+				let code = this.$route.query.code;
+				if (sessionStorage.getItem('codeBasice')) {// 如果存在 
+					let { compId, userId } = JSON.parse(sessionStorage.getItem('codeBasice'))
+					this.UI = userId;
+					this.CI = compId;
+				};
+				if (code) {
 					this.getList();  //推送
+					this.haringUser(code);
+				} else {
+					this.login2.code = this.urlcut(urlparame); // 将suiteId 和 code 信息储存 data 中
+					sessionStorage.setItem("codeBasice", JSON.stringify(this.login2.code));
+					let { compId, userId } = this.login2.code;
+					let env = process.env.VUE_APP_ROUTE
+					let urljoin = 'https://wxa.jiain.net' + env + 'haiRing?compId=' + compId + '&userId=' + userId;
+					let url = encodeURI(urljoin)
+					location.href = 'https://wxa.jiain.net/work/mp/authorize?url=' + url + '&compId=' + compId;
 				}
-			} else {
-				this.$toast('url有误')
+			} else { // 聊天工具栏normal
+				if (url.includes('suiteId') && url.includes('code')) { //如果有参数请求信息
+					this.login2.code = this.urlcut(urlparame); // 将suiteId 和 code 信息储存 data 中
+					sessionStorage.setItem("codeBasice", JSON.stringify(this.login2.code))
+					this.getUserinfo()
+				} else {
+					this.$toast('url有误,请检查配置。')
+				}
 			}
 		}
 	},
@@ -102,12 +119,12 @@ export const Toolbar = {
 								} else if (this.$route.name === 'ChatCustomer') { // 营销画像
 									this.init() // 请求数据
 									this.accomplish = true;
-								} else if (this.$route.name === 'HaiRing') {  //朋友圈素材
-									this.initMineInfo(); //
-									this.getList();
-									this.pushText() // 推送
-
 								}
+								// else if (this.$route.name === 'HaiRing') {  //朋友圈素材
+								// 	this.initMineInfo(); //
+								// 	this.getList();
+								// 	this.pushText() // 推送
+								// }
 								sessionStorage.setItem('Single', true);
 								this.masking = ''; //清空mengban
 							}
@@ -162,6 +179,21 @@ export const Toolbar = {
 				}
 				return theRequest //{code:'1213',suiteId:'456',state:0} 返回格式;
 			}
+		},
+		haringUser(code) { // 获取朋友圈userinfo限定。
+			this.$get("/work/mp/get/userinfo", {
+				params: {
+					code,
+					compId: this.CI,
+				},
+			}).then((res) => {
+				if (res.code == 200 && res.msg == 'success') {
+					this.pushText(res.data.nickname || '') // 推送
+				}
+			})
+				.catch(function (error) {
+					console.log(error);
+				});
 		}
 	}
 };

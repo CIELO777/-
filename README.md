@@ -344,4 +344,5 @@ customer(1872r) 上线前改回
 【重构】客户画像页面样式微调
 
 
+【重构】企业微信对外信息展示
 https://wxa.jiain.net/wx-crmTest/ConfigParam // 企业微信配置

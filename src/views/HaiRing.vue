@@ -43,7 +43,6 @@ let timeout = generateTimeout();
 let nonce = generateNonce();
 import local from '../uilts/localStorage';
 import { Toolbar } from '../uilts/toolbarMixin';
-
 import HaiRingView from '../components/HaringView/HaringViews';
 export default {
   name: "HaiRing",
@@ -60,6 +59,9 @@ export default {
         bottom: 0,
         background: '#fff',
         zIndex: 999,
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: 'flex'
       },
       type: 1,
       show: false,
@@ -122,16 +124,13 @@ export default {
           this.comment = Object.assign(this.comment, res.comment);
           this.thumb = Object.assign(this.thumb, res.thumb);
           this.total = res.totalPageCount;
-          console.log(this.$U || local.U() || this.UI)
           this.userInfo = {
             nick: res.user[this.$U || local.U() || this.UI]?.nickname || '粉丝' + this.UI.substring(11 - 4),
             background: res.user[this.UI]?.background || 'http://ego-file.soperson.com/itver/18600630743/20171016/33971508152959763.png',
             portrait: res.user[this.UI]?.portrait || 'http://ego-file.soperson.com/itver/13522008806/201712271708/85671523589501951.png'
           };
           this.masking = '';
-          // setTimeout(() => {
-          //   this.$toast.clear()
-          // }, 800)
+          this.$toast.clear()
         })
         .catch(function (error) {
           console.log(error);
@@ -142,7 +141,6 @@ export default {
       document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
       this.current = 1;
       this.onSearch(this.current);
-
     },
     onSearch(cur) {
       let signature = generateSignature3(
@@ -190,11 +188,13 @@ export default {
     onCancel() {
       this.state = 'list';
       this.current = 1;
+      console.log('onCancel')
       document.documentElement.scrollTop = document.body.scrollTop = 0; // 设置每个页面的scrollTop
       this.getList()
     },
     mySonChagne(data) {
-      let cur = ++data
+      let cur = ++data;
+      this.current = cur;
       this.getList(cur)
     },
     loading() {
@@ -271,14 +271,13 @@ export default {
         this.backName = this.backUserIds;
       });
     },
-    pushText() { // 推送;
+    pushText(name) { // 推送;
       this.$get("/work/message/push", {
         params: {
           type: 'text',
           itrId: this.UI,
           compId: this.CI,
-          text: '客户访问了你的朋友圈。',
-          // text: `客户【${this.backName}】打开了你的朋友圈。`,
+          text: `客户【${name}】打开了你的朋友圈。`,
         },
       }).then((res) => {
         console.log(res)

@@ -222,14 +222,13 @@ export default {
       } else {
         let cur = ++this.current;
         this.$emit('onSearch', cur) // 触发爷组件方法更新数据下一页
-
       }
       setTimeout(() => {
         this.loading = false;
       }, 1800)
     },
-
     historyNews() {
+      return;
       this.$router.push({
         path: '/haringHistroy'
       })
