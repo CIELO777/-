@@ -15,7 +15,7 @@ import wx from "weixin-js-sdk";
 import Vconsole from 'vconsole';
 import UUID from 'vue-uuid';
 import '@vant/touch-emulator'; //
-import Icon from 'vue2-svg-icon/Icon'
+import Icon from 'vue2-svg-icon/Icon';
 Vue.component('icon',Icon);
 Vue.use(UUID);
 // new Vconsole();
