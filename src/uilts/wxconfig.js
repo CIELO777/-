@@ -2,7 +2,7 @@
  * @Author: Tian 
  * @Date: 2021-07-02 15:18:13 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-07 19:20:20
+ * @Last Modified time: 2021-07-12 11:43:14
  * 公共微信授权接口。项目全部授权接口全部走此授权（客户画像比较特殊单独走了一个）
  */
 import { get } from './https';
@@ -77,7 +77,6 @@ let getWxJsJdk = () => {
 							console.log(res)
 						},
 						fail: (res) => {
-							console.log(res, '44444444444444')
 							Toast.fail(res);
 							if (res.errMsg.indexOf("function not exist") > -1) {
 							};

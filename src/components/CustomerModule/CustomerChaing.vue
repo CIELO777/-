@@ -43,5 +43,6 @@ export default {
 .CustomerChaing {
   overflow-y: scroll;
   height: 78vh;
+  padding-top: 15px;
 }
 </style>

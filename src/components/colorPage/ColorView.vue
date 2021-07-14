@@ -1,8 +1,8 @@
 /*
  * @Author: YUN_KONG 
  * @Date: 2021-01-12 13:56:29 
- * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-06-04 11:04:47
+ * @Last Modified by: Tian
+ * @Last Modified time: 2021-07-12 11:21:08
  8 此模块用于彩页，软文列表
  */
 <template>
@@ -244,7 +244,9 @@ export default {
   activated() {
   },
   created() {
-    console.log(this.configs)
+    if (this.$route.name !== 'ChatBarShare') { // 这个授权只是在工作台时候授权
+      wxxx()
+    };
     this.uid = JSON.parse(sessionStorage.getItem('userinfo')).id;
     // wxxx(); // 为了授权分享接口使用，所以一定要在这调用
   },

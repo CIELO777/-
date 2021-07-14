@@ -1,7 +1,7 @@
 <template>
   <div
     class="CustomerOpera"
-    :style="{ height: height }"
+    :style="{ height: height  }"
     @scroll="scrollEventselect"
   >
     <template v-if="Object.keys(optRecordMap).length > 0">
@@ -178,7 +178,7 @@ export default {
 <style lang="less" scoped>
 .CustomerOpera {
   overflow-y: scroll;
-  height: 78vh;
+  padding: 0 15px;
   .qs-title {
     background-color: #f0f0f5;
     padding: 5px;
@@ -186,7 +186,7 @@ export default {
   }
   .OPeraBox {
     // padding-bottom: 30px;
-    padding-top: 10px;
+    // padding-top: 10px;
   }
   .OPeraBox:last-of-type {
     padding-bottom: 30px;

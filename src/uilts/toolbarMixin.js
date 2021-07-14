@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:13:08 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-09 15:51:53
+ * @Last Modified time: 2021-07-13 18:24:25
  * 聊天工具栏素材分享功能组件，
  */
 
@@ -136,7 +136,7 @@ export const Toolbar = {
 							sessionStorage.setItem('tickets', JSON.stringify(res.data.tickets))
 						}
 					} else {
-						this.$toast(res.msg);
+						this.$toast(res, 'userinfoError');
 					}
 				}
 			)

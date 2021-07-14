@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:48:39 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-08 16:08:25
+ * @Last Modified time: 2021-07-13 18:42:51
    聊天工具栏客户管理工具栏,和我的客户对话时候快捷打开
    1.先获取当前企业微信联系人ID，并通过code 授权获取this.U and this.C()。
    2.拉取联系人列表通过（wx。wxcrmID）判断在联系人列表里有是否有当前联系人。
@@ -11,16 +11,16 @@
  */
 <template>
   <div class="ChatCustomer">
-    <div :style="maskings">
+    <!-- <div :style="maskings">
       <van-loading
         size="36"
         color="rgb(25, 137, 250)"
         v-if="maskings"
         type="spinner"
       />
-    </div>
+    </div> -->
     <header>
-      <img :src="userInfo.avatar || imgSrc" alt="" />
+      <img  :src="userInfo.avatar || imgSrc" alt="" />
       <div class="infoBox">
         <p style="display: flex; align-items: center">
           <strong class="namebold"
@@ -64,66 +64,58 @@
       <p class="origin"><span>Ta添加的：</span><span>-</span></p>
       <span>共{{}}个群聊 ></span>
     </article> -->
-    <article class="tab">
-      <div class="company">
-        <div>
+
+    <article class="dynamic">
+      <van-tabs v-model="active" color="#53b1d8">
+        <van-tab title="企业标签">
+          <article class="tab">
+            <div class="company">
+              <!-- <div>
           <span class="title">企业标签</span>
           <div>
-            <!-- <van-button
-              type="primary"
-              size="small"
-              style="margin-right: 10px"
-              @click="syncTag"
-              >同步</van-button
-            > -->
             <van-button
               style="margin-right: 10px"
-              plain
+              plain 
               color="#5f97ae"
               type="info"
-              size="mini"
+              size="small"
               @click="AddTab"
               icon="plus"
               >添加</van-button
             >
           </div>
-        </div>
-        <template v-if="TagList2.length > 0">
-          <div
-            v-for="(item, index) in TagList2"
-            :key="index"
-            style="margin-top: 5px"
-          >
-            <p class="grade" v-show="item.checked">{{ item.group_name }}</p>
-            <div v-if="item.tag && item.tag.length > 0">
-              <template v-for="(item1, index1) in item.tag">
-                <van-button
-                  v-show="item1.checked"
-                  plain
-                  type="default"
-                  style="
-                    margin: 0 10px 5px 0;
-                    color: #767676;
-                    background-color: #f5f5f5;
-                  "
-                  size="mini"
-                  :key="index1"
-                  >{{ item1.name }}</van-button
+        </div> -->
+              <template v-if="TagList2.length > 0">
+                <div
+                  v-for="(item, index) in TagList2"
+                  :key="index"
+                  style="margin-top: 5px"
                 >
+                  <p class="grade" v-show="item.checked">
+                    {{ item.group_name }}
+                  </p>
+                  <div v-if="item.tag && item.tag.length > 0">
+                    <template v-for="(item1, index1) in item.tag">
+                      <van-button
+                        v-show="item1.checked"
+                        plain
+                        type="default"
+                        style="
+                          margin: 0 10px 5px 0;
+                          color: #767676;
+                          background-color: #f5f5f5;
+                        "
+                        size="mini"
+                        :key="index1"
+                        >{{ item1.name }}</van-button
+                      >
+                    </template>
+                  </div>
+                </div>
               </template>
             </div>
-          </div>
-        </template>
-      </div>
-      <!-- <div class="personage">
-        <p>
-          <span class="title">个人标签</span
-          ><van-button type="info" size="small">添加</van-button>
-        </p>
-      </div> -->
-    </article>
-    <article class="dynamic">
-      <van-tabs v-model="active" color="#53b1d8">
+          </article>
+        </van-tab>
         <van-tab title="跟进记录">
           <CustomerFollow
             :height="height"
@@ -143,20 +135,23 @@
         </van-tab>
       </van-tabs>
     </article>
-    <!-- <van-tabbar v-model="TabActive" active-color="#646566" z-index="99">
-      <van-tabbar-item icon="search" @click="Tabclick(1)"
+    <van-tabbar v-model="TabActive" active-color="#646566" z-index="99">
+      <van-tabbar-item icon="coupon-o" @click="Tabclick(4)"
+        >添加标签</van-tabbar-item
+      >
+      <van-tabbar-item icon="plus" @click="Tabclick(1)"
         >添加跟进</van-tabbar-item
       >
-     <van-tabbar-item icon="friends-o" @click="Tabclick(2)"
+      <!-- <van-tabbar-item icon="friends-o" @click="Tabclick(2)"
         >转接客户</van-tabbar-item
-      > 
+      >  -->
       <van-tabbar-item @click="Tabclick(3)">
         <template #icon>
           <van-icon name="chat-o" />
         </template>
-        <span> 拨打电话</span>
+        <span>拨打电话</span>
       </van-tabbar-item>
-    </van-tabbar> -->
+    </van-tabbar>
     <!-- 详情弹框 -->
     <van-popup
       v-model="detailsPop"
@@ -752,7 +747,7 @@ export default {
   inject: ['reload'],
   data() {
     return {
-      height: '400px',
+      height: '68vh',
       show: false,
       overlay: true,
       sheetPop: false,
@@ -1036,16 +1031,25 @@ export default {
           if (result == null) {
             this.$toast('初始化,请稍后...')
           } else {
-            this.$toast('手机号码错误，请修改后再拨打电话')
+            this.$dialog.confirm({
+              title: '温馨提示',
+              message: '手机号未设置，是否设置手机号？',
+            })
+              .then(() => {
+                this.popShow.phone = true; // 打开弹框
+                this.formData.phone =this.crmInfos.phone; // 回显数据
+                // on confirm
+              })
+              .catch(() => {
+                // on cancel
+              });
           }
           // setTimeout(() => {
           //   this.detailsPop = true;
           // }, 800)
         }
       } else if (data == 4) {
-        console.log(this.crmInfos)
-        return
-        window.location.href = `sms:${this.crmInfos.phone}?body=${12}`; // type== 0 关闭弹框
+        this.AddTab();
       }
     },
     check_mobil(phone) { // 校验手机号
@@ -1097,6 +1101,7 @@ export default {
           this.area = d.split('-')[2];
         }
         this.popShow[e] = true; // 打开弹框
+
         if (e == 'share') {
           this.formData[e] = d; // 回显数据
         }
@@ -1581,12 +1586,11 @@ export default {
             res.data.createtime ? this.userInfo.createtime = timestampToTime(res.data.createtime) : this.userInfo.createtime = '-';
             if (res.data.tags) {
               this.getdispost(res.data.tags) // 赋值标签
-
             }
             this.maskings = '';  // 清空蒙版
             this.$toast.clear();
             setTimeout(() => {
-              this.getTagList();
+              // this.getTagList();
               this.getCrm()
             }, 5000)
           } else {
@@ -1800,7 +1804,6 @@ export default {
         .then((res) => {
           this.findPitchTag(res.data) // 处理数据结构，选中添加checked
           console.log(this.TagList)
-
         })
         .catch((error) => {
           console.log(error);
@@ -1898,8 +1901,6 @@ export default {
       this.$post1("/work/tag/mark_tag" + '?compId=' + this.userInfo.itr_compid + '&timeout=' + timeout + '&nonce=' + nonce + '&signature=' + signature, params)
         .then(async (res) => {
           if (res.code == 200 && res.msg == 'success') {
-            // await this.getlinkmanDetail();
-            // this.getTagList();
             let result = JSON.parse(JSON.stringify(this.TagList.map(item => { //更新数组
               if (item.tag && item.tag.length) {
                 for (let index = 0; index < item.tag.length; index++) {
@@ -2002,7 +2003,7 @@ export default {
   },
   async created() {
     // await this.getlinkmanDetail();
-    // this.getTagList()
+    // this.getTagList();
     // this.init();
     //  wxxxChat().then(res => {
     //    console.log(res)
@@ -2011,7 +2012,7 @@ export default {
     //   //  resolve(res);
     //   }).catch(error => {
     //     console.log(error)
-    //  })
+    //  })     
     // this.applyComp()
     // this.init();
     // console.log(this.getDetail())
@@ -2140,21 +2141,24 @@ export default {
     .commonPadd;
     padding-top: 0;
     padding-bottom: 0;
+    border: none;
+    max-height: 68vh;
+    overflow-y: auto;
     .company {
       margin-bottom: 15px;
       // border-top: 10px solid #aaaaaa;
-      padding-top: 10px;
+      padding: 5px;
       border-style: solid;
-      div:first-child {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.2rem;
-        .title {
-          font-size: 0.3rem;
-          font-weight: 600;
-        }
-      }
+      // div:first-child {
+      //   display: flex;
+      //   justify-content: space-between;
+      //   align-items: center;
+      //   margin-bottom: 0.2rem;
+      //   .title {
+      //     font-size: 0.3rem;
+      //     font-weight: 600;
+      //   }
+      // }
       p {
         display: flex;
         justify-content: space-between;
@@ -2523,7 +2527,7 @@ export default {
   /deep/ .van-button--mini {
     padding: 0 7px;
   }
-  /deep/ .van-button--default{
+  /deep/ .van-button--default {
     background-color: #f1f4f6;
   }
 }

@@ -77,7 +77,7 @@ export default {
             this.shareCount()
             // this.$toast('分享成功')
           } else {
-            this.$toast('分享失败,您的企业微信没有权限分享，请检查企业微信配置')
+            this.$toast('分享失败', res)
           }
         }
         );
@@ -95,10 +95,8 @@ export default {
           if (res.err_msg == "shareAppMessage:ok") {
             this.shareCount()
             this.$toast('分享成功')
-          } else if (res.err_msg == 'shareAppMessage:cancel') {
-            this.$toast('分享取消')
           } else {
-            this.$toast('分享失败,您的企业微信没有权限分享，请检查企业微信配置')
+            this.$toast('分享失败', res)
           }
         }
         );

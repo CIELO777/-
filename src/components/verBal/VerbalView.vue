@@ -114,6 +114,7 @@
 
 <script>
 import share from '../share'
+import wxxx from '../../uilts/wxconfig';
 
 export default {
   name: "VerbalView",
@@ -127,7 +128,7 @@ export default {
       refreshing: false,
       ShareContent: {},
       editPop: false,
-      message: ''
+      message: '',
     };
   },
   watch: {},
@@ -221,7 +222,9 @@ export default {
     }
   },
   created() {
-
+    if (this.$route.name !== 'ChatBarShare') { // 这个授权只是在工作台时候授权
+      wxxx()
+    };
   },
   mounted() { },
 };

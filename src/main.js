@@ -22,7 +22,7 @@ Vue.use(UUID);
 Vue.prototype.$wx = wx; // 挂载wx-jdk 插件
 Vue.prototype.$post = post;
 Vue.prototype.$post1 = post1;
-Vue.prototype.$get = get;  // axios二次封 装
+Vue.prototype.$get = get;  // axios二次封装
 Vue.prototype.$U = local.U();  // Userid
 Vue.prototype.$C = local.C();  // Compid
 Vue.config.productionTip = false;

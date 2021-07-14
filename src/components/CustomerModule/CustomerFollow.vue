@@ -1,6 +1,6 @@
 <template>
   <div class="CustomerFollow">
-    <div class="follTit">
+    <!-- <div class="follTit">
       <div style="margin-left: 15px">
         <img src="../../assets/img/pencil3.png" class="addicon" alt="" />
         <div style="color:'#5f97ae'">
@@ -12,10 +12,7 @@
           <van-icon name="phone-o" size="0.46rem" style="margin-right: 15px" />
         </a>
       </div>
-      <!-- <van-popup v-model="audioPop" :style="{ height: '30%' }" position="bottom">
-            <div class="circle"><span>按住说话</span></div>
-            </van-popup>  -->
-    </div>
+    </div> -->
     <div @scroll="scrollEventselect" :style="{ height: height,overflowY:'scroll',paddingTop:'15px'}">
       <div class="follCont" v-if="follList.length > 0">
         <div v-for="(item, index) in follList" :key="index" class="follMain">
