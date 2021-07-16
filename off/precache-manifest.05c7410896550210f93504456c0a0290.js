@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "3df965097437082df786",
-    "url": "/looyu/css/about.9d83ec11.css"
+    "revision": "85405ae9f1f863de9797",
+    "url": "/looyu/css/about.1d7915bb.css"
   },
   {
-    "revision": "4f416ae5e84d41d2925d",
+    "revision": "0ebeb66a1cf927acecc4",
     "url": "/looyu/css/app.c3cd8529.css"
   },
   {
@@ -54,6 +54,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
     "revision": "66830ea6be8e7e94fb55df9f7b778f2e",
     "url": "/looyu/img/apple-touch-icon.png"
+  },
+  {
+    "revision": "b79e54e55bfa979c9978177add8bb7df",
+    "url": "/looyu/img/chatTag.b79e54e5.png"
   },
   {
     "revision": "5f0ecc071609c69b8a3bc0689b02847c",
@@ -248,10 +252,6 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/looyu/img/pdf.34e5e6c5.png"
   },
   {
-    "revision": "0da546e6187567df4d84d6f6ad4aaba6",
-    "url": "/looyu/img/pencil3.0da546e6.png"
-  },
-  {
     "revision": "4e857233cbd3bb2d2db4f78bed62a52f",
     "url": "/looyu/img/safari-pinned-tab.svg"
   },
@@ -328,6 +328,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/looyu/img/海报素材.371515b7.png"
   },
   {
+    "revision": "5984831dc3abd7bf7adc2f7b761cdf81",
+    "url": "/looyu/img/电话.5984831d.png"
+  },
+  {
     "revision": "65360032397165f6ea07888b60e30100",
     "url": "/looyu/img/营销文档.65360032.png"
   },
@@ -348,6 +352,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/looyu/img/记录.a3b105d7.png"
   },
   {
+    "revision": "3c4b0ffb3527a5e9594f3e1735b6c04a",
+    "url": "/looyu/img/跟进记录.3c4b0ffb.png"
+  },
+  {
     "revision": "55454feee3efe399a1c4294fe26d94ab",
     "url": "/looyu/img/软文素材.55454fee.png"
   },
@@ -356,16 +364,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/looyu/img/销售雷达.1dc28589.png"
   },
   {
-    "revision": "caeb932436da2088c38016325e542835",
+    "revision": "bd8ab2238eb65bac92cbf106c4d79cb5",
     "url": "/looyu/index.html"
   },
   {
-    "revision": "3df965097437082df786",
-    "url": "/looyu/js/about.3b212535.js"
+    "revision": "85405ae9f1f863de9797",
+    "url": "/looyu/js/about.d91b6c5d.js"
   },
   {
-    "revision": "4f416ae5e84d41d2925d",
-    "url": "/looyu/js/app.f56bbdf3.js"
+    "revision": "0ebeb66a1cf927acecc4",
+    "url": "/looyu/js/app.92773624.js"
   },
   {
     "revision": "2611e21f9815004e885a",

@@ -1,23 +1,21 @@
 <template>
   <div
     class="CustomerOpera"
-    :style="{ height: height  }"
+    :style="{ height: height }"
     @scroll="scrollEventselect"
   >
     <template v-if="Object.keys(optRecordMap).length > 0">
       <div v-for="(item, index) in optRecordMap" :key="index" class="OPeraBox">
         <div class="qs-title bg-color-f0">
-          <span>{{ index }}</span>
+          <span style="font-weight: 550;">{{ index }}</span>
         </div>
         <div
           class="record-detail"
           v-for="(items, indexs) in item"
           :key="indexs"
         >
-          <span>{{ items.accurateTime }}</span>
-          <span class="detail"
-            >{{ optRecordUserMap[items.creator].nickname }}
-          </span>
+          <span class="timeColor">{{ items.accurateTime }}</span>
+          <span class="detail">{{ optRecordUserMap[items.creator].nickname }}</span>
           <span class="detail qs-blue">{{ items.typeName }}</span>
           <span v-if="items.type != 6 && items.type != 7">
             <span v-if="items.type == 2"> 给 </span>
@@ -178,11 +176,11 @@ export default {
 <style lang="less" scoped>
 .CustomerOpera {
   overflow-y: scroll;
-  padding: 0 15px;
+  // padding: 0 15px;
   .qs-title {
     background-color: #f0f0f5;
-    padding: 5px;
-    font-size: 0.36rem;
+    padding: 10px;
+    font-size: 0.28rem;
   }
   .OPeraBox {
     // padding-bottom: 30px;
@@ -194,16 +192,20 @@ export default {
   .record-detail {
     background-color: #fff;
     // padding: 10px;
-    font-size: 0.3rem;
+    font-size: 0.26rem;
     line-height: 36px;
     margin-bottom: 1px;
     letter-spacing: 1px;
+    padding: 0 10px;
     .detail {
-      padding-left: 10px;
+      padding-left: 5px;
     }
     .qs-blue {
       color: #0000ff;
     }
+  }
+  .timeColor {
+    color:#304d04
   }
 }
 </style>

@@ -14,50 +14,61 @@
           :key="index"
           class="card"
           :style="{
-            flexDirection: openId == item.fromId ? 'row-reverse' : 'row',
+            flexDirection: openId != item.from ? 'row-reverse' : 'row',
           }"
         >
           <!-- 文字 -->
           <template v-if="item.msgType == 'text'">
             <img
-              :src="openId == item.fromId ? fromUser.portrait : toUser.portrait"
+              :src="
+                openId != item.from
+                  ? user[item.from].avatar || defaultImg
+                  : user[item.from].avatar || defaultImg
+              "
               alt=""
               class="head"
             />
             <div
-              :class="openId == item.fromId ? 'chatBox' : 'chatBoxL'"
+              :class="openId != item.from ? 'chatBox' : 'chatBoxL'"
               :style="{
-                marginLeft: openId == item.fromId ? '' : '10px',
-                marginRight: openId != item.fromId ? '' : '10px',
-                background: openId == item.fromId ? '#C5E9FF' : '#fff',
+                marginLeft: openId != item.from ? '' : '10px',
+                marginRight: openId != item.from ? '10px' : '',
+                background: openId != item.from ? '#C5E9FF' : '#eee',
               }"
             >
-              {{ item.cont }}
+              {{ item.content }}
             </div>
           </template>
           <!-- 图片 -->
           <template v-if="item.msgType == 'image'">
             <img
-              :src="openId == item.fromId ? fromUser.portrait : toUser.portrait"
+              :src="
+                openId != item.from
+                  ? user[item.from].avatar || defaultImg
+                  : user[item.from].avatar || defaultImg
+              "
               alt=""
               class="head"
             />
-
             <div
               class="ImgBack"
-              @click="ClickImgBack(item.localFileIdUrl)"
+              @click="ClickImgBack(item.sdkFileUrl)"
               :style="{
-                backgroundImage: 'url(' + item.localFileIdUrl + ') ',
-                backgroundPositionX: openId == item.fromId ? 'right' : 'left',
-                marginLeft: openId == item.fromId ? '' : '10px',
-                marginRight: openId == item.fromId ? '10px' : '',
+                backgroundImage: 'url(' + item.sdkFileUrl + ') ',
+                backgroundPositionX: openId == item.from ? 'right' : 'left',
+                marginLeft: openId == item.from ? '' : '10px',
+                marginRight: openId == item.from ? '10px' : '',
               }"
             ></div>
           </template>
           <!-- 视频 -->
           <template v-if="item.msgType == 'video'">
             <img
-              :src="openId == item.fromId ? fromUser.portrait : toUser.portrait"
+              :src="
+                openId != item.from
+                  ? user[item.from].avatar || defaultImg
+                  : user[item.from].avatar || defaultImg
+              "
               alt=""
               class="head"
             />
@@ -65,8 +76,8 @@
               @click="VedioClick(item.localFileIdUrl + '?frame=1')"
               class="mack"
               :style="{
-                left: openId == item.fromId ? '' : '3.2rem',
-                right: openId == item.fromId ? '1.35rem' : '',
+                left: openId == item.from ? '' : '3.2rem',
+                right: openId == item.from ? '1.35rem' : '',
                 top: '10px',
               }"
             >
@@ -83,8 +94,8 @@
               class="iframeS"
               scrolling="auto"
               :style="{
-                marginLeft: openId == item.fromId ? '' : '10px',
-                marginRight: openId == item.fromId ? '10px' : '',
+                marginLeft: openId == item.from ? '' : '10px',
+                marginRight: openId == item.from ? '10px' : '',
               }"
             >
             </iframe>
@@ -92,22 +103,26 @@
           <!-- 语音 -->
           <template v-if="item.msgType == 'voice'">
             <img
-              :src="openId == item.fromId ? fromUser.portrait : toUser.portrait"
+              :src="
+                openId != item.from
+                  ? user[item.from].avatar || defaultImg
+                  : user[item.from].avatar || defaultImg
+              "
               alt=""
               class="head"
             />
             <audio
-              @play="onPlay(item.auidoInfo)"
+              @play="onPlay(item.sdkFileUrl)"
               @error="onError"
               @pause="onPause"
               @timeupdate="updateTime"
-              v-if="item.auidoInfo"
-              :src="item.auidoInfo.playUrl"
+              v-if="item.sdkFileUrl"
+              :src="item.sdkFileUrl"
               controls="false"
               controlslist="nodownload"
               :style="{
-                marginLeft: openId == item.fromId ? '' : '10px',
-                marginRight: openId == item.fromId ? '10px' : '',
+                marginLeft: openId == item.from ? '10px' : '',
+                marginRight: openId == item.from ? '' : '10px',
               }"
             />
           </template>
@@ -170,6 +185,8 @@ export default {
       fileDuration: 0,
       surplus: true,
       empty: false,
+      user: {},
+      defaultImg: 'http://ego-file.soperson.com/itver/13522008806/201712271708/85671523589501951.png'
     };
   },
   watch: {},
@@ -193,11 +210,11 @@ export default {
       this.openId = sessionStorage.getItem('openId');
       let itrId = JSON.parse(sessionStorage.getItem('userinfo')).id;
       let signature = generateSignature4(timeout, nonce, itrId);
-      this.$get("/work/session/list", {
+      this.$get("/work/session/result", {
         params: {
-          fromOpenId: this.openId,
-          toOpenId: wxCrmId,
-          itrId: itrId,
+          from: 'SongTianYu',
+          to: wxCrmId || 'wmmmFVEAAAQbwte-CPVAc-zHKbGgErzA',
+          compId: 40000013,
           current: this.current,
           size: 20,
           timeout,
@@ -215,8 +232,9 @@ export default {
             })
             this.list = this.current == 1 ? res.data.data : this.list.concat(res.data.data);
             this.total = res.data.totalPageCount;
-            this.fromUser = res.data.fromUser;
-            this.toUser = res.data.toUser;
+            this.user = res.data.user;
+            // this.fromUser = res.data.fromUser;
+            // this.toUser = res.data.toUser;
             if (this.list.length == 0) this.empty = true; //如果数据大于0，就显示空信息
             window.document.title = res.data.toUser?.nickname ? `与${res.data.toUser.nickname}的会话记录` : '会话记录';
           } else {
@@ -234,7 +252,7 @@ export default {
       let signature = generateSignature4(timeout, nonce);
       this.$get("/work/session/sync", {
         params: {
-          wxCompId: CorpId,
+          wxCompId: 'wxa9317077abcb6273' || CorpId,
           nonce,
           timeout,
           signature,
@@ -369,10 +387,9 @@ export default {
     }
   },
   created() {
-    this.updateList() // 先更新
     this.getList() // 拉数据
     this.openId = sessionStorage.getItem('openId');
-    this.balance() // 判断是否有剩余流量
+    // this.balance() // 判断是否有剩余流量
   },
   mounted() { }
 };
@@ -424,6 +441,7 @@ export default {
       line-height: 0.36rem;
       border-radius: 0.15rem;
       position: relative;
+      background: #eee;
     }
     .chatBoxL::before {
       content: "";
@@ -435,6 +453,7 @@ export default {
       //   margin-top: -10px;
       background: inherit;
       /*自动继承父元素的背景*/
+
       transform: translateY(-50%) rotate(45deg);
     }
   }

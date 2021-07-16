@@ -748,13 +748,15 @@ export default {
           .img-list {
             display: flex;
             width: 90%;
-            padding: 5px;
+            padding: 5px;  
             flex-wrap: wrap;
+            padding-left: 0;
             img {
               width: 1.2rem;
               height: 1.2rem;
               margin-right: 0.1rem;
               margin-bottom: 0.1rem;
+              object-fit: cover;
             }
           }
         }

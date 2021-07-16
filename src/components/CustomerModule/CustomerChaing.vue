@@ -1,10 +1,9 @@
 <template>
-  <div
-    :style="{ height: height }"
-    @scroll="scrollEventselect"
-    class="CustomerChaing"
-  >
-    <ChatRecord></ChatRecord>
+  <div>
+    <van-button type="primary" size="mini" style="margin-left: 85%;" @click="sync">同步</van-button>
+    <div style="height:66vh" @scroll="scrollEventselect" class="CustomerChaing">
+      <ChatRecord></ChatRecord>
+    </div>
   </div>
 </template>
 
@@ -23,15 +22,12 @@ export default {
   watch: {},
   computed: {},
   methods: {
-    scrollEventselect() {
-      let read = document.querySelector('.CustomerChaing')
-      var scrollTop = read.scrollTop;
-      var windowHeight = read.clientHeight;
-      var scrollHeight = read.scrollHeight;
-      if (parseInt(scrollTop) + windowHeight == scrollHeight && scrollTop > 15) {
-      }
+    sync(){// 执行子组件同步方法
+      this.$children[0].updateList(); 
     },
-
+    scrollEventselect(){
+      
+    }
   },
   created() {
   },

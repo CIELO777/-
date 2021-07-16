@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:48:39 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-13 18:42:51
+ * @Last Modified time: 2021-07-16 19:02:54
    聊天工具栏客户管理工具栏,和我的客户对话时候快捷打开
    1.先获取当前企业微信联系人ID，并通过code 授权获取this.U and this.C()。
    2.拉取联系人列表通过（wx。wxcrmID）判断在联系人列表里有是否有当前联系人。
@@ -11,16 +11,16 @@
  */
 <template>
   <div class="ChatCustomer">
-    <!-- <div :style="maskings">
+    <div :style="maskings">
       <van-loading
         size="36"
         color="rgb(25, 137, 250)"
         v-if="maskings"
         type="spinner"
       />
-    </div> -->
+    </div>
     <header>
-      <img  :src="userInfo.avatar || imgSrc" alt="" />
+      <img :src="userInfo.avatar || imgSrc" alt="" style="border-radius: 5px" />
       <div class="infoBox">
         <p style="display: flex; align-items: center">
           <strong class="namebold"
@@ -64,27 +64,11 @@
       <p class="origin"><span>Ta添加的：</span><span>-</span></p>
       <span>共{{}}个群聊 ></span>
     </article> -->
-
     <article class="dynamic">
-      <van-tabs v-model="active" color="#53b1d8">
+      <van-tabs v-model="active" color="#53b1d8" swipe-threshold="3">
         <van-tab title="企业标签">
           <article class="tab">
             <div class="company">
-              <!-- <div>
-          <span class="title">企业标签</span>
-          <div>
-            <van-button
-              style="margin-right: 10px"
-              plain 
-              color="#5f97ae"
-              type="info"
-              size="small"
-              @click="AddTab"
-              icon="plus"
-              >添加</van-button
-            >
-          </div>
-        </div> -->
               <template v-if="TagList2.length > 0">
                 <div
                   v-for="(item, index) in TagList2"
@@ -113,6 +97,15 @@
                   </div>
                 </div>
               </template>
+              <van-empty
+                v-else
+                image-size="40px"
+                @click="Tabclick(4)"
+                image="https://img01.yzcdn.cn/vant/custom-empty-image.png"
+                description="暂未添加标签，点击添加标签"
+              >
+                <span @click="Tabclick(4)"></span
+              ></van-empty>
             </div>
           </article>
         </van-tab>
@@ -124,32 +117,40 @@
             @onTavclick="Tabclick"
           ></CustomerFollow>
         </van-tab>
-        <van-tab title="企微记录">
+        <!-- <van-tab title="访问轨迹">
+          <CustomerTrack></CustomerTrack>
+        </van-tab> -->
+        <!-- <van-tab title="企微记录">
           <CustomerChaing
             :height="height"
             :userInfo="userInfo"
           ></CustomerChaing>
-        </van-tab>
+        </van-tab> -->
         <van-tab title="操作记录">
           <CustomerOpera :height="height" :userInfo="userInfo"></CustomerOpera>
         </van-tab>
       </van-tabs>
     </article>
     <van-tabbar v-model="TabActive" active-color="#646566" z-index="99">
-      <van-tabbar-item icon="coupon-o" @click="Tabclick(4)"
-        >添加标签</van-tabbar-item
-      >
-      <van-tabbar-item icon="plus" @click="Tabclick(1)"
-        >添加跟进</van-tabbar-item
-      >
+      <van-tabbar-item @click="Tabclick(4)">
+        <span>添加标签</span>
+        <template #icon="props">
+          <img src="../../assets/img/chatTag.png" />
+        </template>
+      </van-tabbar-item>
+      <van-tabbar-item icon="plus" @click="Tabclick(1)">
+        <span>添加跟进</span>
+        <template #icon="props">
+          <img src="../../assets/img/跟进记录.png" /> </template
+      ></van-tabbar-item>
       <!-- <van-tabbar-item icon="friends-o" @click="Tabclick(2)"
         >转接客户</van-tabbar-item
       >  -->
       <van-tabbar-item @click="Tabclick(3)">
-        <template #icon>
-          <van-icon name="chat-o" />
-        </template>
         <span>拨打电话</span>
+        <template #icon="props">
+          <img src="../../assets/img/电话.png" />
+        </template>
       </van-tabbar-item>
     </van-tabbar>
     <!-- 详情弹框 -->
@@ -163,7 +164,7 @@
       <div>
         <p class="titles">客户详情</p>
         <header>
-          <img :src="imgSrc" alt="" />
+          <img :src="imgSrc" alt="" style="border-radius: 5px" />
           <div class="infoBox">
             <p>名字：{{ userInfo.name }}</p>
             <div class="details">
@@ -312,6 +313,7 @@
       <p class="pop-tit">修改{{ diy.name }}</p>
       <div v-if="diy.type === 'text' || diy.type === 'textarea'">
         <van-field
+          clearable
           type="textarea"
           autosize
           v-model="diy.price"
@@ -495,6 +497,7 @@
       <p class="pop-tit">姓名</p>
       <van-field
         label=""
+        clearable
         v-model="formData.nickname"
         placeholder="请输入姓名"
         :autofocus="true"
@@ -521,6 +524,7 @@
       <p class="pop-tit">手机</p>
       <van-field
         label=""
+        clearable
         type="tel"
         v-model="formData.phone"
         placeholder="请输入手机号"
@@ -548,6 +552,7 @@
       <van-field
         label=""
         type="tel"
+        clearable
         v-model="formData.workNumber"
         placeholder="请输入手机号"
       />
@@ -574,6 +579,7 @@
       <van-field
         label=""
         type="tel"
+        clearable
         v-model="formData.address"
         placeholder=""
       />
@@ -623,6 +629,7 @@
       <p class="pop-tit">备注</p>
       <van-field
         label=""
+        clearable
         v-model="formData.remark"
         type="textarea"
         rows="4"
@@ -667,7 +674,12 @@
       :close-on-click-overlay="overlay"
     >
       <p class="pop-tit">微信</p>
-      <van-field label="" v-model="formData.wx" placeholder="请输入微信号" />
+      <van-field
+        label=""
+        v-model="formData.wx"
+        clearable
+        placeholder="请输入微信号"
+      />
       <van-button
         color="#60C6C6"
         size="mini"
@@ -689,7 +701,12 @@
       :close-on-click-overlay="overlay"
     >
       <p class="pop-tit">QQ</p>
-      <van-field label="" v-model="formData.qq" placeholder="请输入QQ号" />
+      <van-field
+        label=""
+        v-model="formData.qq"
+        clearable
+        placeholder="请输入QQ号"
+      />
       <van-button
         color="#60C6C6"
         size="mini"
@@ -710,7 +727,12 @@
       :close-on-click-overlay="overlay"
     >
       <p class="pop-tit">邮箱</p>
-      <van-field label="" v-model="formData.email" placeholder="请输入邮箱号" />
+      <van-field
+        label=""
+        v-model="formData.email"
+        clearable
+        placeholder="请输入邮箱号"
+      />
       <van-button
         color="#60C6C6"
         size="mini"
@@ -738,11 +760,12 @@ import { formatDate, timestampToTime } from "../../uilts/date";
 import CustomerFollow from '../../components/CustomerModule/CustomerFollow.vue';
 import CustomerOpera from '../../components/CustomerModule/CustomerOpera.vue';
 import CustomerChaing from '../../components/CustomerModule/CustomerChaing.vue';
+import CustomerTrack from '../../components/CustomerModule/CustomerTrack.vue'
 import Utils from '../../uilts/utils';
 import Sheetimg from '../../components/Sheetimg.vue';
 export default {
   name: "ChatCustomer",
-  components: { VDistpicker, compInfo, shareUser, CustomerFollow, CustomerOpera, CustomerChaing, Sheetimg, BindPop },
+  components: { VDistpicker, compInfo, shareUser, CustomerFollow, CustomerOpera, CustomerChaing, CustomerTrack, Sheetimg, BindPop },
   mixins: [Toolbar],
   inject: ['reload'],
   data() {
@@ -1027,6 +1050,7 @@ export default {
         let result = this.check_mobil(this.crmInfos.phone_back)
         if (result) {
           window.location.href = `tel:${this.crmInfos.phone_back}`; // type== 0 关闭弹框
+          this.telClick()
         } else {
           if (result == null) {
             this.$toast('初始化,请稍后...')
@@ -1037,16 +1061,13 @@ export default {
             })
               .then(() => {
                 this.popShow.phone = true; // 打开弹框
-                this.formData.phone =this.crmInfos.phone; // 回显数据
+                this.formData.phone = this.crmInfos.phone; // 回显数据
                 // on confirm
               })
               .catch(() => {
                 // on cancel
               });
           }
-          // setTimeout(() => {
-          //   this.detailsPop = true;
-          // }, 800)
         }
       } else if (data == 4) {
         this.AddTab();
@@ -1058,6 +1079,34 @@ export default {
       } else {
         return true;
       }
+    },
+    telClick() {  // 点击拨打电话
+      let crmInfo = sessionStorage.getItem('linkmanId');
+      let U = JSON.parse(sessionStorage.getItem('userinfo')).id;
+      let C = sessionStorage.getItem('bind_compId');
+      let signature = generateSignature3(0, C, U, crmInfo, timeout, nonce);
+      let param = new URLSearchParams();
+      param.append("timeout", timeout);
+      param.append("nonce", nonce);
+      param.append("signature", signature);
+      param.append("id", 0);
+      param.append("title", "拨打了电话");
+      param.append("content", "");
+      param.append("itrId", U);
+      param.append("pid", crmInfo);
+      param.append("type", 2);
+      param.append("compId", C);
+      this.$post1('/api/request/itr/comp/customer/record/save', param
+      ).then((res) => {
+        if (res.error === 'success') {
+          this.$nextTick(() => {
+            this.$refs.customerFollow.getAgendaList()
+          })
+        }
+      })
+        .catch(function (error) {
+          console.log(error);
+        });
     },
     showPopup(e, d, items) {
       this.item = items; // 备份ITEM; 必填校验用
@@ -1592,7 +1641,7 @@ export default {
             setTimeout(() => {
               // this.getTagList();
               this.getCrm()
-            }, 5000)
+            }, 500)
           } else {
             this.$toast.fail(res.msg);
           };
@@ -1720,6 +1769,7 @@ export default {
     },
     colseSheet() { // 添加跟进记录
       this.sheetPop = false;
+      this.active = 1;  //tab切换到跟进记录
       this.$nextTick(() => {
         this.$refs.customerFollow.current = 1;
         this.$refs.customerFollow.getAgendaList() // 刷新列表
@@ -1954,6 +2004,7 @@ export default {
     },
     enterPriseSave() { // 企业标签保存按钮
       this.enterpriseTab = false;
+      this.active = 0; // 改变tab指向
       this.saveTagWx();
     },
     async BindCompletes() { // 关闭弹框
@@ -2026,7 +2077,6 @@ export default {
   computed: {},
   mounted() {
     Utils.$on("bindSuccess", (res) => {  // 该函数通过聊天工具栏客户画像列表触发，绑定手机号成功时触发。
-      console.log(res, '213131')
       this.maskings = '';
       this.maskings = {
         position: 'fixed',
@@ -2038,7 +2088,7 @@ export default {
         zIndex: 999,
         justifyContent: 'center',
         alignItems: 'center',
-        display: 'flex'
+        display: 'flex',
       };
       this.$nextTick(() => {
         console.log('I\'M IRON sss')
@@ -2529,6 +2579,22 @@ export default {
   }
   /deep/ .van-button--default {
     background-color: #f1f4f6;
+  }
+  /deep/ .van-empty__bottom {
+    width: 100%;
+    height: 200px;
+    margin-top: -110px;
+    & > span {
+      display: inline-block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+  /deep/ .van-cell__title,
+  .van-cell__value {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 }
 </style>

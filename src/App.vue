@@ -57,6 +57,7 @@ export default {
       unbind: this.unbind,
       registerOpen: this.registerOpen,
       registerClose: this.registerClose,
+      track: this.track,
     }
   },
   data() {
@@ -131,6 +132,43 @@ export default {
       // }else if(this.$route.name === 'ChatCustomer'){
       //     Utils.$emit('bindSuccess',res)
       // }
+    },
+    track() { // 访问轨迹
+      let param = new URLSearchParams();
+      let signature = generateSignature4(nonce, timeout);
+      param.append("title", title);
+      param.append("description",description);
+      param.append("thumb", thumb);
+      param.append("pageurl", pageurl);
+      param.append("pagetype", pagetype);
+      param.append("openid", openid);
+      param.append("nickname", nickname);
+      param.append("headimgurl", headimgurl);
+      param.append("gender",gender);
+      param.append("unionid", unionid);
+      param.append("userid", this.$U);
+      param.append("compid",this.$C);
+
+      param.append("nonce", nonce);
+      param.append("timeout", timeout);
+      param.append("signature", signature);
+      this.$post1('/work/trajectory/record', param)
+        .then(function (res) {
+          if (res.code === 200 && res.msg == 'success') {
+            that.$toast.success('该账号解绑成功');
+            that.shows = false; // 解绑成功关闭弹框
+            sessionStorage.clear() // 清除所有缓存
+            that.$router.replace('/') // 跳转到首页进行重新绑定
+            Utils.$emit('reset', 'msg');
+            sessionStorage.setItem('codeBasice', JSON.stringify(code))
+            // that.registerOpen();
+          } else {
+            that.$toast.fail('解绑失败,请稍后再试');
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     },
     unbindsss() {
       this.unbind()

@@ -155,9 +155,7 @@ export default {
     }
   },
   async created() {
-    let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
-    // console.log(this.ShareContents)
-    // this.url = this.ShareContents.url;
+
   },
   mounted() { }
 };

@@ -13,7 +13,10 @@
         </a>
       </div>
     </div> -->
-    <div @scroll="scrollEventselect" :style="{ height: height,overflowY:'scroll',paddingTop:'15px'}">
+    <div
+      @scroll="scrollEventselect"
+      :style="{ height: height, overflowY: 'scroll', paddingTop: '15px' }"
+    >
       <div class="follCont" v-if="follList.length > 0">
         <div v-for="(item, index) in follList" :key="index" class="follMain">
           <div class="time">
@@ -300,7 +303,7 @@ export default {
         flex: 1;
         // margin-left: 0.2rem;
         .text {
-          background:rgb(249,249,249);
+          background: rgb(249, 249, 249);
           padding: 10px 5px;
           overflow: hidden;
           span {
@@ -315,11 +318,13 @@ export default {
             width: 90%;
             padding: 5px;
             flex-wrap: wrap;
+            padding-left: 0;
             img {
               width: 1.2rem;
               height: 1.2rem;
               margin-right: 0.1rem;
               margin-bottom: 0.1rem;
+              object-fit: cover;
             }
           }
         }
@@ -426,15 +431,15 @@ export default {
   }
   .follTit {
     display: flex;
-    background: rgb(249,249,249);
+    background: rgb(249, 249, 249);
     justify-content: space-between;
     // margin-top: 0.2rem;
     height: 0.8rem;
     align-items: center;
     color: #468af1;
     height: 0.6rem;
-    border-bottom: 8px solid rgb(249,249,249);
-    border-top: 8px solid rgb(249,249,249);
+    border-bottom: 8px solid rgb(249, 249, 249);
+    border-top: 8px solid rgb(249, 249, 249);
     // position: absolute;
     // left: 0;
     // width: 100%;
@@ -466,7 +471,7 @@ export default {
   }
   .addicon {
     width: 0.32rem;
-    height:.3rem;
+    height: 0.3rem;
     margin-right: 5px;
   }
 }
