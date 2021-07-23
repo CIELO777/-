@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-05-21 10:50:24 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-12 11:44:24
+ * @Last Modified time: 2021-07-23 11:26:11
  * 营销画像模块专用授权，针对客户画像模块进行了优化; 
  */
 import { get } from './https';
@@ -75,8 +75,6 @@ let getWxJsJdk = async () => {
 					wx.hideMenuItems({
 						menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari', 'menuItem: refresh'] // 要隐藏的菜单项
 					});
-					console.log(config, 'config')
-					console.log(agentConfig, 'agentConfig')
 					wx.agentConfig({
 						corpid: config.appId, // 必填，企业微信的corpid，必须与当前登录的企业一致
 						agentid: agentConfig.agentid, // 必填，企业微信的应用id （e.g. 1000247）
@@ -85,25 +83,44 @@ let getWxJsJdk = async () => {
 						signature: agentConfig.signature, // 必填，签名，见附录-JS-SDK使用权限签名算法
 						jsApiList: ["sendChatMessage", 'getContext', 'getCurExternalContact'], //必填
 						success: (res) => {
-							wx.invoke('getCurExternalContact', {
-							}, (res) => {
-								console.log(res, 'getCurExternalContact')
-								if (res.err_msg == "getCurExternalContact:ok") {
-									resolve(res.userId)
+							wx.invoke('getContext', {
+							}, function (res) {
+								if (res.err_msg.includes('ok')) {
+									if (res.entry === 'group_chat_tools') {
+										Toast.fail({
+											message: '外部群不支持客户画像功能',
+											forbidClick: true,
+											duration: 0,
+											overlay: true,
+										});
+										reject('客户ID获取失败，请稍后再试...');
+									} else {
+										wx.invoke('getCurExternalContact', {
+										}, (res) => {
+											if (res.err_msg == "getCurExternalContact:ok") {
+												resolve(res.userId);
+											} else {
+												Toast.fail({
+													message: res.err_msg,
+													forbidClick: true,
+													duration: 0,
+													overlay: true,
+												});
+											}
+										});
+									}
 								} else {
-									//错误处理
 									Toast.fail({
-										message: res,
+										message: '授权失败，请重试',
 										forbidClick: true,
 										duration: 0,
 										overlay: true,
 									});
-									reject('客户ID获取失败，请稍后再试...')
 								}
 							});
+
 						},
 						fail: (res) => {
-							console.log(res, '44444444444444')
 							Toast.fail(res);
 							if (res.errMsg.indexOf("function not exist") > -1) {
 							};

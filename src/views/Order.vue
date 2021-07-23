@@ -268,8 +268,8 @@ export default {
   },
   created() {
     if (sessionStorage.getItem('userinfo')) {
-      this.loading()
-      this.getList()
+      // this.loading()
+      // this.getList()
     } else {
       this.$toast.fail({
         message: '此模块不支持聊天工具栏。',

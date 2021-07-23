@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-02-03 14:12:55 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-16 13:37:17
+ * @Last Modified time: 2021-07-22 14:12:01
  * 文档数据展示
  */
 <template>
@@ -92,13 +92,17 @@
 </template>
 
 <script>
-import share from '../../components/share'
-import wxxx from '../../uilts/wxconfig'
+import share from '../../components/share';
+import wxxx from '../../uilts/wxconfig';
+import { shareMixin } from '../../uilts/shareMixin';
+
 export default {
+
   name: "docView",
   components: {},
   props: ['datas', 'userMaps', 'configs', 'states'],
   components: { share },
+  mixins: [shareMixin],
   data() {
     return {
       loading: false,
@@ -137,24 +141,26 @@ export default {
       }, 1000);
       this.onLoad();
     },
-    clickColor(item) {
+    async clickColor(item) {
       // 分享图片为线上图片
+      // await this.getShareUrl(item.title, item.description, item.thumb, item.url, item.id, 1)
       this.$router.push({
         name: 'Iframe',
         params: {
-          url: item.initialUrl + '?shareType=15',
+          url: item.initialUrl + '&shareType=15',
           title: item.title,
           desc: item.description,
           imgUrl: item.thumb
         }
       })
     },
-    createContent(item) {
+    async createContent(item) {
+      await this.getShareUrl(item.title, item.description, item.img, item.initialUrl, item.id, 5)
       if (sessionStorage.getItem('Single')) { //单聊模式发送  正常模式赋值
         wx.invoke('sendChatMessage', {
           msgtype: "news", //消息类型，必填
           news: {
-            link: item.initialUrl + '?shareType=15', //H5消息页面url 必填
+            link: this.shareUrl, //H5消息页面url 必填
             title: item.title, //H5消息标题
             desc: item.description, //H5消息摘要
             imgUrl: `https://dist.jiain.net/itr/dom/svg_type_${item.fileSuffix}.png`, //H5消息封面图片URL
@@ -171,7 +177,7 @@ export default {
           title: item.title,
           imgUrl: `https://dist.jiain.net/itr/dom/svg_type_${item.fileSuffix}.png`,
           desc: item.description,
-          url: item.initialUrl + '?shareType=15'
+          url: item.initialUrl + '&shareType=15'
         }
 
       }

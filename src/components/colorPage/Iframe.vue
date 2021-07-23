@@ -1,8 +1,8 @@
 <template>
   <div class="iframesss">
-    <div class="share" @click="createContent">
+    <!-- <div class="share" @click="createContent">
       <van-icon name="share-o" size="20px" />
-    </div>
+    </div> -->
     <div class="back" @click="back">
       <van-icon name="arrow-left" size="20px" />
     </div>
@@ -39,7 +39,7 @@ export default {
         title: this.$route.params.title,
         imgUrl: this.$route.params.imgUrl,
         desc: this.$route.params.desc,
-        url: this.$route.params.url
+        url: this.$route.params.url,
       }
     },
     back() {
@@ -52,13 +52,20 @@ export default {
     }
   },
   activated() {
+    console.log(213)
   },
   created() {
     this.url = this.$route.params.url;
-    console.log(this.url, 'video');
-    setTimeout(() => {
-      wxxx(); // 为了授权分享接口使用，所以一定要在这调用
-    }, 1500);
+    // console.log(this.url, 'video');
+    // setTimeout(() => {
+    //   wxxx(); // 为了授权分享接口使用，所以一定要在这调用
+    // }, 1500);
+  },
+  beforeRouteEnter: (to, from, next) => {
+    // console.log(to, from, next, 'to, from, nextChatBarShare')
+    next(vm => {
+      vm.$store.commit("cache", from.name);
+    })
   },
   mounted() { },
 };

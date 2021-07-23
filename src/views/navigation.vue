@@ -817,7 +817,7 @@ export default {
           });
           wx.ready(() => {
             // wx.hideAllNonBaseMenuItem();
-            // wx.hideOptionMenu();
+            console.log('hideOptionMenu')
             // wx.hideMenuItems({
             //   menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari', 'menuItem: refresh'] // 要隐藏的菜单项
             // });

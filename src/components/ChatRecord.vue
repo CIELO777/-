@@ -4,7 +4,6 @@
       v-model="loading"
       :finished="finished"
       :immediate-check="false"
-      finished-text="没有更多了"
       @load="onLoad"
       class="chatList"
       v-if="list.length > 0"
@@ -52,9 +51,9 @@
             />
             <div
               class="ImgBack"
-              @click="ClickImgBack(item.sdkFileUrl)"
+              @click="ClickImgBack(item.itrFileUrl)"
               :style="{
-                backgroundImage: 'url(' + item.sdkFileUrl + ') ',
+                backgroundImage: 'url(' + item.itrFileUrl + ') ',
                 backgroundPositionX: openId == item.from ? 'right' : 'left',
                 marginLeft: openId == item.from ? '' : '10px',
                 marginRight: openId == item.from ? '10px' : '',
@@ -73,11 +72,11 @@
               class="head"
             />
             <div
-              @click="VedioClick(item.localFileIdUrl + '?frame=1')"
+              @click="VedioClick(item.itrFileUrl + '?frame=1')"
               class="mack"
               :style="{
-                left: openId == item.from ? '' : '3.2rem',
-                right: openId == item.from ? '1.35rem' : '',
+                left: openId == item.from ? '3.2rem' : '',
+                right: openId == item.from ? '' : '1.35rem',
                 top: '10px',
               }"
             >
@@ -88,14 +87,14 @@
               />
             </div>
             <iframe
-              :src="item.localFileIdUrl + '?frame=1'"
+              :src="item.itrFileUrl + '?frame=1'"
               height="300"
               width="500"
               class="iframeS"
               scrolling="auto"
               :style="{
-                marginLeft: openId == item.from ? '' : '10px',
-                marginRight: openId == item.from ? '10px' : '',
+                marginLeft: openId == item.from ? '10px' : '',
+                marginRight: openId == item.from ? '' : '10px',
               }"
             >
             </iframe>
@@ -112,18 +111,23 @@
               class="head"
             />
             <audio
-              @play="onPlay(item.sdkFileUrl)"
-              @error="onError"
+              @play="onPlay(item.auidoInfo)"
+              @error="onError(item, index)"
               @pause="onPause"
               @timeupdate="updateTime"
-              v-if="item.sdkFileUrl"
-              :src="item.sdkFileUrl"
+              v-if="item.auidoInfo"
+              :src="item.auidoInfo"
               controls="false"
               controlslist="nodownload"
               :style="{
-                marginLeft: openId == item.from ? '10px' : '',
-                marginRight: openId == item.from ? '' : '10px',
+                marginLeft: openId == item.from ? '10px' : '3px',
+                marginRight: openId == item.from ? '3px' : '10px',
               }"
+            />
+            <van-icon
+              name="replay"
+              v-show="item.error"
+              @click="errorUpdate(item)"
             />
           </template>
         </div>
@@ -151,7 +155,6 @@
     </van-popup>
   </div>
 </template>
-
 <script>
 import { ImagePreview } from 'vant';
 
@@ -164,7 +167,7 @@ import {
 import local from '../uilts/localStorage';
 let timeout = generateTimeout();
 let nonce = generateNonce();
-// import { uuid } from 'vue-uuid'; // uuid object is also exported to things
+import BenzAMRRecorder from 'benz-amr-recorder';
 export default {
   name: "ChatRecord",
   components: {},
@@ -208,11 +211,12 @@ export default {
     getList() {
       let wxCrmId = this.$route.name == 'ChatCustomer' ? sessionStorage.getItem('wxcrmId') : JSON.parse(sessionStorage.getItem('_crm_info')).wxCrmId;
       this.openId = sessionStorage.getItem('openId');
+      let from = sessionStorage.getItem('bind_UserID')
       let itrId = JSON.parse(sessionStorage.getItem('userinfo')).id;
       let signature = generateSignature4(timeout, nonce, itrId);
       this.$get("/work/session/result", {
         params: {
-          from: 'SongTianYu',
+          from,
           to: wxCrmId || 'wmmmFVEAAAQbwte-CPVAc-zHKbGgErzA',
           compId: 40000013,
           current: this.current,
@@ -226,7 +230,7 @@ export default {
           if (res.code === 200 && res.msg === 'success' && res.data.data.length > 0) {
             res.data.data.forEach(async item => {
               if (item.msgType == 'voice') {
-                item.auidoInfo = await this.getVideoInfo(item.localFileId);
+                item.auidoInfo = await this.getVideoInfo(item.itrFileId);
                 this.$set(item, 'item.auidoInfo', item.auidoInfo)
               }
             })
@@ -252,7 +256,7 @@ export default {
       let signature = generateSignature4(timeout, nonce);
       this.$get("/work/session/sync", {
         params: {
-          wxCompId: 'wxa9317077abcb6273' || CorpId,
+          wxCompId: CorpId ,
           nonce,
           timeout,
           signature,
@@ -285,6 +289,7 @@ export default {
       });
     },
     VedioClick(src) {
+      console.log(21131)
       this.show = true;
       this.videoSrc = src;
     },
@@ -294,6 +299,7 @@ export default {
         this.$get("/aliyun/remote/vod/detail", {
           params: {
             id: id,
+            playUrlState:1,
             userId: this.$U,
             nonce,
             playUrlState: 1,
@@ -301,7 +307,7 @@ export default {
             signature,
           },
         }).then((res) => {
-          resolve(res);
+          resolve(res.playUrl);
         })
           .catch((error) => {
             reject(error)
@@ -375,8 +381,22 @@ export default {
           console.log(error);
         });
     },
-    onError() {
-      this.$toast('播放错误，请稍后再试!');
+    onError(item, index) {
+      this.$toast('部分消息拉取失败，请手动拉取', item, index);
+      this.list[index].error = true;
+    },
+    errorUpdate(item) { // 手动同步
+      this.$get("/work/session/upload", {
+        params: {
+          msgId: item.msgId,
+        },
+      })
+        .then((res) => {
+          console.log(res)
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
     onPause() {
       console.log('暂停了');
@@ -384,6 +404,19 @@ export default {
     updateTime(e) {
       // console.log(e.target.currentTime);
       this.fileDuration = e.target.currentTime * 1000;
+    },
+    openRecording(url) {
+      console.log(23121)
+      var amr = new BenzAMRRecorder();
+      amr.initWithUrl('https://api.jiain.net/aliyun/oss/media/10419.amr').then(function () {
+        // amr.isPlaying() 返回音频的播放状态 是否正在播放 返回boolean类型
+        console.log(amr.isPlaying())
+        if (amr.isPlaying()) {
+          amr.stop();
+        } else {
+          amr.play();
+        }
+      });
     }
   },
   created() {

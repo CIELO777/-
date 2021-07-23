@@ -97,7 +97,5 @@ export const ScorllMixin = {
 		// this.$store.commit("ClearCurNum", "common"); // 一级菜单不进行清除，因为从表单返回时候缓存了，所以不清空页数
 		// this.$store.commit("ClearCurNum", "highseas");
 		this.$store.commit("ClearCurNum", "filter");
-	},
-
-
+	}
 }

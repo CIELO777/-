@@ -80,9 +80,10 @@ export default {
         .then((res) => {
           let qq = this.treeData[this.id];
           let cc = res.data.map(item => {
+            console.log(JSON.parse(item.content))
             return {
               ...item,
-              content: JSON.parse(item.content)[0]
+              content: JSON.parse(item.content)
             }
           })
           qq.data = (cur == 1 || cur == undefined) ? cc : qq.data.concat(cc);

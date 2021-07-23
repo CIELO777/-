@@ -172,7 +172,7 @@ export default {
     },
     createContent(item) { //send
       let temp = item.title;
-      let content = item.content
+      let content = item.content;
       if (content) {
         content.forEach((item) => {
           temp += '\n' + item.data;
@@ -180,19 +180,7 @@ export default {
       }
       if (sessionStorage.getItem('Single')) { //单聊模式发送  正常模式赋值
         this.editPop = true;
-        console.log(temp)
         this.message = temp;
-        // wx.invoke('sendChatMessage', {
-        //   msgtype: "text", //消息类型，必填
-        //   text: {
-        //     content: temp, //文本内容
-        //   },
-        // }, function (res) {
-        //   console.log('服务指引返回结果', res);
-        //   if (res.err_msg == 'sendChatMessage:ok') {
-        //     //发送成功
-        //   }
-        // })
       } else {
         wx.setClipboardData({
           data: temp,

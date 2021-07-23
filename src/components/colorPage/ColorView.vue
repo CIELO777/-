@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-01-12 13:56:29 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-12 11:21:08
+ * @Last Modified time: 2021-07-23 18:22:55
  8 此模块用于彩页，软文列表
  */
 <template>
@@ -147,7 +147,7 @@
 <script>
 import share from '../../components/share';
 import wxxx from '../../uilts/wxconfig';
-
+import { shareMixin } from '../../uilts/shareMixin';
 export default {
   name: "colorView",
   components: { share },
@@ -174,6 +174,7 @@ export default {
       showShare: false,
     };
   },
+  mixins: [shareMixin],
   methods: {
     onLoad() {  // 触底事件、
       console.log(this.configs.current, this.configs.total)
@@ -203,7 +204,10 @@ export default {
       }, 1500);
       this.onLoad();
     },
-    clickColor(item) {
+    async clickColor(item) {
+      // await this.getShareUrl(item.title, item.description, item.thumb, item.url, item.id, 1);
+      // console.log(this.shareUrl, 'this.shareUrl')
+      // console.log( this.$route.name == 'ChatBarShare' ? this.shareUrl : null)
       this.$router.push({
         name: 'Iframe',
         params: {
@@ -214,12 +218,14 @@ export default {
         }
       })
     },
-    createContent(item) {
+    async createContent(item) {
+      await this.getShareUrl(item.title, item.description, item.thumb, item.url, item.id, 1)
+      console.log(this.shareUrl)
       if (sessionStorage.getItem('Single')) { //单聊模式发送  正常模式赋值
         wx.invoke('sendChatMessage', {
           msgtype: "news", //消息类型，必填
           news: {
-            link: item.initialUrl + '&shareType=15', //H5消息页面url 必填
+            link: this.shareUrl, //H5消息页面url 必填
             title: item.title, //H5消息标题
             desc: item.description, //H5消息摘要
             imgUrl: item.thumb, //H5消息封面图片URL
@@ -261,10 +267,11 @@ export default {
   height: calc(100vh - 70px);
 
   .card {
-    margin: 15px 0;
+    margin: 10px;
     background-color: #fff;
     padding: 10px;
     position: relative;
+    border-radius: 5px;
   }
   .card .info {
     display: flex;
@@ -302,13 +309,14 @@ export default {
     background-color: #e64a38;
   }
   .card .info .img {
-    width: 90px;
-    height: 90px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .ldldl {
     background: rgba(0, 0, 0, 0.4);
     position: absolute;
-    bottom: 3px;
+    bottom: 0;
     color: #fff;
     left: 0;
     width: 100%;
@@ -323,7 +331,7 @@ export default {
     flex-direction: column;
     justify-content: center;
     flex: 1;
-    line-height: 30px;
+    line-height: 0.48rem;
   }
 
   .card .info .desc div {
@@ -351,9 +359,12 @@ export default {
   .header {
     display: flex;
     width: 100%;
+    align-items: center;
   }
   .jino {
     position: relative;
+    width: 1.5rem;
+    height: 1.5rem;
   }
   .card .info .desc div {
     display: inline;

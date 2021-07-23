@@ -174,8 +174,8 @@
 <script> 
 import { generateTimeout, generateSignature, generateSignature8, generateNonce, generateSignature3, generateSignature4 } from "../uilts/tools";
 let timeout = generateTimeout();
-import local from '../uilts/localStorage';
 let nonce = generateNonce();
+import local from '../uilts/localStorage';
 import colorPage from '../components/colorPage/ColorView';
 import documents from '../components/poster/documentView';
 import advertorial from '../components/Advertorial/AdvertorialView';

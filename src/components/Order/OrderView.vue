@@ -1,14 +1,14 @@
 /*
  * @Author: YUN_KONG 
  * @Date: 2021-02-07 16:29:18 
- * @Last Modified by: YUN_KONG
- * @Last Modified time: 2021-05-25 14:14:52
+ * @Last Modified by: Tian
+ * @Last Modified time: 2021-07-19 10:56:32
  */
 <template>
   <div
     class="OrderView"
     :style="{
-      height: datas.length > 5 ? 'calc(100% - 100px)' : 'calc(100vh - 100px)',
+      height: datas.length > 5 ? 'calc(100% - 100px)' : '100vh',
     }"
   >
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">

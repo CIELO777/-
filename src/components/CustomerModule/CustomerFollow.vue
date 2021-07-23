@@ -15,7 +15,7 @@
     </div> -->
     <div
       @scroll="scrollEventselect"
-      :style="{ height: height, overflowY: 'scroll', paddingTop: '15px' }"
+      :style="{ height: height, overflowY: 'scroll' }"
     >
       <div class="follCont" v-if="follList.length > 0">
         <div v-for="(item, index) in follList" :key="index" class="follMain">
@@ -196,7 +196,6 @@ export default {
         },
       })
         .then(function (res) {
-          console.log(res, 'getAgendaList')
           if (!res.error) {
             let str = '';
             let data = res.data.map(item => {
@@ -285,7 +284,6 @@ export default {
     .follMain {
       display: flex;
       padding: 10px 15px;
-
       .time {
         margin-right: 0.3rem;
         flex-shrink: 0;
@@ -303,7 +301,7 @@ export default {
         flex: 1;
         // margin-left: 0.2rem;
         .text {
-          background: rgb(249, 249, 249);
+          background: rgb(243, 243, 243);
           padding: 10px 5px;
           overflow: hidden;
           span {

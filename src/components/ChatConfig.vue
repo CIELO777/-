@@ -1,58 +1,98 @@
 <template>
   <div class="ChatConfig">
-    <van-field v-model="secretKey" label="secretKey" placeholder="请输入secretKey" />
-    <template v-if="List && List.length > 0">
-      <van-swipe-cell class="card" v-for="(item, index) in List" :key="index">
-        <van-cell title="版本">
-          <!-- 使用 right-icon 插槽来自定义右侧图标 -->
-          <template #title>
-            <span class="custom-title">版本</span>
-            <van-tag plain type="primary">请选择版本</van-tag>
-          </template>
-          <template #right-icon>
-            <van-stepper integer v-model="item.version" />
-          </template>
-        </van-cell>
-        <van-field
-          v-model="item.privateKey"
-          rows="4"
-          label="私钥"
-          type="textarea"
-          placeholder="请输入私钥"
-          show-word-limit
-        />
-        <template #left>
-          <van-button
-            square
-            type="primary"
-            text="新增"
-            style="height: 100%"
-            @click="add(item, index)"
+    <iframe
+      src="https://api.jiain.net/web/#/p/2a3c1a305f7983e578207d3daeb5faa0"
+      frameborder="0"
+      class="Configiframe"
+    ></iframe>
+    <div class="form">
+      <van-field v-model="compID" label="compID" placeholder="请输入公司ID" />
+      <van-button type="primary" block class="btn" @click="getConfig"
+        >拉取</van-button
+      >
+      <!-- <van-field
+        v-model="secretKey"
+        label="secretKey"
+        placeholder="请输入secretKey"
+      /> -->
+      <template v-if="List && List.length > 0">
+        <van-swipe-cell class="card" v-for="(item, index) in List" :key="index">
+          <van-field
+            v-model="item.secretKey"
+            rows="4"
+            label="会话存档Secret"
+            type="textarea"
+            placeholder="会话存档Secret"
+            show-word-limit
           />
-        </template>
-        <template #right>
-          <van-button
-            square
-            type="danger"
-            text="删除"
-            style="height: 100%"
-            @click="dele(item, index)"
+          <van-field
+            v-model="item.id"
+            label="	RSA私钥ID"
+            placeholder="	RSA私钥ID"
+            show-word-limit
           />
-        </template>
-      </van-swipe-cell>
-    </template>
-    <van-button type="primary" block class="btn" @click="Save"
-      >保存配置</van-button
-    >
+          <van-cell title="版本">
+            <!-- 使用 right-icon 插槽来自定义右侧图标 -->
+            <template #title>
+              <span class="custom-title">版本</span>
+              <van-tag plain type="primary">请选择版本</van-tag>
+            </template>
+            <template #right-icon>
+              <van-stepper integer v-model="item.version" />
+            </template>
+          </van-cell>
+          <van-field
+            v-model="item.privateKey"
+            rows="4"
+            label="私钥"
+            type="textarea"
+            placeholder="请输入私钥"
+            show-word-limit
+          />
+          <van-field
+            v-model="item.wxCompId"
+            label="企业微信公司ID"
+            placeholder="请输入企业微信公司ID"
+            show-word-limit
+          />
+          <van-field
+            v-model="item.compId"
+            label="乐语公司ID"
+            placeholder="请输入乐语公司ID"
+            show-word-limit
+          />
+          <template #left>
+            <van-button
+              square
+              type="primary"
+              text="新增"
+              style="height: 100%"
+              @click="add(item, index)"
+            />
+          </template>
+          <template #right>
+            <van-button
+              square
+              type="danger"
+              text="删除"
+              style="height: 100%"
+              @click="dele(item, index)"
+            />
+          </template>
+        </van-swipe-cell>
+      </template>
+      <van-button type="primary" block class="btn" @click="Save"
+        >保存配置</van-button
+      >
+    </div>
   </div>
 </template>
 
 <script>
 import local from '../uilts/localStorage';
 import {
-  generateSignature3, generateTimeout,
+  generateTimeout,
   generateNonce,
-  generateSignature8,
   generateSignature4
 } from '../uilts/tools';
 let timeout = generateTimeout();
@@ -66,33 +106,30 @@ export default {
     return {
       secretKey: '',
       List: [],
-      
+      compID: '40000013'
     };
   },
   watch: {},
   computed: {},
   methods: {
     getConfig() {
-      let signature = generateSignature4(this.$U || local.U(), this.$C || local.C(), timeout, nonce)
-      this.$get("/wx-crm-server/session/conf/detail", {
+      let signature = generateSignature4(this.$C || local.C(), timeout, nonce)
+      this.$get("/work/session/config/list", {
         params: {
-          userId: this.$U || local.U(),
-          compId: this.$C || local.C(),
+          compId: this.compID,
           timeout,
           nonce,
           signature
         },
       })
         .then((res) => {
-          if (res.code === 200) {
-            let { secretKey, privateKeyList } = res.data;
-            if (privateKeyList.length > 0) {
-              this.List = privateKeyList;
-            } else {
-              this.List = [{ privateKey: '', version: 1, id: 0, wxCompId: sessionStorage.getItem('CorpId'), compId: this.$C || local.C() }]
-            }
-            this.secretKey = secretKey;
-            console.log(this.secretKey);
+          if (res.code === 200 && res.msg == 'success') {
+            this.List = res.data;
+            // else {
+            //   this.List = [{ privateKey: '', version: 1, id: 0, wxCompId: sessionStorage.getItem('CorpId'), compId: this.$C || local.C() }]
+            // }
+            // this.secretKey = secretKey;
+            // console.log(this.secretKey);
           } else {
             this.$toast.fail('请求失败，请稍后再试！')
           };
@@ -154,7 +191,6 @@ export default {
     }
   },
   created() {
-    this.getConfig()
   },
   mounted() { }
 };
@@ -163,10 +199,14 @@ export default {
 <style lang="less" scoped>
 .ChatConfig {
   font-size: 0.32rem;
-  padding-bottom: 50px;
   background: #eee;
-  .card {
-    margin-bottom: 0.2rem;
+  display: flex;
+  .Configiframe {
+    width: 60%;
+    height: 100vh;
+  }
+  .form {
+    flex: 1;
   }
   .custom-title {
     margin-right: 5px;
@@ -174,12 +214,8 @@ export default {
   /deep/ .van-cell__title {
     width: auto;
   }
-  .btn {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    font-size: 0.3rem;
+  .card{
+    margin-bottom: 20px;
   }
 }
 </style>

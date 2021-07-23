@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:13:08 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-13 18:24:25
+ * @Last Modified time: 2021-07-19 13:23:10
  * 聊天工具栏素材分享功能组件，
  */
 
@@ -89,6 +89,7 @@ export const Toolbar = {
 				},
 			}).then(
 				async (res) => {
+					console.log(res,'92929292929')
 					if (res.code === 200 && res.msg == 'success' && JSON.stringify(res.data) != "{}") {
 						// openid 和wxid 都存在在发送请求，请求用户信息
 						this.UserId = res.data.userId;
@@ -114,7 +115,6 @@ export const Toolbar = {
 									this.outData(res.data.user.id);  // 获取是否过期；
 									this.getTabList();  // 存在就是从第三方应用进入的，没有存在就是从通讯录进入的
 									this.getList();
-									console.log('weqeqwkejqwjehwqehqwikehjqwikewhqioewjoweqjieoqwjeioqwjeqwioej')
 									this.$router.push('/chatBarShare')
 								} else if (this.$route.name === 'ChatCustomer') { // 营销画像
 									this.init() // 请求数据

@@ -91,10 +91,14 @@
 import share from '../../components/share'
 import communication from "../../uilts/communication";
 import { getM } from '../../uilts/date';
-import wxxx from '../../uilts/wxconfig'
+import wxxx from '../../uilts/wxconfig';
+import { shareMixin } from '../../uilts/shareMixin';
+
 export default {
   name: "VideoPage",
   components: {},
+  mixins: [shareMixin],
+
   props: ['datas', 'userMaps', 'configs', 'states'],
   data() {
     return {
@@ -110,13 +114,9 @@ export default {
       Single: false,
     };
   },
-  watch: {
-  },
-  computed: {},
-  methods: {},
   created() {
     this.backWidth = this.screenWidth / 2;
-    this.backHeight = (this.backWidth * 1.5) + 'px';
+    this.backHeight = (this.backWidth * 1.2) + 'px';
     this.$nextTick(() => {
       this.Single = sessionStorage.getItem('Single') || false;
 
@@ -134,7 +134,7 @@ export default {
         window.screenWidth = document.body.clientWidth;
         that.screenWidth = window.screenWidth;
         that.backWidth = that.screenWidth / 2;
-        that.backHeight = (that.backWidth * 1.5) + 'px';
+        that.backHeight = (that.backWidth * 1.2) + 'px';
       })()
     }
   },
@@ -168,21 +168,22 @@ export default {
       this.$router.push({
         name: 'Iframe',
         params: {
-          url: item.initialUrl + '?shareType=15',
+          url: item.initialUrl + '&shareType=15',
           title: item.title,
           desc: item.description,
           imgUrl: item.thumb,
           view: 'video'
         }
-      })
+      });
       communication.$emit('dateViodeo', index, getM()[3]); //触发home 页面方法，目的是为了更新列表数据
     },
-    createContent(item) {
+    async createContent(item) {
+      await this.getShareUrl(item.title, item.description, item.thumb, item.url, item.id, 6)
       if (sessionStorage.getItem('Single')) { //单聊模式发送  正常模式赋值
         wx.invoke('sendChatMessage', {
           msgtype: "news", //消息类型，必填
           news: {
-            link: item.initialUrl + '?shareType=15', //H5消息页面url 必填
+            link: this.shareUrl, //H5消息页面url 必填
             title: item.title, //H5消息标题
             desc: item.description, //H5消息摘要
             imgUrl: item.thumb, //H5消息封面图片URL
@@ -204,7 +205,6 @@ export default {
       }
     }
   },
-
   components: {
     share
   }
@@ -219,9 +219,8 @@ export default {
   padding-top: 70px;
   height: calc(100vh - 70px);
   .cont {
-    width: 50%;
-    width: calc(100% / 2 - 5px);
-    margin: 0 calc(5px / 2) 10px;
+    width: calc(100% / 2 - 12px);
+    margin: 0 calc(12px / 2) 10px;
   }
   .van-list {
     display: flex;
@@ -238,7 +237,7 @@ export default {
     margin: 0 auto;
     position: relative;
     width: 100%;
-    border-radius: 10px;
+    border-radius: 10px 10px 0 0;
   }
   .mask {
     width: 45px;
@@ -315,6 +314,10 @@ export default {
     box-sizing: border-box;
     justify-content: space-between;
     border-radius: 0 0 9px 9px;
+    &>:first-child{
+      flex-shrink: 0;
+      margin-right: 5 px;
+    }
   }
   .HbTit {
     line-height: 25px;
@@ -325,6 +328,7 @@ export default {
     display: flex;
     justify-content: space-between;
     flex-direction: column;
+    border-radius: 0 0 10px 10px;
   }
 }
 </style>

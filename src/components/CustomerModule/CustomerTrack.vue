@@ -1,37 +1,52 @@
 <template>
   <div class="CustomerTrack">
-    <van-list
-      v-if="list.length > 0"
-      class="vanList"
-      finished-text="没有更多了"
-      :immediate-check="false"
-      v-model="loading"
-      :finished="finished"
-      finished-span="没有更多了"
-      @load="onLoad"
-    >
-      <div
-        class="card"
-        v-for="(item, index) in list"
-        :key="index"
-        @click="clickColor(item)"
+    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+      <van-list
+        v-if="list.length > 0"
+        class="vanList"
+        :immediate-check="false"
+        v-model="loading"
+        :finished="finished"
+        @load="onLoad"
       >
-        <div class="imgView">
-          <img :src="item.thumb || url" alt="" />
+        <div
+          v-for="(item, index) in list"
+          :key="index"
+          @click="clickColor(item)"
+          class="follMain"
+        >
+          <div class="time">
+            <icon
+              :name="'6'"
+              :w="20"
+              :height="20"
+              style="background: #eee; border-radius: 50%"
+            ></icon>
+            <div class="wire"></div>
+          </div>
+          <div class="info">
+            <p class="font">
+              {{ item.createTime }} 访问了
+              <span v-if="item.pageType == 1">页面</span>
+              <span v-else-if="item.pageType == 2">微站（首页）</span>
+              <span v-else-if="item.pageType == 3">微站（详情页）</span>
+              <span v-else-if="item.pageType == 4">微站（分类页）</span>
+              <span v-else-if="item.pageType == 5">文档</span>
+              <span v-else-if="item.pageType == 6">短视频</span>【{{
+                item.title
+              }}】
+            </p>
+          </div>
         </div>
-        <div class="info">
-          <p>{{ item.title }}</p>
-          <p>{{ item.createTime }}</p>
-        </div>
-      </div>
-    </van-list>
-    <van-empty
-      image-size="40px"
-      v-else-if="empty"
-      class="custom-image"
-      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
-      description="暂无相关消息"
-    />
+      </van-list>
+      <van-empty
+        image-size="40px"
+        v-else-if="empty"
+        class="custom-image"
+        image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+        description="暂无相关消息"
+      />
+    </van-pull-refresh>
   </div>
 </template>
 
@@ -48,6 +63,7 @@ export default {
       list: [],
       loading: false,
       finished: false,
+      refreshing: false,
       empty: false,
       total: 0,
       current: 1,
@@ -63,12 +79,9 @@ export default {
       let userId = JSON.parse(sessionStorage.getItem('userinfo'))?.id;
       let wxcrmId = sessionStorage.getItem('wxcrmId');
       let signature = generateSignature4(compId, timeout, nonce);
-    //   alert(wxcrmId, 'wxcrmId')
-    //   alert(userId, 'userId')
-    //   alert(compId, 'compId')
-      param.append("from", wxcrmId);
+      param.append("from", wxcrmId || 'wmoqMGCgAAGrSMOKeEpW0g0g47V5WSJg'); //
       param.append("to", userId);
-      param.append("compId", compId);
+      param.append("compId", compId || 40007760);//|| 40007760
       param.append("timeout", timeout);
       param.append("nonce", nonce);
       param.append("size", 20);
@@ -76,10 +89,8 @@ export default {
       param.append("signature", signature);
       this.$post1("/work/trajectory/log/result", param)
         .then((res) => {
-        //   alert(JSON.stringify(res))
-        //   alert(res.data.data.length)
           if (res.code == 200 && res.msg == 'success') {
-            if (res.data.data.length) { 
+            if (res.data.data.length) {
               this.list = this.current == 1 ? res.data.data : this.list.concat(res.data.data);
               this.total = res.data.totalPageCount;
             } else {
@@ -96,11 +107,10 @@ export default {
         });
     },
     clickColor(item) {
-      return;
       this.$router.push({
         name: 'Iframe',
         params: {
-          url: item.pageUrl + '?shareType=15',
+          url: item.pageUrl,
           title: item.title,
           desc: item.description,
           imgUrl: item.thumb
@@ -118,6 +128,13 @@ export default {
       setTimeout(() => {
         this.loading = false;
       }, 1500)
+    },
+    onRefresh() {
+      this.current = 1;
+      this.getAgendaList();
+      setTimeout(() => {
+        this.refreshing = false;
+      }, 1000);
     }
   },
   created() {
@@ -130,78 +147,47 @@ export default {
 <style lang="less" scoped>
 .CustomerTrack {
   font-size: 0.32rem;
-  height: 1;
-  //   padding-top: 100px;
-  .card {
-    background: #f9f9f9;
+  overflow-y: scroll;
+  height: 68vh;
+  .follMain {
     display: flex;
-    margin: 0 10px;
-    padding: 0.36rem 0.26rem;
-    // background: #fff;
-    margin-bottom: 8px;
-    border-radius: 5px;
-    position: relative;
-    height: 48px;
-    align-items: center;
-    .share {
-      position: absolute;
-      right: 12px;
-      bottom: 10px;
-      display: flex;
-      align-items: center;
-      font-size: 0.28rem;
-      i {
-        margin-right: 3px;
+    padding: 10px 15px;
+    .time {
+      margin-right: 0.3rem;
+      flex-shrink: 0;
+      span:first-child {
+        font-size: 22px;
+        font-weight: bold;
+      }
+      span:last-child {
+        font-size: 16px;
+        font-weight: 400;
+        padding-left: 5px;
+      }
+      svg path {
+        stroke: red;
+        fill: red;
+      }
+    }
+    .info {
+      background: #f3f3f3;
+      padding: 10px 5px;
+      flex: 1;
+      .font {
+        line-height: 25px;
+        word-break: break-all;
+        padding-left: 8px;
+        padding: 5px 2px;
+        font-size: 0.3rem;
       }
     }
   }
-  .imgView {
-    .top {
-      position: absolute;
-      left: 0px;
-      top: 1px;
-      background: #f6c110;
-      width: 29px;
-      border-radius: 3px;
-      color: #000;
-      font-size: 10px;
-      text-align: center;
-      padding: 2px;
-    }
-    img {
-      width: 0.9rem;
-      height: 0.9rem;
-    }
-  }
-  .info {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin-left: 8px;
-    font-size: 14px;
-    height: auto;
-    width: 90%;
-    flex-shrink: 0;
-    // min-height: 60px;
-    p:first-child {
-      margin-bottom: 6px;
-    }
-    p:last-child {
-      color: #807e7e;
-    }
-    p {
-      width: 90%;
-      //   margin-bottom: 8px;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      overflow: hidden;
-      line-height: 20px;
-      white-space: pre;
-    }
-    span {
-      color: #807e7e;
-    }
+  .wire {
+    width: 1px;
+    height: calc(100% - 25px);
+    margin: 0 auto;
+    margin-top: 5px;
+    background: #c1bebe;
   }
 }
 </style>

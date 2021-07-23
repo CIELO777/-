@@ -7,7 +7,7 @@
     <template v-if="Object.keys(optRecordMap).length > 0">
       <div v-for="(item, index) in optRecordMap" :key="index" class="OPeraBox">
         <div class="qs-title bg-color-f0">
-          <span style="font-weight: 550;">{{ index }}</span>
+          <span style="font-weight: 550">{{ index }}</span>
         </div>
         <div
           class="record-detail"
@@ -15,7 +15,9 @@
           :key="indexs"
         >
           <span class="timeColor">{{ items.accurateTime }}</span>
-          <span class="detail">{{ optRecordUserMap[items.creator].nickname }}</span>
+          <span class="detail">{{
+            optRecordUserMap[items.creator].nickname
+          }}</span>
           <span class="detail qs-blue">{{ items.typeName }}</span>
           <span v-if="items.type != 6 && items.type != 7">
             <span v-if="items.type == 2"> 给 </span>
@@ -148,11 +150,12 @@ export default {
             })
             that.optRecordMap = { ...optRecordMap };
             console.log(that.optRecordMap)
-            // console.log();
-            if (Object.keys(that.optRecordMap).length == 0) that.empty = true; //如果数据等于0，就显示空信息
-            that.optRecordUserMap = Object.assign(optRecordUserMap, res.user);
+            console.log(Object.keys(that.optRecordMap))
+            console.log(optRecordUserMap, res.user, 'res.user')
+            console.log(res.totalPageCount, 'res.totalPageCount')
+            if (Object.keys(that.optRecordMap)?.length == 0) { that.empty = true; return }  //如果数据等于0，就显示空信息
+            that.optRecordUserMap = Object.assign(optRecordUserMap || {}, res.user || {});
             that.total = res.totalPageCount;
-
           } else {
             that.empty = true;
           }
@@ -191,12 +194,15 @@ export default {
   }
   .record-detail {
     background-color: #fff;
-    // padding: 10px;
     font-size: 0.26rem;
-    line-height: 36px;
+    line-height: 0.8rem;
     margin-bottom: 1px;
     letter-spacing: 1px;
     padding: 0 10px;
+    border-bottom: 1px solid #eee;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     .detail {
       padding-left: 5px;
     }
@@ -205,7 +211,7 @@ export default {
     }
   }
   .timeColor {
-    color:#304d04
+    color: #304d04;
   }
 }
 </style>

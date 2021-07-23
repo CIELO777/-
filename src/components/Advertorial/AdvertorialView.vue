@@ -270,8 +270,10 @@
 </template>
 
 <script>
-import share from '../../components/share'
-import wxxx from '../../uilts/wxconfig'
+import share from '../../components/share';
+import wxxx from '../../uilts/wxconfig';
+import { shareMixin } from '../../uilts/shareMixin';
+
 export default {
   name: "AdvertorialView",
   components: {},
@@ -286,8 +288,7 @@ export default {
       ShareContent: {}
     };
   },
-  watch: {},
-  computed: {},
+  mixins: [shareMixin],
   methods: {
     onLoad() {  // 触底事件、
       if (this.configs.current >= this.configs.total) {
@@ -317,7 +318,7 @@ export default {
       }, 1000);
       this.onLoad();
     },
-    clickColor(item) {
+    async clickColor(item) {
       this.$router.push({
         name: 'Iframe',
         params: {
@@ -328,12 +329,13 @@ export default {
         }
       })
     },
-    createContent(item) {
+    async createContent(item) {
+      await this.getShareUrl(item.title, item.description, item.thumb, item.url, item.id, 1);
       if (sessionStorage.getItem('Single')) { //单聊模式发送  正常模式赋值
         wx.invoke('sendChatMessage', {
           msgtype: "news", //消息类型，必填
           news: {
-            link: item.initialUrl + '&shareType=15', //H5消息页面url 必填
+            link: this.shareUrl, //H5消息页面url 必填
             title: item.title, //H5消息标题
             desc: item.description ? item.description : '暂无数据', //H5消息摘要
             imgUrl: item.thumb, //H5消息封面图片URL

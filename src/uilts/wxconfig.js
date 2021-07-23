@@ -2,7 +2,7 @@
  * @Author: Tian 
  * @Date: 2021-07-02 15:18:13 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-12 11:43:14
+ * @Last Modified time: 2021-07-23 11:22:17
  * 公共微信授权接口。项目全部授权接口全部走此授权（客户画像比较特殊单独走了一个）
  */
 import { get } from './https';
@@ -61,11 +61,11 @@ let getWxJsJdk = () => {
 					jsApiList: ['agentConfig', 'closeWindow', "selectExternalContact", 'openEnterpriseChat', 'getCurExternalContact'], // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
 				});
 				wx.ready(() => {
-					wx.hideMenuItems({
-						menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari', 'menuItem: refresh'] // 要隐藏的菜单项
-					});
-					console.log(config, 'config')
-					console.log(agentConfig, 'agentConfig')
+					wx.hideOptionMenu();
+					console.log('wx.hideOptionMenu()')
+					// wx.hideMenuItems({
+					// 	menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari', 'menuItem: refresh'] // 要隐藏的菜单项
+					// });
 					wx.agentConfig({
 						corpid: config.appId, // 必填，企业微信的corpid，必须与当前登录的企业一致
 						agentid: agentConfig.agentid, // 必填，企业微信的应用id （e.g. 1000247）
@@ -74,7 +74,43 @@ let getWxJsJdk = () => {
 						signature: agentConfig.signature, // 必填，签名，见附录-JS-SDK使用权限签名算法
 						jsApiList: ["sendChatMessage", 'getContext', 'getCurExternalContact'], //必填
 						success: (res) => {
-							console.log(res)
+							wx.invoke('getContext', {
+							}, function (res) {
+								if (res.err_msg.includes('ok')) {
+									if (res.entry === 'group_chat_tools') {
+										Toast.fail({
+											message: '外部群不支持营销素材功能',
+											forbidClick: true,
+											duration: 0,
+											overlay: true,
+										});
+										reject('客户ID获取失败，请稍后再试...');
+									} else {
+										wx.invoke('getCurExternalContact', {
+										}, (res) => {
+											console.log(res, 'getCurExternalContact')
+											if (res.err_msg == "getCurExternalContact:ok") {
+												sessionStorage.setItem('wxcrmId', res.userId)
+											} else {
+												Toast.fail({
+													message: res.err_msg,
+													forbidClick: true,
+													duration: 0,
+													overlay: true,
+												});
+											}
+										});
+									}
+								} else {
+									Toast.fail({
+										message: '授权失败，请重试',
+										forbidClick: true,
+										duration: 0,
+										overlay: true,
+									});
+								}
+							});
+
 						},
 						fail: (res) => {
 							Toast.fail(res);

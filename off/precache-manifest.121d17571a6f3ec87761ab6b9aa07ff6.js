@@ -1,11 +1,11 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "85405ae9f1f863de9797",
-    "url": "/looyu/css/about.1d7915bb.css"
+    "revision": "7adfa9782364991fc511",
+    "url": "/looyu/css/about.e32f4104.css"
   },
   {
-    "revision": "0ebeb66a1cf927acecc4",
-    "url": "/looyu/css/app.c3cd8529.css"
+    "revision": "88830f4f3a04bff2c746",
+    "url": "/looyu/css/app.344d0ee1.css"
   },
   {
     "revision": "2611e21f9815004e885a",
@@ -364,16 +364,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/looyu/img/销售雷达.1dc28589.png"
   },
   {
-    "revision": "bd8ab2238eb65bac92cbf106c4d79cb5",
+    "revision": "15bff2ca5e430b92bb5f0b1149bfd8e9",
     "url": "/looyu/index.html"
   },
   {
-    "revision": "85405ae9f1f863de9797",
-    "url": "/looyu/js/about.d91b6c5d.js"
+    "revision": "7adfa9782364991fc511",
+    "url": "/looyu/js/about.5fc45cd7.js"
   },
   {
-    "revision": "0ebeb66a1cf927acecc4",
-    "url": "/looyu/js/app.92773624.js"
+    "revision": "88830f4f3a04bff2c746",
+    "url": "/looyu/js/app.ed5c5735.js"
   },
   {
     "revision": "2611e21f9815004e885a",

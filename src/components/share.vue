@@ -75,15 +75,14 @@ export default {
           console.log(res, '分享接口')
           if (res.err_msg == "shareWechatMessage:ok") {
             this.shareCount()
-            // this.$toast('分享成功')
-          } else {
-            this.$toast('分享失败', res)
+            // this.$toast('分享成功') 
           }
         }
         );
       } else if (name == '朋友圈') {
         this.$toast('请打开右上角菜单，选择朋友圈分享');
       } else if (name == '我的客户') {
+        console.log(this.ShareContents)
         wx.invoke(
           "shareAppMessage", {
           title: this.ShareContents.title, // 分享标题

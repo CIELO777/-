@@ -22,7 +22,9 @@
             <div class="infoUser">
               <p class="title">{{ item.title }}</p>
               <p class="desc">{{ item.description }}</p>
-              <p>{{ item.createTime }}</p>
+              <p style="color: #848282; font-size: 0.24rem">
+                {{ item.createTime }}
+              </p>
             </div>
           </div>
           <div class="other" @click.stop="createContent(item)">
@@ -47,10 +49,12 @@
 
 <script>
 import local from '../uilts/localStorage';
+import { shareMixin } from '../uilts/shareMixin';
 
 export default {
   name: "MicroStationViews",
   components: {},
+  mixins: [shareMixin],
   props: ['datas', 'configs', 'states', 'soless'],
   data() {
     return {
@@ -107,10 +111,10 @@ export default {
       }, 1000);
       //   this.onLoad();
     },
-    clickColor(item) { // 点击详情页
+    async clickColor(item) { // 点击详情页
       let url;
       if (item.type === 'micHome') {
-        url = `${item.url.split('/{id}')[0]}/${item.id}?s=${item.id}&promote=${item.userId}`
+        url = `${item.url.split('/{id}')[0]}/${item.id}?s=${item.id}&promote=${item.userId}`;
       } else {
         if (item.url.includes('classify')) { // 分类页
           url = `${item.url.split('/{sid}')[0]}/${item.sid}/${item.id}?s=${item.sid}&l=${item.id}&promote=${this.$U || local.U()}`;
@@ -121,29 +125,30 @@ export default {
       this.$router.push({
         name: 'Iframe',
         params: {
-          url: url,
+          url: url + '&shareType=15',
           title: item.title,
           desc: item.description,
           imgUrl: item.thumb
         }
       })
     },
-    createContent(item) { // 发送
+    async createContent(item) { // 发送
       let url;
-      console.log(item.url)
+      console.log(item)
       if (item.type == 'micHome') { // 微站首页
         url = `${item.url.split('/{id}')[0]}/${item.id}?s=${item.id}&promote=${item.userId}`
-      }else if(!item.uuid){
+      } else if (!item.uuid) {
         let data = `${item.url.split('/{id}')[0]}/${item.id}?s=${item.id}&promote=${item.userId}`;
-        url = data.replace('{sid}',item.sid);
+        url = data.replace('{sid}', item.sid);
       } else {
         url = `${item.url.split('/{sid}')[0]}/${item.sid}/${item.id}/0?s=${item.sid}&p=${item.id}&promote=${this.$U || local.U()}` // url拼接处理
       }
-      console.log(url)
+      console.log(item.sid ? 3 : 4)
+      await this.getShareUrl(item.title, item.description, item.thumb, url, item.id, item.type == 'micHome' ? 2 : item.shelvesStatus ? 3 : 4)
       wx.invoke('sendChatMessage', {
         msgtype: "news", //消息类型，必填
         news: {
-          link: url, //H5消息页面url 必填
+          link: this.shareUrl, //H5消息页面url 必填
           title: item.title, //H5消息标题
           desc: item.description, //H5消息摘要
           imgUrl: item.thumb, //H5消息封面图片URL
@@ -166,12 +171,13 @@ export default {
   background: #eee;
   font-size: 0.28rem;
   padding-top: 90px;
-  height: calc(100vh - 90px);
+  // height: calc(100vh - 90px);
   .card {
-    margin: 15px 0;
+    margin: 10px;
     background-color: #fff;
     padding: 10px;
     position: relative;
+    border-radius: 5px;
   }
   .card .info {
     display: flex;
@@ -179,8 +185,8 @@ export default {
     align-items: center;
     position: relative;
     img {
-      width: 80px;
-      height: 80px;
+      width: 1.5rem;
+      height: 1.5rem;
       object-fit: cover;
     }
     .infoUser {
@@ -201,6 +207,8 @@ export default {
       text-overflow: ellipsis;
       white-space: nowrap;
       width: 200px;
+      font-size: 0.24rem;
+      color: #848282;
     }
   }
   .card .other {

@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:48:39 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-16 19:02:54
+ * @Last Modified time: 2021-07-23 18:18:33
    聊天工具栏客户管理工具栏,和我的客户对话时候快捷打开
    1.先获取当前企业微信联系人ID，并通过code 授权获取this.U and this.C()。
    2.拉取联系人列表通过（wx。wxcrmID）判断在联系人列表里有是否有当前联系人。
@@ -20,10 +20,10 @@
       />
     </div>
     <header>
-      <img :src="userInfo.avatar || imgSrc" alt="" style="border-radius: 5px" />
+      <img :src="userInfo.avatar || imgSrc" alt="" style="border-radius: 5px"/>
       <div class="infoBox">
-        <p style="display: flex; align-items: center">
-          <strong class="namebold"
+        <p style="display: flex; align-items: center" v-if="showName">
+          <strong class="namebold" @click="changeName = showName = !showName"
             >名字：{{ userInfo.remark || userInfo.name }}</strong
           >
           <template v-if="userInfo.gender == 1 || userInfo.gender == 2">
@@ -35,6 +35,15 @@
           </template>
           <van-icon name="question-o" v-else />
         </p>
+        <input
+          type="text"
+          v-model="Nameremark"
+          v-else
+          class="nameInput"
+          autofocus="autofocus"
+          @keyup.enter="InputSave"
+          @blur="Inputblur = showName = true"
+        />
         <div class="details">
           <span style="color: #6b6a6a">添加时间：{{ userInfo.createtime }}</span
           ><span @click="details">详情 ></span>
@@ -89,7 +98,7 @@
                           color: #767676;
                           background-color: #f5f5f5;
                         "
-                        size="mini"
+                        size="small"
                         :key="index1"
                         >{{ item1.name }}</van-button
                       >
@@ -117,20 +126,21 @@
             @onTavclick="Tabclick"
           ></CustomerFollow>
         </van-tab>
-        <!-- <van-tab title="访问轨迹">
+        <van-tab title="访问轨迹">
           <CustomerTrack></CustomerTrack>
-        </van-tab> -->
-        <!-- <van-tab title="企微记录">
+        </van-tab>
+        <van-tab title="企微记录">
           <CustomerChaing
             :height="height"
             :userInfo="userInfo"
           ></CustomerChaing>
-        </van-tab> -->
+        </van-tab>
         <van-tab title="操作记录">
           <CustomerOpera :height="height" :userInfo="userInfo"></CustomerOpera>
         </van-tab>
       </van-tabs>
     </article>
+    
     <van-tabbar v-model="TabActive" active-color="#646566" z-index="99">
       <van-tabbar-item @click="Tabclick(4)">
         <span>添加标签</span>
@@ -214,7 +224,7 @@
               <van-button
                 style="margin-right: 5px; margin-bottom: 6px"
                 :type="item1.checked ? 'info' : 'default'"
-                size="mini"
+                size="small"
                 @click="hitTagBtn(item, index, item1, index1)"
                 :key="index1"
                 >{{ item1.name }}</van-button
@@ -488,7 +498,6 @@
       close-icon-position="top-left"
       :safe-area-inset-bottom="true"
       v-model="popShow.nickname"
-      closeable
       position="bottom"
       :style="{ height: '180px' }"
       @click-overlay="closePop"
@@ -497,6 +506,7 @@
       <p class="pop-tit">姓名</p>
       <van-field
         label=""
+        autofocus
         clearable
         v-model="formData.nickname"
         placeholder="请输入姓名"
@@ -515,7 +525,6 @@
       close-icon-position="top-left"
       :safe-area-inset-bottom="true"
       v-model="popShow.phone"
-      closeable
       position="bottom"
       :style="{ height: '200px' }"
       @click-overlay="closePop"
@@ -526,6 +535,7 @@
         label=""
         clearable
         type="tel"
+        autofocus
         v-model="formData.phone"
         placeholder="请输入手机号"
       />
@@ -542,7 +552,6 @@
       close-icon-position="top-left"
       :safe-area-inset-bottom="true"
       v-model="popShow.workNumber"
-      closeable
       position="bottom"
       :style="{ height: '200px' }"
       @click-overlay="closePop"
@@ -552,6 +561,7 @@
       <van-field
         label=""
         type="tel"
+        autofocus
         clearable
         v-model="formData.workNumber"
         placeholder="请输入手机号"
@@ -569,7 +579,6 @@
       close-icon-position="top-left"
       :safe-area-inset-bottom="true"
       v-model="popShow.address"
-      closeable
       position="bottom"
       :style="{ height: '200px' }"
       @click-overlay="closePop"
@@ -580,6 +589,7 @@
         label=""
         type="tel"
         clearable
+        autofocus
         v-model="formData.address"
         placeholder=""
       />
@@ -620,7 +630,6 @@
       close-icon-position="top-left"
       :safe-area-inset-bottom="true"
       v-model="popShow.remark"
-      closeable
       position="bottom"
       :style="{ height: '250px' }"
       @click-overlay="closePop"
@@ -629,7 +638,7 @@
       <p class="pop-tit">备注</p>
       <van-field
         label=""
-        clearable
+        autofocus
         v-model="formData.remark"
         type="textarea"
         rows="4"
@@ -667,7 +676,6 @@
       close-icon-position="top-left"
       :safe-area-inset-bottom="true"
       v-model="popShow.wx"
-      closeable
       position="bottom"
       :style="{ height: '180px' }"
       @click-overlay="closePop"
@@ -677,7 +685,7 @@
       <van-field
         label=""
         v-model="formData.wx"
-        clearable
+        autofocus
         placeholder="请输入微信号"
       />
       <van-button
@@ -694,7 +702,6 @@
       close-icon-position="top-left"
       :safe-area-inset-bottom="true"
       v-model="popShow.qq"
-      closeable
       position="bottom"
       :style="{ height: '180px' }"
       @click-overlay="closePop"
@@ -704,7 +711,7 @@
       <van-field
         label=""
         v-model="formData.qq"
-        clearable
+        autofocus
         placeholder="请输入QQ号"
       />
       <van-button
@@ -720,7 +727,6 @@
       close-icon-position="top-left"
       :safe-area-inset-bottom="true"
       v-model="popShow.email"
-      closeable
       position="bottom"
       :style="{ height: '180px' }"
       @click-overlay="closePop"
@@ -730,7 +736,7 @@
       <van-field
         label=""
         v-model="formData.email"
-        clearable
+        autofocus
         placeholder="请输入邮箱号"
       />
       <van-button
@@ -1031,6 +1037,8 @@ export default {
         alignItems: 'center',
         display: 'flex'
       },
+      showName: true,
+      Nameremark: '',
     };
   },
   methods: {
@@ -1177,6 +1185,28 @@ export default {
     },
     closeShare() {
       this.getCrm()
+    },
+    InputSave() {
+      if (!this.Nameremark) return;
+      let params = {
+        userid: sessionStorage.getItem('bind_UserID'),
+        external_userid: sessionStorage.getItem('wxcrmId'),
+        remark: this.Nameremark,
+        compId: sessionStorage.getItem('bind_compId'),
+      };
+      this.$post1("/work/contact/remark"+ '?userid=' + params.userid + '&external_userid=' + params.external_userid + '&remark=' + params.remark + '&compId=' + params.compId, params)
+        .then((res) => {
+          if (res.code == 200 && res.msg === 'success') {
+            this.$toast('修改成功')
+            this.userInfo.remark = this.Nameremark;
+            this.showName = true;
+          } else {
+            this.$toast.fail('修改失败', res)
+          }
+        })
+        .catch((error) => {
+          this.$toast.fail('修改失败', res)
+        });
     },
     closePop() { },
     regionSave() {
@@ -1636,8 +1666,8 @@ export default {
             if (res.data.tags) {
               this.getdispost(res.data.tags) // 赋值标签
             }
-            this.maskings = '';  // 清空蒙版
             this.$toast.clear();
+              this.maskings = '';  // 清空蒙版
             setTimeout(() => {
               // this.getTagList();
               this.getCrm()
@@ -2595,6 +2625,10 @@ export default {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+  .nameInput {
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
   }
 }
 </style>
