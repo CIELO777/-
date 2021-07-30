@@ -191,6 +191,7 @@ export default {
   data() {
     return {
       active: 0,
+      showaaa: false,
       maskings: {
         position: 'fixed',
         left: 0,
@@ -379,7 +380,7 @@ export default {
         params: params,
       })
         .then((res) => {
-          console.log(res,their)
+          console.log(res, their)
           let qq = this.treeData[this.active];
           let cur = qq.config.current;
           if (their === 'colorPage') {  // 宣传彩页
@@ -800,8 +801,6 @@ export default {
       this.searchCom();
     },
     onCancel() { // 取消搜索
-      // if (this.value === '')  return;
-      console.log('21312')
       this.value = '';
       this.tabArray[this.active].state = 'list';
       this.treeData[this.active].config.current = 1;

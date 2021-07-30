@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-01-12 13:56:29 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-23 18:22:55
+ * @Last Modified time: 2021-07-26 15:53:39
  8 此模块用于彩页，软文列表
  */
 <template>
@@ -220,7 +220,7 @@ export default {
     },
     async createContent(item) {
       await this.getShareUrl(item.title, item.description, item.thumb, item.url, item.id, 1)
-      console.log(this.shareUrl)
+      // alert(this.shareUrl)
       if (sessionStorage.getItem('Single')) { //单聊模式发送  正常模式赋值
         wx.invoke('sendChatMessage', {
           msgtype: "news", //消息类型，必填

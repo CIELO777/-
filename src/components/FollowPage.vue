@@ -199,7 +199,7 @@ import { ImagePreview } from 'vant';
 import sha1 from '../uilts/sha1';
 import Utils from '../uilts/utils';
 import communication from "../uilts/communication";
-import FileSaver from 'file-saver';
+// import FileSaver from 'file-saver';
 import wxxx from '../uilts/wxconfig'
 export default {
   name: 'FollowPage',

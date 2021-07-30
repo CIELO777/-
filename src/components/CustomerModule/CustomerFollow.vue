@@ -1,5 +1,9 @@
 <template>
-  <div class="CustomerFollow">
+  <div
+    class="CustomerFollow"
+    @scroll="scrollEventselect"
+    :style="{ height: height, overflowY: 'scroll' }"
+  >
     <!-- <div class="follTit">
       <div style="margin-left: 15px">
         <img src="../../assets/img/pencil3.png" class="addicon" alt="" />
@@ -13,118 +17,106 @@
         </a>
       </div>
     </div> -->
-    <div
-      @scroll="scrollEventselect"
-      :style="{ height: height, overflowY: 'scroll' }"
-    >
-      <div class="follCont" v-if="follList.length > 0">
-        <div v-for="(item, index) in follList" :key="index" class="follMain">
-          <div class="time">
-            <icon
-              :name="item.type + ''"
-              :w="20"
-              :height="20"
-              style="background: #eee; border-radius: 50%"
-            ></icon>
-            <div class="wire"></div>
-          </div>
-          <div class="content">
-            <div class="text">
-              <!-- 如果type === 4 证明是对话，对话展示content内容，其他展示title -->
-              <template>
-                <span v-if="item.type == 4" style="white-space: pre-wrap">{{
-                  item.content
-                }}</span>
-                <span style="white-space: pre-wrap"
-                  >{{ item.title == null ? "" : item.title }}
-                  <br />
-                  <!-- <a
+    <div class="follCont" v-if="follList.length > 0">
+      <div v-for="(item, index) in follList" :key="index" class="follMain">
+        <div class="time">
+          <icon
+            :name="item.type + ''"
+            :w="20"
+            :height="20"
+            style="background: #eee; border-radius: 50%"
+          ></icon>
+          <div class="wire"></div>
+        </div>
+        <div class="content">
+          <div class="text">
+            <!-- 如果type === 4 证明是对话，对话展示content内容，其他展示title -->
+            <template>
+              <span v-if="item.type == 4" style="white-space: pre-wrap">{{
+                item.content
+              }}</span>
+              <span style="white-space: pre-wrap"
+                >{{ item.title == null ? "" : item.title }}
+                <br />
+                <!-- <a
                   v-if="item.url != false"
                   @click="JumpOrder(item.url)"
                   style="color: blue"
                   >查看链接</a
                 >-->
-                  <a
-                    v-if="
-                      item.url &&
-                      item.callRecordUrl &&
-                      item.callRecordUrl !== ''
-                    "
-                    @click="callRecord(item)"
-                    style="color: blue"
-                    >查看通话录音</a
-                  >
-                </span>
+                <a
+                  v-if="
+                    item.url && item.callRecordUrl && item.callRecordUrl !== ''
+                  "
+                  @click="callRecord(item)"
+                  style="color: blue"
+                  >查看通话录音</a
+                >
+              </span>
+            </template>
+            <div
+              v-if="item.type == 0 && item.content && item.content.length > 0"
+              class="img-list"
+            >
+              <template v-for="(itr, i) in item.content">
+                <img :key="i" :src="itr" @click="ImgClick(item.content)" />
               </template>
-              <div
-                v-if="item.type == 0 && item.content && item.content.length > 0"
-                class="img-list"
-              >
-                <template v-for="(itr, i) in item.content">
-                  <img :key="i" :src="itr" @click="ImgClick(item.content)" />
-                </template>
-              </div>
-              <div v-if="item.type == 1">
-                <!-- <div class="media" @click="handelClickMadiaPlay(item.content)">
-              </div> -->
-                <!-- <van-icon size="20px" color="#AAA" name="volume-o" /> -->
-                <audio
-                  controls="controls"
-                  preload="auto"
-                  :src="item.content"
-                  class="audio"
-                ></audio>
-              </div>
             </div>
-            <div class="info">
-              <span style="font-size: 12px">{{ item.detTime }}</span>
-              <!-- <span v-show="limits" class="user" @click="dele(item.id, item.pid)"
+            <div v-if="item.type == 1">
+              <!-- <div class="media" @click="handelClickMadiaPlay(item.content)">
+              </div> -->
+              <!-- <van-icon size="20px" color="#AAA" name="volume-o" /> -->
+              <audio
+                controls="controls"
+                preload="auto"
+                :src="item.content"
+                class="audio"
+              ></audio>
+            </div>
+          </div>
+          <div class="info">
+            <span style="font-size: 12px">{{ item.detTime }}</span>
+            <!-- <span v-show="limits" class="user" @click="dele(item.id, item.pid)"
               >删除</span
             > -->
-              <span
-                @click="chat(followUserMap[item.itrId], item.pid)"
-                class="user"
-                v-if="followUserMap[item.itrId]"
-                >{{ followUserMap[item.itrId].nickname || "" }}</span
-              >
-            </div>
+            <span
+              @click="chat(followUserMap[item.itrId], item.pid)"
+              class="user"
+              v-if="followUserMap[item.itrId]"
+              >{{ followUserMap[item.itrId].nickname || "" }}</span
+            >
           </div>
         </div>
       </div>
-      <van-empty
-        v-else-if="empty"
-        image-size="40px"
-        image="https://img.yzcdn.cn/vant/custom-empty-image.png"
-        description="暂无相关消息"
-      />
-      <!-- 查看录音弹框 -->
-      <van-popup
-        v-model="call.pop"
-        :style="{
-          width: '80%',
-          height: '100px',
-          padding: '10px',
-          fontSize: '.30rem',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-evenly',
-          display: 'flex',
-        }"
-        round
-      >
-        <p style="margin-bottom: 20px; margin-left: 5px">{{ call.title }}</p>
-        <!-- <p class="downLoad">
+    </div>
+    <van-empty
+      v-else-if="empty"
+      image-size="40px"
+      image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+      description="暂无相关消息"
+    />
+    <!-- 查看录音弹框 -->
+    <van-popup
+      v-model="call.pop"
+      :style="{
+        width: '80%',
+        height: '100px',
+        padding: '10px',
+        fontSize: '.30rem',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        display: 'flex',
+      }"
+      round
+    >
+      <p style="margin-bottom: 20px; margin-left: 5px">{{ call.title }}</p>
+      <!-- <p class="downLoad">
         <van-icon name="down" size="18px" @click="downLoadMp3" />下载
       </p> -->
-        <audio
-          :src="call.url"
-          controls="controls"
-          preload="auto"
-          class="audio"
-        />
-        <!-- controlslist="nodownload" -->
-      </van-popup>
-    </div>
+      <audio :src="call.url" controls="controls" preload="auto" class="audio" />
+      <!-- controlslist="nodownload" -->
+    </van-popup>
   </div>
 </template>
 
@@ -133,7 +125,6 @@ import { ImagePreview } from 'vant';
 import { generateTimeout, generateNonce, generateSignature3 } from '../../uilts/tools';
 let timeout = generateTimeout()
 let nonce = generateNonce();
-import local from '../../uilts/localStorage';
 
 export default {
   name: "CustomerFollow",
@@ -171,6 +162,7 @@ export default {
       var scrollTop = read.scrollTop;
       var windowHeight = read.clientHeight;
       var scrollHeight = read.scrollHeight;
+      console.log(scrollTop)
       if (parseInt(scrollTop) + windowHeight == scrollHeight && scrollTop > 15) {
         console.log('到底',);
         if (this.total <= this.current) return;
@@ -271,6 +263,7 @@ export default {
 
 <style lang="less" scoped>
 .CustomerFollow {
+  height: 68vh;
   // position: relative;
   .follCont:nth-child(2) {
     // padding-top: 3.4rem;

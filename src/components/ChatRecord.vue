@@ -13,14 +13,14 @@
           :key="index"
           class="card"
           :style="{
-            flexDirection: openId != item.from ? 'row-reverse' : 'row',
+            flexDirection: openId == item.from ? 'row-reverse' : 'row',
           }"
         >
           <!-- 文字 -->
           <template v-if="item.msgType == 'text'">
             <img
               :src="
-                openId != item.from
+                openId == item.from
                   ? user[item.from].avatar || defaultImg
                   : user[item.from].avatar || defaultImg
               "
@@ -28,11 +28,11 @@
               class="head"
             />
             <div
-              :class="openId != item.from ? 'chatBox' : 'chatBoxL'"
+              :class="openId == item.from ? 'chatBox' : 'chatBoxL'"
               :style="{
-                marginLeft: openId != item.from ? '' : '10px',
-                marginRight: openId != item.from ? '10px' : '',
-                background: openId != item.from ? '#C5E9FF' : '#eee',
+                marginLeft: openId == item.from ? '' : '10px',
+                marginRight: openId == item.from ? '10px' : '',
+                background: openId == item.from ? '#C5E9FF' : '#eee',
               }"
             >
               {{ item.content }}
@@ -42,7 +42,7 @@
           <template v-if="item.msgType == 'image'">
             <img
               :src="
-                openId != item.from
+                openId == item.from
                   ? user[item.from].avatar || defaultImg
                   : user[item.from].avatar || defaultImg
               "
@@ -64,7 +64,7 @@
           <template v-if="item.msgType == 'video'">
             <img
               :src="
-                openId != item.from
+                openId == item.from
                   ? user[item.from].avatar || defaultImg
                   : user[item.from].avatar || defaultImg
               "
@@ -75,8 +75,8 @@
               @click="VedioClick(item.itrFileUrl + '?frame=1')"
               class="mack"
               :style="{
-                left: openId == item.from ? '3.2rem' : '',
-                right: openId == item.from ? '' : '1.35rem',
+                left: openId == item.from ? '3.2rem' : '10px',
+                right: openId == item.from ? '10px' : '1.35rem',
                 top: '10px',
               }"
             >
@@ -93,8 +93,8 @@
               class="iframeS"
               scrolling="auto"
               :style="{
-                marginLeft: openId == item.from ? '10px' : '',
-                marginRight: openId == item.from ? '' : '10px',
+                marginLeft: openId == item.from ? '' : '10px',
+                marginRight: openId == item.from ? '10px' : '',
               }"
             >
             </iframe>
@@ -103,7 +103,7 @@
           <template v-if="item.msgType == 'voice'">
             <img
               :src="
-                openId != item.from
+                openId == item.from
                   ? user[item.from].avatar || defaultImg
                   : user[item.from].avatar || defaultImg
               "
@@ -211,14 +211,15 @@ export default {
     getList() {
       let wxCrmId = this.$route.name == 'ChatCustomer' ? sessionStorage.getItem('wxcrmId') : JSON.parse(sessionStorage.getItem('_crm_info')).wxCrmId;
       this.openId = sessionStorage.getItem('openId');
-      let from = sessionStorage.getItem('bind_UserID')
+      let from = sessionStorage.getItem('bind_UserID');
+      let compId = sessionStorage.getItem('bind_compId');
       let itrId = JSON.parse(sessionStorage.getItem('userinfo')).id;
       let signature = generateSignature4(timeout, nonce, itrId);
       this.$get("/work/session/result", {
         params: {
-          from,
+          from: from || 'SongTianYu',
           to: wxCrmId || 'wmmmFVEAAAQbwte-CPVAc-zHKbGgErzA',
-          compId: 40000013,
+          compId: compId || 40000013,
           current: this.current,
           size: 20,
           timeout,
@@ -256,7 +257,7 @@ export default {
       let signature = generateSignature4(timeout, nonce);
       this.$get("/work/session/sync", {
         params: {
-          wxCompId: CorpId ,
+          wxCompId: CorpId,
           nonce,
           timeout,
           signature,
@@ -289,7 +290,6 @@ export default {
       });
     },
     VedioClick(src) {
-      console.log(21131)
       this.show = true;
       this.videoSrc = src;
     },
@@ -299,10 +299,9 @@ export default {
         this.$get("/aliyun/remote/vod/detail", {
           params: {
             id: id,
-            playUrlState:1,
+            playUrlState: 1,
             userId: this.$U,
             nonce,
-            playUrlState: 1,
             timeout,
             signature,
           },
@@ -421,7 +420,7 @@ export default {
   },
   created() {
     this.getList() // 拉数据
-    this.openId = sessionStorage.getItem('openId');
+    this.openId = sessionStorage.getItem('bind_UserID');
     // this.balance() // 判断是否有剩余流量
   },
   mounted() { }

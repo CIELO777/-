@@ -75,6 +75,7 @@ export default {
     scrollEventselect() {
       let read = document.querySelector('.CustomerOpera')
       var scrollTop = read.scrollTop;
+      console.log(scrollTop)
       var windowHeight = read.clientHeight;
       var scrollHeight = read.scrollHeight;
       if (parseInt(scrollTop) + windowHeight == scrollHeight && scrollTop > 15) {

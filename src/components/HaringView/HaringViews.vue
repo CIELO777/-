@@ -128,7 +128,6 @@
 
 <script>
 import { ImagePreview } from 'vant';
-import FileSaver from 'file-saver';
 import {
   generateTimeout,
   generateNonce,

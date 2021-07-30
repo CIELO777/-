@@ -118,7 +118,6 @@ export default {
     }
   },
   created() {
-    console.log(21312321)
     if (sessionStorage.getItem('userinfo')) {
       this.loading()
       this.initMineInfo()

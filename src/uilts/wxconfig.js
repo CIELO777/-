@@ -2,7 +2,7 @@
  * @Author: Tian 
  * @Date: 2021-07-02 15:18:13 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-23 11:22:17
+ * @Last Modified time: 2021-07-28 13:55:15
  * 公共微信授权接口。项目全部授权接口全部走此授权（客户画像比较特殊单独走了一个）
  */
 import { get } from './https';
@@ -14,6 +14,9 @@ import {
 let timeout = generateTimeout();
 import sha1 from "./sha1";
 let nonce = generateNonce();
+import router from '../router/index';
+console.log(router,11111111111111)
+
 let getWxJsJdk = () => {
 	let { id, bind_comp_id } = JSON.parse(sessionStorage.getItem("userinfo"));
 	let { suiteId } = JSON.parse(sessionStorage.getItem("codeBasice"));
@@ -24,7 +27,6 @@ let getWxJsJdk = () => {
 	}
 	get("/work/wx/js_api_ticket/auth", { params: param })
 		.then((res) => {
-			console.log(res);
 			if (res.code === 200 && res.msg == 'success') {
 				let url = location.href.split("#")[0];
 				let config = { // config授权参数
@@ -66,6 +68,7 @@ let getWxJsJdk = () => {
 					// wx.hideMenuItems({
 					// 	menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari', 'menuItem: refresh'] // 要隐藏的菜单项
 					// });
+
 					wx.agentConfig({
 						corpid: config.appId, // 必填，企业微信的corpid，必须与当前登录的企业一致
 						agentid: agentConfig.agentid, // 必填，企业微信的应用id （e.g. 1000247）
@@ -78,28 +81,33 @@ let getWxJsJdk = () => {
 							}, function (res) {
 								if (res.err_msg.includes('ok')) {
 									if (res.entry === 'group_chat_tools') {
-										Toast.fail({
-											message: '外部群不支持营销素材功能',
-											forbidClick: true,
-											duration: 0,
-											overlay: true,
-										});
-										reject('客户ID获取失败，请稍后再试...');
+										// Toast.fail({
+										// 	message: '外部群不支持营销素材功能',
+										// 	forbidClick: true,
+										// 	duration: 0,
+										// 	overlay: true,
+										// });
+										// reject('客户ID获取失败，请稍后再试...');
 									} else {
-										wx.invoke('getCurExternalContact', {
-										}, (res) => {
-											console.log(res, 'getCurExternalContact')
-											if (res.err_msg == "getCurExternalContact:ok") {
-												sessionStorage.setItem('wxcrmId', res.userId)
-											} else {
-												Toast.fail({
-													message: res.err_msg,
-													forbidClick: true,
-													duration: 0,
-													overlay: true,
-												});
-											}
-										});
+										// alert(router.history._startLocation.includes("colorPage"))
+										// alert(router.history._startLocation)
+										if (router.history._startLocation.includes("colorPage")) { // 只有分享获取外部联系人ID٩( 'ω' )و 
+											wx.invoke('getCurExternalContact', {
+											}, (res) => {
+												console.log(res, 'getCurExternalContact')
+												if (res.err_msg == "getCurExternalContact:ok") {
+													sessionStorage.setItem('wxcrmId', res.userId)
+												} else {
+													Toast.fail({
+														message: res.err_msg,
+														forbidClick: true,
+														duration: 0,
+														overlay: true,
+													});
+												}
+											});
+										}
+
 									}
 								} else {
 									Toast.fail({
@@ -110,7 +118,6 @@ let getWxJsJdk = () => {
 									});
 								}
 							});
-
 						},
 						fail: (res) => {
 							Toast.fail(res);

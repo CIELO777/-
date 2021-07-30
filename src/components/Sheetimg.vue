@@ -77,6 +77,11 @@ export default {
   },
   methods: {
     sheetSave() {  // 确认保存
+      this.$toast.loading({
+        message: '保存中...',
+        forbidClick: true,
+        overlay: true,
+      });
       let that = this;
       if (this.message == "") {
         this.$toast.fail('内容不能为空')
@@ -134,10 +139,14 @@ export default {
             } else {
               that.$emit('sheetClose')
             }
+            that.$toast.clear()
+          } else {
+            that.$toast.fail('新增失败')
           }
         })
         .catch(function (error) {
           console.log(error);
+          that.$toast.fail('新增失败')
         });
     },
     S4() {

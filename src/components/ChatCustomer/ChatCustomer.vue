@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:48:39 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-23 18:18:33
+ * @Last Modified time: 2021-07-30 19:36:45
    聊天工具栏客户管理工具栏,和我的客户对话时候快捷打开
    1.先获取当前企业微信联系人ID，并通过code 授权获取this.U and this.C()。
    2.拉取联系人列表通过（wx。wxcrmID）判断在联系人列表里有是否有当前联系人。
@@ -18,9 +18,9 @@
         v-if="maskings"
         type="spinner"
       />
-    </div>
+    </div> 
     <header>
-      <img :src="userInfo.avatar || imgSrc" alt="" style="border-radius: 5px"/>
+      <img :src="userInfo.avatar || imgSrc" alt="" style="border-radius: 5px" />
       <div class="infoBox">
         <p style="display: flex; align-items: center" v-if="showName">
           <strong class="namebold" @click="changeName = showName = !showName"
@@ -50,61 +50,42 @@
         </div>
       </div>
     </header>
-    <!--   个人信息暂时隐藏
-    <article class="info">
-      <p class="origin">
-        <span @click="applyComp">手机：{{ crmInfos.phone }}</span>
-      </p>
-      <ul>
-        <li>
-          <span>联系人等级：{{ crmInfos.starLevel }}</span>
-        </li>
-        <li>
-          <span>有效性：{{ crmInfos.status }}</span>
-        </li>
-        <li>
-          <span
-            >所属公司：{{ crmInfos.company ? crmInfos.company : "暂无" }}</span
-          >
-        </li>
-      </ul>
-    </article> -->
-    <!-- <article class="add">
-      <p class="origin"><span>Ta添加的：</span><span>-</span></p>
-      <span>共{{}}个群聊 ></span>
-    </article> -->
     <article class="dynamic">
       <van-tabs v-model="active" color="#53b1d8" swipe-threshold="3">
         <van-tab title="企业标签">
           <article class="tab">
             <div class="company">
               <template v-if="TagList2.length > 0">
-                <div
+                <template
                   v-for="(item, index) in TagList2"
-                  :key="index"
-                  style="margin-top: 5px"
+                  style="margin-top: 5px; display: inline-block"
                 >
-                  <p class="grade" v-show="item.checked">
+                  <!-- <p class="grade" v-show="item.checked">
                     {{ item.group_name }}
-                  </p>
-                  <div v-if="item.tag && item.tag.length > 0">
+                  </p> -->
+                  <template
+                    v-if="item.tag && item.tag.length > 0"
+                    style="display: inline-block"
+                  >
                     <template v-for="(item1, index1) in item.tag">
                       <van-button
                         v-show="item1.checked"
                         plain
                         type="default"
-                        style="
-                          margin: 0 10px 5px 0;
-                          color: #767676;
-                          background-color: #f5f5f5;
-                        "
+                        :style="{
+                          margin: '0 10px 5px 0',
+                          color: '#fff',
+                          backgroundColor:
+                            tabColorRandom[index > 5 ? index % 2 : index],
+                          opacity: 0.6,
+                        }"
                         size="small"
-                        :key="index1"
+                        :key="index1 + '_' + item1.name"
                         >{{ item1.name }}</van-button
                       >
                     </template>
-                  </div>
-                </div>
+                  </template>
+                </template>
               </template>
               <van-empty
                 v-else
@@ -117,6 +98,13 @@
               ></van-empty>
             </div>
           </article>
+          <div style="border-bottom: 10px solid #f9f9f9"></div>
+          <span
+            class="title"
+            style="margin-left: 20px; padding-top: 10px; display: inline-block"
+            >动态</span
+          >
+          <CustomerDynamic :userInfo="userInfo"></CustomerDynamic>
         </van-tab>
         <van-tab title="跟进记录">
           <CustomerFollow
@@ -129,18 +117,17 @@
         <van-tab title="访问轨迹">
           <CustomerTrack></CustomerTrack>
         </van-tab>
-        <van-tab title="企微记录">
+        <!-- <van-tab title="企微记录">
           <CustomerChaing
             :height="height"
             :userInfo="userInfo"
           ></CustomerChaing>
-        </van-tab>
+        </van-tab> -->
         <van-tab title="操作记录">
           <CustomerOpera :height="height" :userInfo="userInfo"></CustomerOpera>
         </van-tab>
       </van-tabs>
     </article>
-    
     <van-tabbar v-model="TabActive" active-color="#646566" z-index="99">
       <van-tabbar-item @click="Tabclick(4)">
         <span>添加标签</span>
@@ -240,67 +227,6 @@
           description="没有标签，请到企业微信后台配置"
         />
       </article>
-      <!-- <van-tabs v-model="tagAction" color="#53b1d8">
-        <van-tab title="标签">
-          <div style="display: flex; flex-shirk: 1">
-            <span style="flex-shrink: 0; line-height: 23px">选择标签组：</span
-            ><select
-              class="TagSelect"
-              v-model="SelectTag"
-              @change="changeSelectTag"
-            >
-              <option
-                :value="index"
-                v-for="(item, index) in TagList"
-                :key="index"
-              >
-                {{ item.name }}
-              </option>
-            </select>
-          </div>
-          <input
-            type="text"
-            placeholder="输入后回车保存标签"
-            style="width: 100%; height: 50px"
-            v-model="Tagname"
-            @keyup.enter="addTag(1)"
-          />
-          <template
-            v-for="(item, index) in SelectTagList"
-            style="margin-top: 5px"
-          >
-            <van-button
-              :key="index"
-              size="mini"
-              plain
-              type="info"
-              style="margin: 0 3px 7px"
-              >{{ item.name
-              }}<van-icon @click="deleTag(item, index, 1)" name="cross"
-            /></van-button>
-          </template>
-        </van-tab>
-        <van-tab title="标签组">
-          <input
-            type="text"
-            placeholder="输入后回车保存标签组"
-            style="width: 100%; height: 50px"
-            v-model="Tagname"
-            @keyup.enter="addTag(2)"
-          />
-          <template v-for="(item, index) in TagList">
-            <van-button
-              :key="index"
-              size="mini"
-              plain
-              type="info"
-              style="margin: 0 3px 7px"
-              >{{ item.name
-              }}<van-icon @click="deleTag(item, index, 2)" name="cross"
-            /></van-button>
-          </template>
-        </van-tab>
-      </van-tabs> -->
       <van-button
         class="btn"
         type="primary"
@@ -752,7 +678,7 @@
   </div>
 </template>
 <script>
-import BindPop from '../../components/ChatCustomer/BindPop'
+import BindPop from '../../components/ChatCustomer/BindPop';
 import wxxxChat from '../../uilts/wxconfigChat.js';
 import { Toolbar } from '../../uilts/toolbarMixin';
 import local from '../../uilts/localStorage';
@@ -766,17 +692,20 @@ import { formatDate, timestampToTime } from "../../uilts/date";
 import CustomerFollow from '../../components/CustomerModule/CustomerFollow.vue';
 import CustomerOpera from '../../components/CustomerModule/CustomerOpera.vue';
 import CustomerChaing from '../../components/CustomerModule/CustomerChaing.vue';
-import CustomerTrack from '../../components/CustomerModule/CustomerTrack.vue'
+import CustomerTrack from '../../components/CustomerModule/CustomerTrack.vue';
+import CustomerDynamic from '../../components/CustomerModule/CustomerDynamic.vue';
+
 import Utils from '../../uilts/utils';
 import Sheetimg from '../../components/Sheetimg.vue';
 export default {
   name: "ChatCustomer",
-  components: { VDistpicker, compInfo, shareUser, CustomerFollow, CustomerOpera, CustomerChaing, CustomerTrack, Sheetimg, BindPop },
+  components: { VDistpicker, compInfo, shareUser, CustomerFollow, CustomerOpera, CustomerChaing, CustomerTrack, Sheetimg, BindPop, CustomerDynamic },
   mixins: [Toolbar],
   inject: ['reload'],
   data() {
     return {
       height: '68vh',
+      tabColorRandom: ['#FE8002', '#F54F7A', '#028CFA', '#9378FC', '#FEA100', '#FF613D'],
       show: false,
       overlay: true,
       sheetPop: false,
@@ -1039,6 +968,8 @@ export default {
       },
       showName: true,
       Nameremark: '',
+      dynamicList: [],
+      dynamicTotal: 0,
     };
   },
   methods: {
@@ -1194,7 +1125,7 @@ export default {
         remark: this.Nameremark,
         compId: sessionStorage.getItem('bind_compId'),
       };
-      this.$post1("/work/contact/remark"+ '?userid=' + params.userid + '&external_userid=' + params.external_userid + '&remark=' + params.remark + '&compId=' + params.compId, params)
+      this.$post1("/work/contact/remark" + '?userid=' + params.userid + '&external_userid=' + params.external_userid + '&remark=' + params.remark + '&compId=' + params.compId, params)
         .then((res) => {
           if (res.code == 200 && res.msg === 'success') {
             this.$toast('修改成功')
@@ -1579,7 +1510,6 @@ export default {
       return result;
     },
     async getCrm() { // 获取基本信息
-      console.log(this.userInfo)
       let { itr_external_userid, itr_compid, itr_userid } = this.userInfo;
       let signature = generateSignature3(itr_external_userid, itr_compid, itr_userid, timeout, nonce);
       await this.$get('/api/request/itr/comp/customer/detail', {
@@ -1667,7 +1597,7 @@ export default {
               this.getdispost(res.data.tags) // 赋值标签
             }
             this.$toast.clear();
-              this.maskings = '';  // 清空蒙版
+            this.maskings = '';  // 清空蒙版
             setTimeout(() => {
               // this.getTagList();
               this.getCrm()
@@ -1701,12 +1631,13 @@ export default {
             obj.tag.push({
               ...item1,
               checked: true,
-              name: item1.tag_name
+              name: item1.tag_name,
             })
           }
         })
         arr1.push(obj);
       })
+      console.log(arr1)
       this.TagList2 = arr1;
     },
     AddTab() {
@@ -1981,11 +1912,14 @@ export default {
       this.$post1("/work/tag/mark_tag" + '?compId=' + this.userInfo.itr_compid + '&timeout=' + timeout + '&nonce=' + nonce + '&signature=' + signature, params)
         .then(async (res) => {
           if (res.code == 200 && res.msg == 'success') {
+            let lock = false;
             let result = JSON.parse(JSON.stringify(this.TagList.map(item => { //更新数组
               if (item.tag && item.tag.length) {
                 for (let index = 0; index < item.tag.length; index++) {
                   if (item.tag[index].checked) { // 如果有check字段，那么就给父元素
                     item.checked = true;
+                    lock = true;
+                    // item.backgroundColor = this.tabColorRandom[parseInt(Math.random() * this.tabColorRandom.length)];
                     break;
                   }
                   if (!item.tag[index].checked) {
@@ -1995,6 +1929,17 @@ export default {
               }
               return item;
             })))
+            let empty = new Array(); // 判断  是否为空，那这个参数控制标签空状态
+            result.forEach(item => {
+              if (item.tag && item.tag.length) {
+                for (let index = 0; index < item.tag.length; index++) {
+                  if (item.tag[index].checked) {
+                    empty.push(item.tag[index].checked)
+                  }
+                }
+              }
+            })
+            if (!empty.length) { result.length = 0 }
             this.TagList2 = result;
             this.$forceUpdate();
             this.$toast('标签保存成功');
@@ -2080,10 +2025,12 @@ export default {
         overlay: true,
         duration: 0,
       });
-    }
+    },
+
   },
   async created() {
     // await this.getlinkmanDetail();
+    // this.getdynamic()
     // this.getTagList();
     // this.init();
     //  wxxxChat().then(res => {
@@ -2217,13 +2164,16 @@ export default {
     }
   }
   .tab {
-    border-bottom: 1px solid #ebe9e9;
     .commonPadd;
     padding-top: 0;
     padding-bottom: 0;
     border: none;
     max-height: 68vh;
     overflow-y: auto;
+    .overY {
+      overflow-y: auto;
+      max-height: 220px;
+    }
     .company {
       margin-bottom: 15px;
       // border-top: 10px solid #aaaaaa;
@@ -2275,6 +2225,7 @@ export default {
   }
   .title {
     margin-left: 3px;
+    color: #323233;
   }
   .title::before {
     content: "";
@@ -2282,7 +2233,7 @@ export default {
     height: 13px;
     background: #1989fa;
     position: absolute;
-    left: 5px;
+    left: 10px;
     border-radius: 20px;
     margin-right: 38px;
     margin-top: 1px;

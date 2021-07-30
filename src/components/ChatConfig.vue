@@ -6,8 +6,12 @@
       class="Configiframe"
     ></iframe>
     <div class="form">
-      <van-field v-model="compID" label="compID" placeholder="请输入公司ID" />
-      <van-button type="primary" block class="btn" @click="getConfig"
+      <van-field
+        v-model="compID"
+        label="乐语公司ID"
+        placeholder="请输入公司ID"
+      />
+      <van-button type="info" block class="btn" @click="getConfig"
         >拉取</van-button
       >
       <!-- <van-field
@@ -16,35 +20,42 @@
         placeholder="请输入secretKey"
       /> -->
       <template v-if="List && List.length > 0">
-        <van-swipe-cell class="card" v-for="(item, index) in List" :key="index">
+        <van-swipe-cell
+          class="card"
+          v-for="(item, index) in List"
+          :key="index"
+          right-width="0px"
+        >
           <van-field
             v-model="item.secretKey"
-            rows="4"
             label="会话存档Secret"
-            type="textarea"
             placeholder="会话存档Secret"
             show-word-limit
+            :readonly="item.readonly"
           />
-          <van-field
+          <!-- <van-field
+            readonly
             v-model="item.id"
             label="	RSA私钥ID"
             placeholder="	RSA私钥ID"
             show-word-limit
-          />
+          /> -->
           <van-cell title="版本">
             <!-- 使用 right-icon 插槽来自定义右侧图标 -->
             <template #title>
               <span class="custom-title">版本</span>
-              <van-tag plain type="primary">请选择版本</van-tag>
+              <!-- <van-tag plain type="primary">请选择版本</van-tag> -->
             </template>
             <template #right-icon>
-              <van-stepper integer v-model="item.version" />
+              <!-- {{ item.version }} -->
+              <van-stepper integer v-model="item.version" :disabled="item.readonly" />
             </template>
           </van-cell>
           <van-field
             v-model="item.privateKey"
-            rows="4"
+            rows="6"
             label="私钥"
+            :readonly="item.readonly"
             type="textarea"
             placeholder="请输入私钥"
             show-word-limit
@@ -54,13 +65,15 @@
             label="企业微信公司ID"
             placeholder="请输入企业微信公司ID"
             show-word-limit
+            :readonly="item.readonly"
           />
-          <van-field
+          <!-- <van-field
             v-model="item.compId"
             label="乐语公司ID"
             placeholder="请输入乐语公司ID"
             show-word-limit
-          />
+            :readonly="item.readonly"
+          /> -->
           <template #left>
             <van-button
               square
@@ -70,7 +83,7 @@
               @click="add(item, index)"
             />
           </template>
-          <template #right>
+          <!-- <template #right>
             <van-button
               square
               type="danger"
@@ -78,10 +91,15 @@
               style="height: 100%"
               @click="dele(item, index)"
             />
-          </template>
+          </template> -->
         </van-swipe-cell>
       </template>
-      <van-button type="primary" block class="btn" @click="Save"
+      <van-button
+        v-if="List && List.length > 0"
+        type="primary"
+        block
+        class="btn"
+        @click="Save"
         >保存配置</van-button
       >
     </div>
@@ -106,7 +124,7 @@ export default {
     return {
       secretKey: '',
       List: [],
-      compID: '40000013'
+      compID: '40007760'
     };
   },
   watch: {},
@@ -124,15 +142,23 @@ export default {
       })
         .then((res) => {
           if (res.code === 200 && res.msg == 'success') {
-            this.List = res.data;
+            this.List = res.data.map(item => {
+              return {
+                ...item,
+                readonly: true, // 禁止编辑
+              }
+            });
             // else {
             //   this.List = [{ privateKey: '', version: 1, id: 0, wxCompId: sessionStorage.getItem('CorpId'), compId: this.$C || local.C() }]
             // }
             // this.secretKey = secretKey;
             // console.log(this.secretKey);
+          } else if (res.msg == '不存在') {
+            this.$toast('当前公司没有配置，请配置参数。')
+            this.add()
           } else {
-            this.$toast.fail('请求失败，请稍后再试！')
-          };
+            this.$toast.fail(res.msg)
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -167,14 +193,31 @@ export default {
       }
     },
     add(item, index) { // 新增数组
-      this.List.push({ privateKey: '', version: 1, id: 0, wxCompId: sessionStorage.getItem('CorpId'), compId: this.$C || local.C() })
+      console.log(this.List)
+      let idx = this.List.length > 0 ? this.List[this.List.length - 1].version + 1 : 1
+      this.List.push({ secretKey: '', privateKey: '', version: idx, id: 0, wxCompId: '', compId: this.$C || local.C(), readonly: false })
     },
     Save() {
-      let signature = generateSignature4(timeout, nonce);
-      this.$post1(`/wx-crm-server/session/conf/save?timeout=${timeout}&nonce=${nonce}&signature=${signature}`, {
-        userId: this.$U || local.U(),
-        secretKey: this.secretKey,
-        privateKeyList: this.List
+      let { id, version, wxCompId, privateKey, secretKey } = this.List[this.List.length - 1];
+      console.log(this.List[this.List.length - 1])
+      console.log(wxCompId, privateKey, secretKey)
+      if (wxCompId === '') {
+        this.$toast.fail("wxCompId获取失败，请联系管理员！");
+      } else if (privateKey === '') {
+        this.$toast.fail("私钥不能为空");
+        return;
+      } else if (secretKey === '') {
+        console.log(secretKey)
+        this.$toast.fail("会话存档Secret")
+        return;
+      }
+      this.$post1("/work/session/config/save", {
+        id,
+        version,
+        secretKey: secretKey,
+        privateKey,
+        wxCompId,
+        compId: Number(this.compID),
       }
       ).then((res) => {
         console.log(res);
@@ -182,7 +225,7 @@ export default {
           this.getConfig();
           this.$toast('保存成功')
         } else {
-          this.$toast('保存失败')
+          this.$toast.fail(res.msg)
         }
       })
         .catch(function (error) {
@@ -202,7 +245,7 @@ export default {
   background: #eee;
   display: flex;
   .Configiframe {
-    width: 60%;
+    width: 70%;
     height: 100vh;
   }
   .form {
@@ -214,8 +257,11 @@ export default {
   /deep/ .van-cell__title {
     width: auto;
   }
-  .card{
+  .card {
     margin-bottom: 20px;
+  }
+  img {
+    width: 100%;
   }
 }
 </style>
