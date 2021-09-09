@@ -894,7 +894,7 @@ export default {
   async created() {
     let url = window.location.href;
     let urlparame = window.location.search; //通过location.href获取code 和suiteId;
-    let userinfo = JSON.parse(sessionStorage.getItem("userinfo"))
+    let userinfo = JSON.parse(sessionStorage.getItem("userinfo"));
     if (userinfo?.bind_comp_id) { // 判断是否有bind_comp_id；有不授权，
       this.getConsole();
       this.noticeData();
@@ -905,7 +905,7 @@ export default {
         sessionStorage.setItem("codeBasice", JSON.stringify(URLCut(urlparame)))
         this.getUserinfo(); //拿code 获取用户信息;
       } else { // 如果两个参数就弹出错误;
-        // this.$toast('内部错误3，请联系管理员');
+         // this.$toast('内部错误3，请联系管理员');
       }
     }
   },

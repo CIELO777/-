@@ -2,7 +2,7 @@
  * @Author: Tian 
  * @Date: 2021-07-02 15:18:13 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-28 13:55:15
+ * @Last Modified time: 2021-08-02 10:58:21
  * 公共微信授权接口。项目全部授权接口全部走此授权（客户画像比较特殊单独走了一个）
  */
 import { get } from './https';
@@ -15,7 +15,7 @@ let timeout = generateTimeout();
 import sha1 from "./sha1";
 let nonce = generateNonce();
 import router from '../router/index';
-console.log(router,11111111111111)
+// console.log(router,11111111111111)
 
 let getWxJsJdk = () => {
 	let { id, bind_comp_id } = JSON.parse(sessionStorage.getItem("userinfo"));

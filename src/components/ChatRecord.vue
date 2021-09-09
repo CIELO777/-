@@ -167,7 +167,6 @@ import {
 import local from '../uilts/localStorage';
 let timeout = generateTimeout();
 let nonce = generateNonce();
-import BenzAMRRecorder from 'benz-amr-recorder';
 export default {
   name: "ChatRecord",
   components: {},
@@ -232,7 +231,7 @@ export default {
             res.data.data.forEach(async item => {
               if (item.msgType == 'voice') {
                 item.auidoInfo = await this.getVideoInfo(item.itrFileId);
-                this.$set(item, 'item.auidoInfo', item.auidoInfo)
+                this.$set(item, 'item.auidoInfo', item.auidoInfo);
               }
             })
             this.list = this.current == 1 ? res.data.data : this.list.concat(res.data.data);
@@ -404,19 +403,7 @@ export default {
       // console.log(e.target.currentTime);
       this.fileDuration = e.target.currentTime * 1000;
     },
-    openRecording(url) {
-      console.log(23121)
-      var amr = new BenzAMRRecorder();
-      amr.initWithUrl('https://api.jiain.net/aliyun/oss/media/10419.amr').then(function () {
-        // amr.isPlaying() 返回音频的播放状态 是否正在播放 返回boolean类型
-        console.log(amr.isPlaying())
-        if (amr.isPlaying()) {
-          amr.stop();
-        } else {
-          amr.play();
-        }
-      });
-    }
+ 
   },
   created() {
     this.getList() // 拉数据

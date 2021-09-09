@@ -165,10 +165,12 @@ export default {
       }, 1000)
     },
     clickColor(item, index) {
+      console.log(item)
       this.$router.push({
         name: 'Iframe',
         params: {
-          url: item.initialUrl + '&shareType=15',
+          // url: item.initialUrl,
+          url: item.url,
           title: item.title,
           desc: item.description,
           imgUrl: item.thumb,

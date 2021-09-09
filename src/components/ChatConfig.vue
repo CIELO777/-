@@ -33,13 +33,13 @@
             show-word-limit
             :readonly="item.readonly"
           />
-          <!-- <van-field
+          <van-field
             readonly
             v-model="item.id"
             label="	RSA私钥ID"
             placeholder="	RSA私钥ID"
             show-word-limit
-          /> -->
+          />
           <van-cell title="版本">
             <!-- 使用 right-icon 插槽来自定义右侧图标 -->
             <template #title>
@@ -67,13 +67,13 @@
             show-word-limit
             :readonly="item.readonly"
           />
-          <!-- <van-field
+          <van-field
             v-model="item.compId"
             label="乐语公司ID"
             placeholder="请输入乐语公司ID"
             show-word-limit
             :readonly="item.readonly"
-          /> -->
+          />
           <template #left>
             <van-button
               square
@@ -83,7 +83,7 @@
               @click="add(item, index)"
             />
           </template>
-          <!-- <template #right>
+          <template #right>
             <van-button
               square
               type="danger"
@@ -91,7 +91,7 @@
               style="height: 100%"
               @click="dele(item, index)"
             />
-          </template> -->
+          </template>
         </van-swipe-cell>
       </template>
       <van-button
@@ -199,8 +199,6 @@ export default {
     },
     Save() {
       let { id, version, wxCompId, privateKey, secretKey } = this.List[this.List.length - 1];
-      console.log(this.List[this.List.length - 1])
-      console.log(wxCompId, privateKey, secretKey)
       if (wxCompId === '') {
         this.$toast.fail("wxCompId获取失败，请联系管理员！");
       } else if (privateKey === '') {
@@ -220,7 +218,6 @@ export default {
         compId: Number(this.compID),
       }
       ).then((res) => {
-        console.log(res);
         if (res.code === 200 && res.msg == 'success') {
           this.getConfig();
           this.$toast('保存成功')

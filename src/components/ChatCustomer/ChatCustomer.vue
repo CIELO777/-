@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:48:39 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-30 19:36:45
+ * @Last Modified time: 2021-08-06 09:32:10
    聊天工具栏客户管理工具栏,和我的客户对话时候快捷打开
    1.先获取当前企业微信联系人ID，并通过code 授权获取this.U and this.C()。
    2.拉取联系人列表通过（wx。wxcrmID）判断在联系人列表里有是否有当前联系人。
@@ -17,13 +17,16 @@
         color="rgb(25, 137, 250)"
         v-if="maskings"
         type="spinner"
-      />
+      /> 
     </div> 
+    <van-button type="info" v-show="CustomerBtn" size="small" @click="SeeCustomer" class="Seebtn" block 
+      >查看客户</van-button
+    >
     <header>
       <img :src="userInfo.avatar || imgSrc" alt="" style="border-radius: 5px" />
       <div class="infoBox">
         <p style="display: flex; align-items: center" v-if="showName">
-          <strong class="namebold" @click="changeName = showName = !showName"
+          <strong class="namebold" @click="changeName"
             >名字：{{ userInfo.remark || userInfo.name }}</strong
           >
           <template v-if="userInfo.gender == 1 || userInfo.gender == 2">
@@ -102,6 +105,7 @@
           <span
             class="title"
             style="margin-left: 20px; padding-top: 10px; display: inline-block"
+            @click="consoles"
             >动态</span
           >
           <CustomerDynamic :userInfo="userInfo"></CustomerDynamic>
@@ -970,11 +974,13 @@ export default {
       Nameremark: '',
       dynamicList: [],
       dynamicTotal: 0,
+      CustomerBtn: false,
     };
   },
   methods: {
     starEnter() { },
     Tabclick(data) {
+      if (this.login2?.code?.external_userid) return;
       if (data === 1) {
         this.sheetPop = true;
         this.$nextTick(() => {
@@ -1048,6 +1054,7 @@ export default {
         });
     },
     showPopup(e, d, items) {
+      if (this.login2?.code?.external_userid) return;
       this.item = items; // 备份ITEM; 必填校验用
       if (e.includes("column")) {
         let item = this.findSelect(e);
@@ -1125,12 +1132,13 @@ export default {
         remark: this.Nameremark,
         compId: sessionStorage.getItem('bind_compId'),
       };
+      this.$toast('修改成功')
+      this.userInfo.remark = this.Nameremark;
+      this.showName = true;
       this.$post1("/work/contact/remark" + '?userid=' + params.userid + '&external_userid=' + params.external_userid + '&remark=' + params.remark + '&compId=' + params.compId, params)
         .then((res) => {
           if (res.code == 200 && res.msg === 'success') {
-            this.$toast('修改成功')
-            this.userInfo.remark = this.Nameremark;
-            this.showName = true;
+
           } else {
             this.$toast.fail('修改失败', res)
           }
@@ -1414,6 +1422,10 @@ export default {
           console.log(error);
         });
     },
+    changeName() {
+      if (this.login2?.code?.external_userid) return;
+      this.showName = !this.showName;
+    },
     getCid() {
       // 来源方式下拉框接口请求
       let that = this;
@@ -1600,6 +1612,10 @@ export default {
             this.maskings = '';  // 清空蒙版
             setTimeout(() => {
               // this.getTagList();
+              let { external_userid } = JSON.parse(sessionStorage.getItem("codeBasice"));
+              if(external_userid){
+                this.CustomerBtn =true; // 删除客户查看客户按钮
+              }
               this.getCrm()
             }, 500)
           } else {
@@ -1820,6 +1836,9 @@ export default {
           console.log(error);
         });
     },
+    consoles() {
+      // document.getElementById("__vconsole").style.display = 'block';
+    },
     syncTag() { // 同步标签
       let signature = generateSignature3(this.userInfos().bind_comp_id1, this.userInfos().id, timeout, nonce);
       this.$get("/api/request/crm/tag/sync", {
@@ -2026,11 +2045,34 @@ export default {
         duration: 0,
       });
     },
-
+    SeeCustomer() {
+      // wx.invoke('openUserProfile', {
+      //     "type": 2, //1表示该userid是企业成员，2表示该userid是外部联系人
+      //     "userid": "wmoqMGCgAA5ozhmAajLTV-IZ2tjbxtnA" //可以是企业成员，也可以是外部联系人
+      //   }, function (res) { 
+      //     console.log(res)
+      //     if (res.err_msg != "openUserProfile:ok") {
+      //       //错误处理
+      //     }
+      //   });
+      if (this.login2?.code?.external_userid) { // URL存在外部联系人ID直接打开
+        wx.invoke('openUserProfile', {
+          "type": 2, //1表示该userid是企业成员，2表示该userid是外部联系人
+          "userid": this.login2.code.external_userid//可以是企业成员，也可以是外部联系人
+        }, function (res) {
+          if (res.err_msg != "openUserProfile:ok") {
+            //错误处理
+          }
+        });
+      } else {
+        this.$toast.fail('url中不存在external_userid')
+      }
+    }
   },
   async created() {
     // await this.getlinkmanDetail();
     // this.getdynamic()
+    // let a = this.urlcut('?suiteId=wx067ebd9128dbc908&project=looyu&path=/chatCustomer&external_userid=external_userid|%s23112321')
     // this.getTagList();
     // this.init();
     //  wxxxChat().then(res => {
@@ -2074,6 +2116,7 @@ export default {
         this.init() // 重新拉取数据
       })
     });
+
   },
   watch: {
     show(val, oldVal) {//普通的watch监听
@@ -2580,6 +2623,15 @@ export default {
   .nameInput {
     border-bottom: 1px solid #eee;
     margin-bottom: 10px;
+  }
+  button.Seebtn {
+    position: fixed;
+    left: 50%;
+    bottom: 7px;
+    transform: translateX(-50%);
+    z-index:998;
+    width: 90%;
+    height: 40px;
   }
 }
 </style>

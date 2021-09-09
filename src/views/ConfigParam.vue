@@ -566,7 +566,6 @@ export default {
       return pwd;
     },
     copy(type) {
-      console.log(type)
       switch (type) {
         case 'url':
           if (this.wxCompId === '') {
@@ -626,9 +625,7 @@ export default {
           break;
       }
     }
-  },
-  created() { },
-  mounted() { }
+  }
 };
 </script>
 

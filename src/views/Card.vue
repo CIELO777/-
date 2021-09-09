@@ -46,7 +46,7 @@ export default {
     initMineInfo() {
       this.$get("/itver/remote/user/profile", {
         params: {
-          userId: this.$U || local.U(),
+          userId: this.$U || local.U(), 
           curLogin: this.$U || local.U(),
         },
       })

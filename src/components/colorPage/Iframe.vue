@@ -17,7 +17,6 @@
 
 <script>
 import share from '../../components/share';
-import wxxx from '../../uilts/wxconfig'
 
 export default {
   name: "Iframe",

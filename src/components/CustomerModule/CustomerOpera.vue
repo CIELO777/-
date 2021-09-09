@@ -75,7 +75,6 @@ export default {
     scrollEventselect() {
       let read = document.querySelector('.CustomerOpera')
       var scrollTop = read.scrollTop;
-      console.log(scrollTop)
       var windowHeight = read.clientHeight;
       var scrollHeight = read.scrollHeight;
       if (parseInt(scrollTop) + windowHeight == scrollHeight && scrollTop > 15) {
@@ -150,10 +149,6 @@ export default {
               }
             })
             that.optRecordMap = { ...optRecordMap };
-            console.log(that.optRecordMap)
-            console.log(Object.keys(that.optRecordMap))
-            console.log(optRecordUserMap, res.user, 'res.user')
-            console.log(res.totalPageCount, 'res.totalPageCount')
             if (Object.keys(that.optRecordMap)?.length == 0) { that.empty = true; return }  //如果数据等于0，就显示空信息
             that.optRecordUserMap = Object.assign(optRecordUserMap || {}, res.user || {});
             that.total = res.totalPageCount;

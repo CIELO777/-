@@ -2,7 +2,7 @@
  * @Author: YUN_KONG 
  * @Date: 2021-04-27 11:13:08 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-19 13:23:10
+ * @Last Modified time: 2021-09-09 09:24:07
  * 聊天工具栏素材分享功能组件，
  */
 
@@ -34,7 +34,6 @@ export const Toolbar = {
 	async created() {
 		let url = window.location.href;
 		let urlparame = window.location.search; //通过location.href获取code 和suiteId;
-		// console.log(sessionStorage.getItem('userinfo'), 'sessionStorage.getIteuserinfo')
 		if (sessionStorage.getItem('userinfo')) { // 通过userinfo字段判断是从哪个接口进入的
 			if (this.$route.name !== 'ChatCustomer' && this.$route.name !== 'HaiRing') { // 客户画像模块不需要 执行如下方法
 				this.loading()
@@ -61,7 +60,7 @@ export const Toolbar = {
 					this.login2.code = this.urlcut(urlparame); // 将suiteId 和 code 信息储存 data 中
 					sessionStorage.setItem("codeBasice", JSON.stringify(this.login2.code));
 					let { compId, userId } = this.login2.code;
-					let env = process.env.VUE_APP_ROUTE
+					let env = process.env.VUE_APP_ROUTE;
 					let urljoin = 'https://wxa.jiain.net' + env + 'haiRing?compId=' + compId + '&userId=' + userId;
 					let url = encodeURI(urljoin)
 					location.href = 'https://wxa.jiain.net/work/mp/authorize?url=' + url + '&compId=' + compId;
@@ -70,9 +69,9 @@ export const Toolbar = {
 				if (url.includes('suiteId') && url.includes('code')) { //如果有参数请求信息
 					this.login2.code = this.urlcut(urlparame); // 将suiteId 和 code 信息储存 data 中
 					sessionStorage.setItem("codeBasice", JSON.stringify(this.login2.code))
-					this.getUserinfo()
+					this.getUserinfo(); // 请求
 				} else {
-					this.$toast('url有误,请检查配置。')
+				 
 				}
 			}
 		}
@@ -89,7 +88,6 @@ export const Toolbar = {
 				},
 			}).then(
 				async (res) => {
-					console.log(res,'92929292929')
 					if (res.code === 200 && res.msg == 'success' && JSON.stringify(res.data) != "{}") {
 						// openid 和wxid 都存在在发送请求，请求用户信息
 						this.UserId = res.data.userId;
@@ -101,7 +99,6 @@ export const Toolbar = {
 						sessionStorage.setItem("openId", that.open_userid); // 保存openID 解绑用
 						sessionStorage.setItem("CorpId", res.data.corpId); // 保存openID 解绑用
 						if (res.data.user) { // itr 那么就缓存itr数据
-							// console.log(2131231,res.data.user)
 							if (res.data.compId === 0 || !res.data.compId) { // 通过compID判断当前是否绑定了联系人。
 								// 没有绑定
 								this.$toast.clear();
@@ -175,6 +172,9 @@ export const Toolbar = {
 				var str = url.substr(1) //substr()方法返回从参数值开始到结束的字符串；
 				var strs = str.split('&')
 				for (var i = 0; i < strs.length; i++) {
+					if (strs[i].includes('external_userid')) { // 单独对获取企业微信获取联系人处理。
+						this.CustomerBtn = true; // 展示客户按钮
+					}
 					theRequest[strs[i].split('=')[0]] = strs[i].split('=')[1]
 				}
 				return theRequest //{code:'1213',suiteId:'456',state:0} 返回格式;

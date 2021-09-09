@@ -1,5 +1,6 @@
 <template>
   <div class="dynamic">
+  
     <div
       class="follCont"
       v-if="dynamicList.length > 0"
@@ -10,7 +11,7 @@
         <!-- {{ item }} -->
         <div class="time">
           <icon
-            :name="0 + ''"
+            :name="item.changeType"
             :w="15"
             :height="15"
             style="background: #eee; border-radius: 50%"

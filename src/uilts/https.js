@@ -5,14 +5,18 @@ const instance = axios.create();
 // 请求前做拦截，用于判断
 const requestInterceptor = instance.interceptors.request.use(
 	(config) => {
+		let userInfo = process.env.VUE_APP_ENV === 'production' ? JSON.parse(sessionStorage.getItem('userinfo'))?.bind_comp_id || JSON.parse(sessionStorage.getItem("RouteQuery"))?.compId || JSON.parse(sessionStorage.getItem("codeBasice"))?.compId : 40007760
+
 		if (config.url.indexOf("upload") !== -1) {
+			if (config.url.indexOf('/session/media/') !== -1) {
+				config.headers['Company-Id'] = userInfo; 
+			}
 		} else if (config.url.indexOf("sms") !== -1 || config.url.indexOf("login") !== -1) {
 			config.headers['Company-Id'] = 0; //如果本地里面有用户数 据，请求头带comp参数
 		} else {
 			if (sessionStorage.getItem('CompIdFriend')) { // 朋友圈请求头
 				config.headers['Company-Id'] = sessionStorage.getItem('CompIdFriend');
 			} else {  // 正常请求头
-				let userInfo = process.env.VUE_APP_ENV === 'production' ? JSON.parse(sessionStorage.getItem('userinfo'))?.bind_comp_id || JSON.parse(sessionStorage.getItem("RouteQuery"))?.compId || JSON.parse(sessionStorage.getItem("codeBasice"))?.compId : 40007760
 				if (userInfo) {
 					config.headers['Company-Id'] = userInfo; //如果本地里面有用户数据，请求头带comp参数
 				} else {

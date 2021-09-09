@@ -67,6 +67,24 @@ module.exports = {
                     '^/view': '/view'//base_api是自定义用来代替http://www.baidu.com/的
                 }
             },
+            '^/upload': {
+                target: 'https://a.looyu.com/',
+                // target: 'http://122.51.207.208:8088/',
+                changeOrigin: true,
+                // 路径重写： 下面的意思是重写访问路径中的  '/api' 为 '' ，如果没有重写, /api 代表 http://127.0.0.1:8090/api
+                pathRewrite: {
+                    '^/upload': '/upload'//base_api是自定义用来代替http://www.baidu.com/的
+                }
+            },
+            '^/session': {
+                target: 'https://wxa.jiain.net/',
+                // target: 'http://122.51.207.208:8088/',
+                changeOrigin: true,
+                // 路径重写： 下面的意思是重写访问路径中的  '/api' 为 '' ，如果没有重写, /api 代表 http://127.0.0.1:8090/api
+                pathRewrite: {
+                    '^/session': '/aliyun/session'
+                }
+            },
         }
     },
     chainWebpack: (config) => {

@@ -137,17 +137,17 @@ export default {
       let param = new URLSearchParams();
       let signature = generateSignature4(nonce, timeout);
       param.append("title", title);
-      param.append("description",description);
+      param.append("description", description);
       param.append("thumb", thumb);
       param.append("pageurl", pageurl);
       param.append("pagetype", pagetype);
       param.append("openid", openid);
       param.append("nickname", nickname);
       param.append("headimgurl", headimgurl);
-      param.append("gender",gender);
+      param.append("gender", gender);
       param.append("unionid", unionid);
       param.append("userid", this.$U);
-      param.append("compid",this.$C);
+      param.append("compid", this.$C);
 
       param.append("nonce", nonce);
       param.append("timeout", timeout);
@@ -182,11 +182,11 @@ export default {
   },
   computed: {
     cacheState() {
-      console.log(this.$store.state.cacheState, '缓存的页面', window.location.href);
       return this.$store.state.cacheState;
     }
   },
   mounted() {
+
     document.addEventListener('mouseup', (e) => {
       let tree = this.$refs.treeWrap
       if (tree) {
@@ -195,6 +195,11 @@ export default {
         }
       }
     })
+  },
+  updated() {
+    // this.$nextTick(() => {
+    //   document.getElementById("__vconsole").style.display = 'none'
+    // })
   },
   created() {
     // websocket.Init(); // 开启socket 连接

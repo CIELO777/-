@@ -2,7 +2,8 @@
  * @Author: YUN_KONG 
  * @Date: 2021-05-21 10:50:24 
  * @Last Modified by: Tian
- * @Last Modified time: 2021-07-23 11:26:11
+ * @Last Modified time: 2021-08-05 17:47:31
+ * 企业微信授权
  * 营销画像模块专用授权，针对客户画像模块进行了优化; 
  */
 import { get } from './https';
@@ -18,19 +19,12 @@ let getWxJsJdk = async () => {
 	return new Promise((resolve, reject) => {
 		// let itrId = JSON.parse(sessionStorage.getItem("userinfo")).id;
 		let { id, bind_comp_id } = JSON.parse(sessionStorage.getItem("userinfo"));
-		let { suiteId } = JSON.parse(sessionStorage.getItem("codeBasice"));
+		let { suiteId, external_userid } = JSON.parse(sessionStorage.getItem("codeBasice"));
 		let param = {
 			itrId: id,
 			compId: bind_comp_id,
 			suiteId: suiteId,
 		}
-		// get("/work/wx/js_api_ticket/auth", { params: param })
-		// 	.then((res) => {
-		// if (res.code === 200 && res.msg == 'success') {
-		// let res = {
-		// 	data: JSON.parse(sessionStorage.getItem('tickets'))
-		// }
-		let lock = false;
 		var timer = setInterval(() => {
 			if (JSON.parse(sessionStorage.getItem('tickets'))) {
 				clearInterval(timer)
@@ -75,16 +69,19 @@ let getWxJsJdk = async () => {
 					wx.hideMenuItems({
 						menuList: ['menuItem:share:appMessage', 'menuItem:share:wechat', 'menuItem:copyUrl', 'menuItem:openWithSafari', 'menuItem: refresh'] // 要隐藏的菜单项
 					});
+					console.log(agentConfig, 'agentConfig')
+					console.log(config, 'config')
 					wx.agentConfig({
 						corpid: config.appId, // 必填，企业微信的corpid，必须与当前登录的企业一致
 						agentid: agentConfig.agentid, // 必填，企业微信的应用id （e.g. 1000247）
 						timestamp: config.timestamp, // 必填，生成签名的时间戳
 						nonceStr: config.nonceStr, // 必填，生成签名的随机串
 						signature: agentConfig.signature, // 必填，签名，见附录-JS-SDK使用权限签名算法
-						jsApiList: ["sendChatMessage", 'getContext', 'getCurExternalContact'], //必填
+						jsApiList: ["sendChatMessage", 'getContext', 'getCurExternalContact', 'openUserProfile'], //必填
 						success: (res) => {
 							wx.invoke('getContext', {
 							}, function (res) {
+								// alert(res, 'getContext')
 								if (res.err_msg.includes('ok')) {
 									if (res.entry === 'group_chat_tools') {
 										Toast.fail({
@@ -100,18 +97,23 @@ let getWxJsJdk = async () => {
 											if (res.err_msg == "getCurExternalContact:ok") {
 												resolve(res.userId);
 											} else {
-												Toast.fail({
-													message: res.err_msg,
-													forbidClick: true,
-													duration: 0,
-													overlay: true,
-												});
+												if (external_userid) { // 如果存在是证明删除好友通知过来的，就不需要授权
+													resolve(external_userid);
+												} else {
+													Toast({
+														message: '获取外部联系人ID失败' + JSON.stringify(res),
+														forbidClick: true,
+														duration: 0,
+														overlay: true,
+													});
+												}
+
 											}
 										});
 									}
 								} else {
 									Toast.fail({
-										message: '授权失败，请重试',
+										message: 'agentConfig授权失败，请重试',
 										forbidClick: true,
 										duration: 0,
 										overlay: true,
@@ -121,26 +123,23 @@ let getWxJsJdk = async () => {
 
 						},
 						fail: (res) => {
-							Toast.fail(res);
+							Toast({
+								message: 'agentConfig授权失败' + 'agent---' + JSON.stringify(agentConfig) + '---config---' + JSON.stringify(config),
+								forbidClick: true,
+								duration: 0,
+								overlay: true,
+							});
 							if (res.errMsg.indexOf("function not exist") > -1) {
 							};
 						},
 					});
 				});
 				wx.error((res) => {
-					console.log('22222222res')
-					// Toast.fail(res)
+					Toast(res)
 					reject(res)
 				});
 			}
 		}, 100);
-
-		// }
-		// })
-		// .catch((err) => {
-		// 	console.log(err);
-		// 	reject(err)
-		// });
 	})
 }
 export default getWxJsJdk;

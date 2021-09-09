@@ -205,7 +205,6 @@ export default {
               phone_back: res.phone,
               phone: res.phone && res.phone.replace(res.phone.substring(3, 7), "****"),
             }
-            console.log(a)
             that.crmInfos = a;
             that.info.nickname = res.nickname;
             that.info.company = res.company;

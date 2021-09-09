@@ -16,16 +16,19 @@ import Vconsole from 'vconsole';
 import UUID from 'vue-uuid';
 import '@vant/touch-emulator'; //
 import Icon from 'vue2-svg-icon/Icon';
-Vue.component('icon',Icon);
+Vue.component('icon', Icon);
 Vue.use(UUID);
-// new Vconsole();
+// new Vconsole(); 
+// document.getElementById
 Vue.prototype.$wx = wx; // 挂载wx-jdk 插件
 Vue.prototype.$post = post;
 Vue.prototype.$post1 = post1;
 Vue.prototype.$get = get;  // axios二次封装
 Vue.prototype.$U = local.U();  // Userid
-Vue.prototype.$C = local.C();  // Compid
+// Vue.prototype.$C = local.C();  // Compid
 Vue.config.productionTip = false;
+
+
 router.beforeEach((to, from, next) => {
   let toP = to.name;
   let fromP = from.name;
